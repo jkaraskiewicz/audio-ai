@@ -1,0 +1,82 @@
+# 🎵➡️📝 Unified Audio-AI Docker Compose
+# Handles all transcription scenarios with simple environment variables
+
+services:
+  # Main Audio-AI service
+  audio-ai:
+    build:
+      context: .
+      target: production
+    ports:
+      - "3000:3000"
+    environment:
+      # Required: AI processing
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      
+      # Transcription configuration
+      - TRANSCRIPTION_PROVIDER=${TRANSCRIPTION_PROVIDER:-free_web_speech}
+      - WHISPER_SERVICE_URL=${WHISPER_SERVICE_URL:-http://whisper-service:8001}
+      - WHISPER_MODEL=${WHISPER_MODEL:-base}
+      
+      # Optional settings
+      - BASE_DIRECTORY=${BASE_DIRECTORY:-processed}
+      - MAX_FILE_SIZE=${MAX_FILE_SIZE:-52428800}
+      - TRANSCRIPTION_LANGUAGE=${TRANSCRIPTION_LANGUAGE:-en}
+    volumes:
+      - ./processed:/usr/src/app/processed
+    depends_on:
+      - whisper-service
+    restart: unless-stopped
+    networks:
+      - audio-ai-network
+
+  # Optional: Self-hosted Whisper service
+  # Only starts if TRANSCRIPTION_PROVIDER=docker_whisper
+  whisper-service:
+    build:
+      context: .
+      dockerfile: whisper.Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - PORT=8001
+      - WHISPER_MODEL=${WHISPER_MODEL:-base}
+    volumes:
+      - /tmp:/tmp
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - audio-ai-network
+    profiles:
+      - whisper-local  # Only starts when profile is active
+
+  # Development service (optional)
+  audio-ai-dev:
+    build:
+      context: .
+      target: development
+    ports:
+      - "3001:3000"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - TRANSCRIPTION_PROVIDER=${TRANSCRIPTION_PROVIDER:-free_web_speech}
+      - WHISPER_SERVICE_URL=${WHISPER_SERVICE_URL:-http://whisper-service:8001}
+      - WHISPER_MODEL=${WHISPER_MODEL:-base}
+      - BASE_DIRECTORY=${BASE_DIRECTORY:-processed}
+    volumes:
+      - .:/usr/src/app
+      - ./processed:/usr/src/app/processed
+    command: npm run dev
+    networks:
+      - audio-ai-network
+    profiles:
+      - development  # Only starts when profile is active
+
+networks:
+  audio-ai-network:
+    driver: bridge

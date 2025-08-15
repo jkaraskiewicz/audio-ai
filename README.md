@@ -1,54 +1,57 @@
-# Audio-AI: Multi-Platform Audio Transcription System
+# 🎵➡️📝 Audio-AI
 
-> **Transform voice recordings and audio files into structured, actionable markdown documents**
+AI-powered audio transcription and analysis system with multiple provider support.
 
-A complete multi-platform system featuring a powerful Node.js/TypeScript backend API and a modern Android share target app. Convert audio files into organized summaries, action items, and searchable content using AI processing.
-
-## 🌟 Key Features
-
-- **🎤 Universal Audio Processing**: Support for MP3, WAV, M4A, OGG, FLAC, WebM, and more
-- **🧠 AI-Powered Organization**: Automatic categorization, summaries, and action item extraction
-- **📱 Android Integration**: Share audio/text from any Android app directly to your backend
-- **💰 Cost-Free Options**: Multiple free transcription providers including local Whisper
-- **🔧 Developer-Friendly**: Clean architecture, comprehensive tests, and extensive documentation
-
-## 🏗️ Architecture Overview
-
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│  Android App    │───▶│  Backend API    │───▶│   File System  │
-│  (Share Target) │    │  (Node.js/TS)   │    │   (Markdown)    │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                               │
-                    ┌─────────────────┐
-                    │ Transcription   │
-                    │   Providers     │
-                    │ • Local Whisper │
-                    │ • Docker Whisper│
-                    │ • Hugging Face  │
-                    │ • Web Speech    │
-                    └─────────────────┘
-```
-
-## 🚀 Quick Start
-
-### Backend Setup (5 minutes)
+## 🚀 **Quick Start (30 seconds)**
 
 ```bash
-# 1. Clone and install
-git clone <your-repo> && cd audio-ai
-npm install
+# 1. Run setup script
+./setup-audio-ai.sh
 
-# 2. Configure environment
-cp backend/.env.example backend/.env
-echo "GEMINI_API_KEY=your_gemini_api_key_here" >> backend/.env
+# 2. Edit .env with your API key
+# 3. Start the service
+docker-compose -f docker-compose.unified.yml up -d
 
-# 3. Start the server
-npm run dev
-# ✅ Server running at http://localhost:3000
+# 4. Test it works
+./test-audio-ai.sh
+```
 
-# 4. Test with audio file
+## 📋 **Three Simple Options**
+
+### **Option 1: Use Your Existing Whisper** (Recommended)
+Perfect if you already have Whisper running (like port 1991):
+```bash
+export TRANSCRIPTION_PROVIDER=openai_whisper_webservice
+export WHISPER_SERVICE_URL=http://host.docker.internal:1991
+docker-compose -f docker-compose.unified.yml up -d
+```
+
+### **Option 2: Fresh Local Whisper**
+Spins up Audio-AI + new Whisper service:
+```bash
+docker-compose -f docker-compose.unified.yml --profile whisper-local up -d
+```
+
+### **Option 3: Free Web Speech**
+No Whisper needed (uses browser speech recognition):
+```bash
+export TRANSCRIPTION_PROVIDER=free_web_speech
+docker-compose -f docker-compose.unified.yml up -d
+```
+
+## 🧪 **Test Your Setup**
+
+```bash
+# Check health
+curl http://localhost:3000/health
+
+# Upload audio for transcription + AI analysis
 curl -X POST http://localhost:3000/process-file -F "file=@your-audio.mp3"
+
+# Process text directly
+curl -X POST http://localhost:3000/process-transcript \
+  -H "Content-Type: application/json" \
+  -d '{"transcript":"Your text here"}'
 ```
 
 ### Android App Setup

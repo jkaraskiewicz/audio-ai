@@ -39,6 +39,8 @@ export enum TranscriptionProvider {
   HUGGING_FACE = 'hugging_face',
   LOCAL_WHISPER = 'local_whisper',
   FREE_WEB_SPEECH = 'free_web_speech',
+  DOCKER_WHISPER = 'docker_whisper',
+  OPENAI_WHISPER_WEBSERVICE = 'openai_whisper_webservice',
   MOCK = 'mock', // For testing
 }
 

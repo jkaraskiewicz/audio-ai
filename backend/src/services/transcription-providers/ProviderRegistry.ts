@@ -9,6 +9,8 @@ import { GeminiAudioTranscriptionProvider } from './GeminiAudioTranscriptionProv
 import { HuggingFaceTranscriptionProvider } from './HuggingFaceTranscriptionProvider';
 import { LocalWhisperProvider } from './LocalWhisperProvider';
 import { FreeWebSpeechProvider } from './FreeWebSpeechProvider';
+import { DockerWhisperProvider } from './DockerWhisperProvider';
+import { OpenAIWhisperWebserviceProvider } from './OpenAIWhisperWebserviceProvider';
 import { logger } from '../../utils/logger';
 
 /**
@@ -145,6 +147,52 @@ export class ProviderRegistry {
         metadata: {
           cost: 'paid',
           installation: 'api_key',
+          performance: 'high',
+          accuracy: 'high',
+        },
+      },
+    ],
+    [
+      TranscriptionProvider.DOCKER_WHISPER,
+      {
+        name: TranscriptionProvider.DOCKER_WHISPER,
+        description: 'Docker-based OpenAI Whisper service (free, external or self-hosted)',
+        constructor: DockerWhisperProvider,
+        factory: (config: TranscriptionProviderConfig) => {
+          const whisperUrl = (config as any).whisperServiceUrl || process.env.WHISPER_SERVICE_URL;
+          return new DockerWhisperProvider(whisperUrl);
+        },
+        requiresApiKey: false,
+        supportsModels: true,
+        supportedFormats: ['.wav', '.mp3', '.ogg', '.flac', '.m4a', '.mp4', '.webm', '.aiff'],
+        maxFileSize: 100 * 1024 * 1024, // 100MB
+        isAvailable: true,
+        metadata: {
+          cost: 'free',
+          installation: 'docker',
+          performance: 'high',
+          accuracy: 'high',
+        },
+      },
+    ],
+    [
+      TranscriptionProvider.OPENAI_WHISPER_WEBSERVICE,
+      {
+        name: TranscriptionProvider.OPENAI_WHISPER_WEBSERVICE,
+        description: 'OpenAI Whisper ASR Webservice (onerahmet/openai-whisper-asr-webservice)',
+        constructor: OpenAIWhisperWebserviceProvider,
+        factory: (config: TranscriptionProviderConfig) => {
+          const whisperUrl = (config as any).whisperServiceUrl || process.env.WHISPER_SERVICE_URL;
+          return new OpenAIWhisperWebserviceProvider(whisperUrl);
+        },
+        requiresApiKey: false,
+        supportsModels: true,
+        supportedFormats: ['.wav', '.mp3', '.ogg', '.flac', '.m4a', '.mp4', '.webm', '.aiff'],
+        maxFileSize: 100 * 1024 * 1024, // 100MB
+        isAvailable: true,
+        metadata: {
+          cost: 'free',
+          installation: 'docker',
           performance: 'high',
           accuracy: 'high',
         },

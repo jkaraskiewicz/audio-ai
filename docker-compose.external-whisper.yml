@@ -5,13 +5,12 @@ services:
       target: production
     ports:
       - "3000:3000"
-    volumes:
-      # Mount external directory for persistent idea storage
-      - ./processed:/usr/src/app/processed
     environment:
+      - TRANSCRIPTION_PROVIDER=${TRANSCRIPTION_PROVIDER:-docker_whisper}
+      - WHISPER_SERVICE_URL=${WHISPER_SERVICE_URL:-http://localhost:8001}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
-      - TRANSCRIPTION_PROVIDER=${TRANSCRIPTION_PROVIDER:-free_web_speech}
-      - WHISPER_SERVICE_URL=${WHISPER_SERVICE_URL}
+    volumes:
+      - ./processed:/usr/src/app/processed
     restart: unless-stopped
 
   # Development service (optional)
@@ -25,7 +24,7 @@ services:
       - .:/usr/src/app
       - ./processed:/usr/src/app/processed
     environment:
+      - TRANSCRIPTION_PROVIDER=${TRANSCRIPTION_PROVIDER:-docker_whisper}
+      - WHISPER_SERVICE_URL=${WHISPER_SERVICE_URL:-http://localhost:8001}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
-      - TRANSCRIPTION_PROVIDER=${TRANSCRIPTION_PROVIDER:-free_web_speech}
-      - WHISPER_SERVICE_URL=${WHISPER_SERVICE_URL}
     command: npm run dev

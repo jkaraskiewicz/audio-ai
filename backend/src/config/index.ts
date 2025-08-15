@@ -151,6 +151,7 @@ export class ConfigManager {
         process.env.MAX_FILE_SIZE || this.getDefaultMaxFileSize(provider).toString(),
         10
       ),
+      whisperServiceUrl: process.env.WHISPER_SERVICE_URL || 'http://localhost:8001',
     };
   }
 

@@ -62,6 +62,7 @@ export interface TranscriptionConfig {
   punctuate?: boolean;
   formatText?: boolean;
   device?: 'cpu' | 'cuda'; // For local providers
+  whisperServiceUrl?: string; // For Docker Whisper provider
   [key: string]: unknown;
 }
 

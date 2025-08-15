@@ -11,8 +11,9 @@ export class DockerWhisperProvider implements AudioTranscriptionProvider {
   private whisperUrl: string;
   private isConfigured = false;
 
-  constructor(whisperUrl = 'http://localhost:8001') {
-    this.whisperUrl = whisperUrl;
+  constructor(whisperUrl?: string) {
+    // Allow configuration via environment variable or parameter
+    this.whisperUrl = whisperUrl || process.env.WHISPER_SERVICE_URL || 'http://localhost:8001';
     this.checkWhisperAvailability();
   }
 

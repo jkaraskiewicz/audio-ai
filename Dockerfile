@@ -3,8 +3,11 @@ FROM node:20-alpine AS builder
 
 WORKDIR /usr/src/app
 
+# Copy root package.json and workspace package.json files
 COPY package*.json ./
+COPY backend/package*.json ./backend/
 
+# Install all dependencies including devDependencies for building
 RUN npm install
 
 COPY . .
@@ -16,9 +19,11 @@ FROM node:20-alpine AS production
 
 WORKDIR /usr/src/app
 
-COPY --from=builder /usr/src/app/dist ./dist
+# Copy built backend files
+COPY --from=builder /usr/src/app/backend/dist ./dist
 COPY --from=builder /usr/src/app/node_modules ./node_modules
 COPY --from=builder /usr/src/app/package.json ./package.json
+COPY --from=builder /usr/src/app/backend/package.json ./backend/package.json
 
 EXPOSE 3000
 
@@ -29,7 +34,9 @@ FROM node:20-alpine AS development
 
 WORKDIR /usr/src/app
 
+# Copy workspace package.json files for development
 COPY package*.json ./
+COPY backend/package*.json ./backend/
 
 RUN npm install
 
