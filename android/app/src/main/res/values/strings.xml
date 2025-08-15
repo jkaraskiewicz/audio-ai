@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Audio AI Share</string>
+    <string name="settings">Settings</string>
+    <string name="server_configuration">Server Configuration</string>
+    <string name="server_url">Server URL</string>
+    <string name="server_url_summary">URL of your Audio AI backend server</string>
+    <string name="server_url_default">http://192.168.1.100:3000</string>
+    <string name="test_connection">Test Connection</string>
+    <string name="connection_successful">Connection successful!</string>
+    <string name="connection_failed">Connection failed: %s</string>
+    <string name="processing_content">Processing content...</string>
+    <string name="content_processed">Content processed successfully!</string>
+    <string name="processing_failed">Processing failed: %s</string>
+    <string name="no_content_to_share">No content to share</string>
+    <string name="unsupported_content_type">Unsupported content type</string>
+    <string name="configure_server_first">Please configure your server URL in settings first</string>
+    <string name="about">About</string>
+    <string name="app_description">Share text and files to your Audio AI backend for processing and analysis.</string>
+    <string name="version">Version %s</string>
+</resources>

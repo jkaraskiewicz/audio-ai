@@ -1,0 +1,48 @@
+{
+  "name": "audio-ai",
+  "version": "1.0.0",
+  "description": "Multi-platform AI-powered audio transcription and analysis system",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "android"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=backend",
+    "build": "npm run build --workspace=backend",
+    "test": "npm run test --workspace=backend",
+    "lint": "npm run lint --workspace=backend",
+    "start": "npm run start --workspace=backend",
+    "backend:dev": "npm run dev --workspace=backend",
+    "backend:build": "npm run build --workspace=backend", 
+    "backend:test": "npm run test --workspace=backend",
+    "backend:start": "npm run start --workspace=backend",
+    "config": "npm run config --workspace=backend",
+    "config:validate": "npm run config:validate --workspace=backend",
+    "config:show": "npm run config:show --workspace=backend",
+    "config:init": "npm run config:init --workspace=backend",
+    "install:all": "npm install && npm install --workspace=backend",
+    "clean": "npm run clean --workspace=backend",
+    "format": "npm run format --workspace=backend",
+    "typecheck": "npm run typecheck --workspace=backend"
+  },
+  "keywords": [
+    "ai",
+    "audio",
+    "transcription",
+    "analysis",
+    "android",
+    "backend",
+    "multi-platform"
+  ],
+  "author": "Audio-AI Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/audio-ai"
+  }
+}
