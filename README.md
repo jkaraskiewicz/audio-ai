@@ -116,7 +116,7 @@ audio-ai/
 │   │   ├── 📁 interfaces/         # TypeScript contracts
 │   │   └── 📁 utils/              # Shared utilities
 │   ├── 📁 tests/                  # Comprehensive test suite
-│   ├── 📁 saved_ideas/            # Generated markdown files
+│   ├── 📁 processed/            # Generated markdown files
 │   └── 📄 PROJECT_OVERVIEW.md     # Detailed backend docs
 ├── 📁 android/                    # Android Kotlin app
 │   ├── 📁 app/src/main/           # App source code
@@ -154,7 +154,7 @@ Discussion of Q1 goals, upcoming deadlines, and resource allocation...
 meeting, project-alpha, q1-goals, team-coordination
 ```
 
-**3. Files automatically organized** in `saved_ideas/meetings/2025/01/`
+**3. Files automatically organized** in `processed/meetings/2025/01/`
 
 ## 🛠️ Development Commands
 
@@ -320,7 +320,7 @@ curl http://localhost:3000/health
 
 ### Understanding Output
 
-**Generated Files Location:** `saved_ideas/category/year/month/`
+**Generated Files Location:** `processed/category/year/month/`
 
 **Example Output Structure:**
 ```markdown
@@ -615,7 +615,7 @@ WHISPER_SERVICE_URL=http://localhost:8001
 
 # Server Configuration
 PORT=3000
-BASE_DIRECTORY=saved_ideas
+BASE_DIRECTORY=processed
 LOG_LEVEL=info
 
 # File Processing

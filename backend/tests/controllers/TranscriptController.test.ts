@@ -51,7 +51,7 @@ describe('TranscriptController', () => {
       const transcript = 'Build a mobile app';
       const mockResult = {
         result: '# Mobile App\\n\\nContent here',
-        saved_to: 'saved_ideas/projects/2025-08-14_mobile-app.md',
+        saved_to: 'processed/projects/2025-08-14_mobile-app.md',
         message: 'Idea processed and saved',
       };
 

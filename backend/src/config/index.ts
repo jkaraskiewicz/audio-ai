@@ -92,7 +92,7 @@ export class ConfigManager {
     return {
       port,
       geminiApiKey,
-      baseDirectory: process.env.BASE_DIRECTORY || 'saved_ideas',
+      baseDirectory: process.env.BASE_DIRECTORY || 'processed',
     };
   }
 

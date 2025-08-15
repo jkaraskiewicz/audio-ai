@@ -27,7 +27,7 @@ services:
       - WHISPER_SERVICE_URL=http://whisper-service:8001
       - GEMINI_API_KEY=${GEMINI_API_KEY}
     volumes:
-      - ./saved_ideas:/usr/src/app/saved_ideas
+      - ./processed:/usr/src/app/processed
     depends_on:
       whisper-service:
         condition: service_healthy

@@ -69,7 +69,7 @@ cd android
    - Meeting summary
    - Action items with ownership
    - Key decisions and follow-ups
-   - Organized in saved_ideas/meetings/
+   - Organized in processed/meetings/
 ```
 
 ### Example 2: WhatsApp Voice Message
@@ -121,7 +121,7 @@ cd android
 
 ### Generated File Structure
 ```
-saved_ideas/
+processed/
 ├── meetings/2025/01/
 │   ├── weekly-standup-jan-15.md
 │   └── project-review-jan-20.md
@@ -258,9 +258,9 @@ Solutions:
 ### Custom Categories
 ```
 Backend can be configured for custom categories:
-- meetings → /saved_ideas/meetings/
-- personal → /saved_ideas/personal/
-- projects → /saved_ideas/projects/
+- meetings → /processed/meetings/
+- personal → /processed/personal/
+- projects → /processed/projects/
 ```
 
 ### Integration with Other Apps

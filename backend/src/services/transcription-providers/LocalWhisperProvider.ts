@@ -83,9 +83,21 @@ export class LocalWhisperProvider implements AudioTranscriptionProvider {
         throw new Error('Empty transcription result from Whisper');
       }
 
+      // Create preview for logging
+      const transcriptionPreview = transcription.length > 200 
+        ? transcription.substring(0, 200) + '...'
+        : transcription;
+
       logger.info('Local Whisper transcription completed', {
         filename: file.originalname,
         transcriptionLength: transcription.length,
+        transcriptionPreview,
+      });
+
+      // Log full transcription for debugging
+      logger.debug('Local Whisper full transcription result', {
+        filename: file.originalname,
+        fullTranscription: transcription,
       });
 
       return {

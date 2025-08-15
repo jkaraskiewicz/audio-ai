@@ -26,7 +26,7 @@ Complete instructions for deploying Audio-AI using Docker in any environment.
    ```bash
    GEMINI_API_KEY=your_actual_gemini_api_key_here
    TRANSCRIPTION_PROVIDER=free_web_speech
-   BASE_DIRECTORY=saved_ideas
+   BASE_DIRECTORY=processed
    PORT=3000
    ```
 
@@ -107,7 +107,7 @@ docker run -d \
   -p 3000:3000 \
   -e GEMINI_API_KEY=your_api_key_here \
   -e TRANSCRIPTION_PROVIDER=free_web_speech \
-  -v $(pwd)/saved_ideas:/usr/src/app/saved_ideas \
+  -v $(pwd)/processed:/usr/src/app/processed \
   audio-ai
 ```
 
@@ -130,7 +130,7 @@ docker run -d \
   -e TRANSCRIPTION_PROVIDER=docker_whisper \
   -e WHISPER_SERVICE_URL=http://whisper-service:8001 \
   --link whisper-service \
-  -v $(pwd)/saved_ideas:/usr/src/app/saved_ideas \
+  -v $(pwd)/processed:/usr/src/app/processed \
   audio-ai
 ```
 
@@ -143,7 +143,7 @@ docker run -d \
 | `GEMINI_API_KEY` | ✅ Yes | - | Your Google Gemini API key |
 | `TRANSCRIPTION_PROVIDER` | No | `free_web_speech` | Transcription service to use |
 | `TRANSCRIPTION_API_KEY` | No | - | API key for transcription service (if needed) |
-| `BASE_DIRECTORY` | No | `saved_ideas` | Directory for saving markdown files |
+| `BASE_DIRECTORY` | No | `processed` | Directory for saving markdown files |
 | `PORT` | No | `3000` | Port for the web server |
 | `WHISPER_SERVICE_URL` | No | `http://localhost:8001` | URL for Docker Whisper service |
 
@@ -204,8 +204,8 @@ Run the included test script:
 
 4. **Check output:**
    ```bash
-   ls saved_ideas/
-   cat saved_ideas/projects/[latest-file].md
+   ls processed/
+   cat processed/projects/[latest-file].md
    ```
 
 ---
@@ -213,13 +213,13 @@ Run the included test script:
 ## 📁 File Persistence
 
 ### Volume Mounting
-The Docker setup automatically mounts the `saved_ideas` directory so your generated markdown files persist outside the container:
+The Docker setup automatically mounts the `processed` directory so your generated markdown files persist outside the container:
 
 ```bash
 # Files are saved to:
-./saved_ideas/projects/
-./saved_ideas/daily/tasks/
-./saved_ideas/personal/
+./processed/projects/
+./processed/daily/tasks/
+./processed/personal/
 # etc.
 ```
 
@@ -230,7 +230,7 @@ To use a different directory:
 BASE_DIRECTORY=my_custom_output
 
 # Option 2: Docker volume
-docker run -v /path/to/your/dir:/usr/src/app/saved_ideas audio-ai
+docker run -v /path/to/your/dir:/usr/src/app/processed audio-ai
 ```
 
 ---

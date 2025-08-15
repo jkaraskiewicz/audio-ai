@@ -32,10 +32,22 @@ export class FreeWebSpeechProvider implements AudioTranscriptionProvider {
       // Fallback: Generate a realistic transcription based on file characteristics
       const transcription = this.generateRealisticTranscription(file);
       
+      // Create preview for logging
+      const transcriptionPreview = transcription.length > 200 
+        ? transcription.substring(0, 200) + '...'
+        : transcription;
+      
       logger.info('Free web speech transcription completed', {
         filename: file.originalname,
         transcriptionLength: transcription.length,
         method: 'realistic_generation',
+        transcriptionPreview,
+      });
+
+      // Log full transcription for debugging
+      logger.debug('Free web speech full transcription result', {
+        filename: file.originalname,
+        fullTranscription: transcription,
       });
 
       return {
@@ -66,8 +78,27 @@ export class FreeWebSpeechProvider implements AudioTranscriptionProvider {
       if (response.ok) {
         const result = await response.json();
         if (result.text && result.text.trim()) {
+          const transcription = result.text.trim();
+          
+          // Create preview for logging
+          const transcriptionPreview = transcription.length > 200 
+            ? transcription.substring(0, 200) + '...'
+            : transcription;
+
+          logger.info('Vosk API transcription successful', {
+            filename: file.originalname,
+            transcriptionLength: transcription.length,
+            transcriptionPreview,
+          });
+
+          // Log full transcription for debugging
+          logger.debug('Vosk API full transcription result', {
+            filename: file.originalname,
+            fullTranscription: transcription,
+          });
+
           return {
-            extractedText: result.text.trim(),
+            extractedText: transcription,
             fileType: FileType.AUDIO,
             processingMethod: 'vosk_api_free',
           };

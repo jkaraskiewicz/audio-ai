@@ -1,6 +1,63 @@
-node_modules
-dist
-.git
-.idea
+# Dependencies
+node_modules/
 npm-debug.log
+yarn-error.log
+
+# Build outputs
+dist/
+build/
+
+# Environment and config
 .env
+.env.local
+.env.production
+.env.test
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Test artifacts and temporary files
+test-*.mp3
+test-*.wav
+test-*.m4a
+test-*.ogg
+test-*.flac
+test-deployment.sh
+idea.md
+*.tmp
+
+# Coverage reports
+coverage/
+*.lcov
+
+# Logs
+logs/
+*.log
+
+# Processed files directory (contains generated content)
+processed/
+saved_ideas/
+
+# Runtime data
+pids
+*.pid
+*.seed
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history

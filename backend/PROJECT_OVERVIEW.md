@@ -68,7 +68,7 @@
 ### Default Settings
 - **Transcription Provider**: Free Web Speech (no API key required)
 - **AI Model**: Gemini 2.0 Flash Experimental
-- **Output Directory**: `saved_ideas/`
+- **Output Directory**: `processed/`
 - **Port**: 3000
 
 ### Environment Variables
@@ -79,7 +79,7 @@ GEMINI_API_KEY=your_gemini_api_key_here
 # Optional
 TRANSCRIPTION_PROVIDER=free_web_speech
 TRANSCRIPTION_API_KEY=optional_provider_api_key
-BASE_DIRECTORY=saved_ideas
+BASE_DIRECTORY=processed
 PORT=3000
 ```
 
@@ -101,7 +101,7 @@ audio-ai/
 │   ├── config/             # Configuration management
 │   └── index.ts            # Application entry point
 ├── tests/                  # Comprehensive test suite
-├── saved_ideas/           # Generated markdown files
+├── processed/           # Generated markdown files
 ├── docker-compose.whisper.yml  # Docker Whisper setup
 ├── whisper.Dockerfile     # Whisper container definition
 └── package.json           # Dependencies and scripts
@@ -507,7 +507,7 @@ npm run build
 ### Usage
 1. **Start the server**: `npm run dev`
 2. **Upload an audio file**: Use POST `/process-file` endpoint
-3. **Check results**: Generated markdown saved in `saved_ideas/`
+3. **Check results**: Generated markdown saved in `processed/`
 
 ## 🛠️ Development Commands
 

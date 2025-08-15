@@ -108,15 +108,15 @@ curl -X POST http://localhost:3000/process-file \
 1. **Record audio** in any voice recording app
 2. **Tap Share** → Select "Audio AI" 
 3. **Watch processing** - you'll get a success notification
-4. **Check results** - files saved in `saved_ideas/` directory
+4. **Check results** - files saved in `processed/` directory
 
 ### 3. Check Generated Output
 ```bash
 # View generated files
-ls -la saved_ideas/
+ls -la processed/
 
 # Example output structure:
-# saved_ideas/meetings/2025/01/team-standup-jan-15.md
+# processed/meetings/2025/01/team-standup-jan-15.md
 ```
 
 ## 🔧 Configuration Options
@@ -152,7 +152,7 @@ echo "TRANSCRIPTION_PROVIDER=docker_whisper" >> backend/.env
 ```bash
 # Backend .env options
 PORT=3000                              # Server port
-BASE_DIRECTORY=saved_ideas            # Output directory
+BASE_DIRECTORY=processed            # Output directory
 LOG_LEVEL=info                        # debug, info, warn, error
 MAX_FILE_SIZE_MB=100                  # Upload limit
 CONCURRENT_TRANSCRIPTIONS=3           # Parallel processing
@@ -299,7 +299,7 @@ pip install --upgrade openai-whisper
 ```bash
 # Backup important files
 cp backend/.env backend/.env.backup
-cp -r saved_ideas saved_ideas.backup
+cp -r processed processed.backup
 
 # Export Android app settings
 # (saved in DataStore - automatic backup with Android backup)
@@ -318,7 +318,7 @@ Your complete Audio AI system is now running with:
 **Start using it:**
 1. Record a voice note about your day
 2. Share to Audio AI from your recording app
-3. Check `saved_ideas/personal/` for organized output
+3. Check `processed/personal/` for organized output
 4. Experience the magic of AI-organized content! ✨
 
 ---

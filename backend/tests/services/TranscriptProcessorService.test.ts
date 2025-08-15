@@ -38,7 +38,7 @@ describe('TranscriptProcessorService', () => {
     it('should process transcript successfully', async () => {
       const transcript = 'Build a mobile app for expense tracking';
       const aiResult = '---\ncategory: projects\nfilename: expense-app\n---\n\n# Expense App';
-      const savedPath = 'saved_ideas/projects/2025-08-14_expense-app.md';
+      const savedPath = 'processed/projects/2025-08-14_expense-app.md';
 
       mockAIService.processTranscript.mockResolvedValue(aiResult);
       mockFileService.saveMarkdownFile.mockReturnValue(savedPath);

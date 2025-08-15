@@ -1,0 +1,73 @@
+# Dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Build outputs
+backend/dist/
+backend/build/
+android/app/build/
+android/.gradle/
+android/local.properties
+
+# Environment and config
+backend/.env
+backend/.env.local
+backend/.env.production
+backend/.env.test
+.env
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Test artifacts and temporary files
+test-*.mp3
+test-*.wav
+test-*.m4a
+test-*.ogg
+test-*.flac
+backend/test-deployment.sh
+backend/idea.md
+*.tmp
+
+# Coverage reports
+backend/coverage/
+*.lcov
+
+# Logs
+logs/
+*.log
+
+# Processed files directories (contains generated content)
+backend/processed/
+backend/saved_ideas/
+processed/
+
+# Android specific
+android/app/release/
+android/app/debug/
+android/.cxx/
+
+# Runtime data
+pids
+*.pid
+*.seed
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history

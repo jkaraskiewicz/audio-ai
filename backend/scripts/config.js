@@ -328,7 +328,7 @@ async function initCommand() {
     const port = await question('Server port [3000]: ') || '3000';
 
     // Base directory
-    const baseDir = await question('Base directory for saved files [saved_ideas]: ') || 'saved_ideas';
+    const baseDir = await question('Base directory for saved files [processed]: ') || 'processed';
 
     // Generate .env content
     let envContent = `# Audio-AI Configuration
