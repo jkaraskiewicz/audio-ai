@@ -11,14 +11,13 @@ import json
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import urllib.parse as urlparse
 
+# Load Whisper model once at module level
+model_name = os.environ.get('WHISPER_MODEL', 'base')
+print(f"Loading Whisper model: {model_name}")
+whisper_model = whisper.load_model(model_name)
+print(f"Whisper model '{model_name}' loaded successfully")
+
 class WhisperHandler(BaseHTTPRequestHandler):
-    
-    def __init__(self, *args, **kwargs):
-        # Load Whisper model once when handler is created
-        print("Loading Whisper model...")
-        self.model = whisper.load_model("base")  # Use base model for speed
-        print("Whisper model loaded successfully")
-        super().__init__(*args, **kwargs)
     
     def do_POST(self):
         if self.path == '/transcribe':
@@ -31,7 +30,12 @@ class WhisperHandler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
             self.end_headers()
-            self.wfile.write(json.dumps({"status": "healthy"}).encode())
+            response = {
+                "status": "healthy",
+                "service": "whisper-transcription",
+                "model": model_name
+            }
+            self.wfile.write(json.dumps(response).encode())
         else:
             self.send_error(404)
     
@@ -54,7 +58,7 @@ class WhisperHandler(BaseHTTPRequestHandler):
             try:
                 # Transcribe with Whisper
                 print(f"Transcribing audio file: {temp_path}")
-                result = self.model.transcribe(temp_path)
+                result = whisper_model.transcribe(temp_path)
                 
                 # Send response
                 response = {

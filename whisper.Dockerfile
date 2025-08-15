@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir openai-whisper
 WORKDIR /app
 
 # Create a simple whisper service script
-COPY whisper-service.py .
+COPY backend/whisper-service.py .
 
 # Expose port for the whisper service
 EXPOSE 8001
