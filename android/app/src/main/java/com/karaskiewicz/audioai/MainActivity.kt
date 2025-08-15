@@ -19,7 +19,7 @@ class MainActivity : ComponentActivity() {
         MainScreen(
           onNavigateToSettings = {
             startActivity(Intent(this@MainActivity, SettingsActivity::class.java))
-          }
+          },
         )
       }
     }

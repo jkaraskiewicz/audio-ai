@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 data class ConnectionTestState(
   val isLoading: Boolean = false,
   val isSuccess: Boolean? = null,
-  val error: String? = null
+  val error: String? = null,
 )
 
 class SettingsViewModel : ViewModel() {
@@ -45,7 +45,7 @@ class SettingsViewModel : ViewModel() {
 
     if (!apiClient.isConfigured(context)) {
       _connectionTestState.value = ConnectionTestState(
-        error = "Please configure server URL first"
+        error = "Please configure server URL first",
       )
       return
     }
@@ -53,7 +53,7 @@ class SettingsViewModel : ViewModel() {
     val apiService = apiClient.getApiService(context)
     if (apiService == null) {
       _connectionTestState.value = ConnectionTestState(
-        error = "Failed to create API service"
+        error = "Failed to create API service",
       )
       return
     }
@@ -67,12 +67,12 @@ class SettingsViewModel : ViewModel() {
           _connectionTestState.value = ConnectionTestState(isSuccess = true)
         } else {
           _connectionTestState.value = ConnectionTestState(
-            error = "HTTP ${response.code()}: ${response.message()}"
+            error = "HTTP ${response.code()}: ${response.message()}",
           )
         }
       } catch (e: Exception) {
         _connectionTestState.value = ConnectionTestState(
-          error = e.message ?: "Unknown error occurred"
+          error = e.message ?: "Unknown error occurred",
         )
       }
     }

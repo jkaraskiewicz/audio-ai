@@ -7,7 +7,7 @@ import com.google.gson.annotations.SerializedName
  */
 data class ProcessTextRequest(
   @SerializedName("transcript")
-  val transcript: String
+  val transcript: String,
 )
 
 /**
@@ -24,7 +24,7 @@ data class ProcessResponse(
   val savedPath: String?,
 
   @SerializedName("error")
-  val error: String?
+  val error: String?,
 )
 
 /**
@@ -38,5 +38,5 @@ data class HealthResponse(
   val message: String?,
 
   @SerializedName("timestamp")
-  val timestamp: String?
+  val timestamp: String?,
 )

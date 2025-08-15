@@ -2,19 +2,15 @@ package com.karaskiewicz.audioai.data
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.whenever
-import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
+import org.mockito.MockitoAnnotations
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertTrue
 
-@RunWith(MockitoJUnitRunner::class)
+@RunWith(RobolectricTestRunner::class)
 class ApiClientTest {
 
   @Mock
@@ -27,23 +23,24 @@ class ApiClientTest {
 
   @Before
   fun setup() {
+    MockitoAnnotations.openMocks(this)
     apiClient = ApiClient.getInstance()
   }
 
   @Test
-  fun `getApiService returns null when server URL is blank`() {
+  fun `getApiService returns service when context has default URL`() {
     // Given
     val context = ApplicationProvider.getApplicationContext<Context>()
 
     // When
     val apiService = apiClient.getApiService(context)
 
-    // Then - will be null because default context has no saved URL
-    assertNull(apiService)
+    // Then - returns service because default URL is configured
+    assertTrue(apiService != null)
   }
 
   @Test
-  fun `isConfigured returns false when server URL is blank`() {
+  fun `isConfigured returns true when context has default URL`() {
     // Given
     val context = ApplicationProvider.getApplicationContext<Context>()
 
@@ -51,7 +48,7 @@ class ApiClientTest {
     val isConfigured = apiClient.isConfigured(context)
 
     // Then
-    assertFalse(isConfigured)
+    assertTrue(isConfigured)
   }
 
   @Test

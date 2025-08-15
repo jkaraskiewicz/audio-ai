@@ -20,7 +20,7 @@ data class ShareState(
   val isLoading: Boolean = false,
   val isSuccess: Boolean = false,
   val error: String? = null,
-  val message: String = ""
+  val message: String = "",
 )
 
 class ShareViewModel : ViewModel() {
@@ -64,7 +64,12 @@ class ShareViewModel : ViewModel() {
   }
 
   private fun handleFileShare(context: Context, intent: Intent) {
-    val uri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
+    val uri = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+      intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+    } else {
+      @Suppress("DEPRECATION")
+      intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
+    }
     if (uri == null) {
       _shareState.value = ShareState(error = "No file found")
       return
@@ -74,7 +79,12 @@ class ShareViewModel : ViewModel() {
   }
 
   private fun handleMultipleFilesShare(context: Context, intent: Intent) {
-    val uris = intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)
+    val uris = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+      intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM, Uri::class.java)
+    } else {
+      @Suppress("DEPRECATION")
+      intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)
+    }
     if (uris.isNullOrEmpty()) {
       _shareState.value = ShareState(error = "No files found")
       return
@@ -103,21 +113,21 @@ class ShareViewModel : ViewModel() {
           if (body?.success == true) {
             _shareState.value = ShareState(
               isSuccess = true,
-              message = "Text processed successfully!"
+              message = "Text processed successfully!",
             )
           } else {
             _shareState.value = ShareState(
-              error = "Processing failed: ${body?.error ?: "Unknown error"}"
+              error = "Processing failed: ${body?.error ?: "Unknown error"}",
             )
           }
         } else {
           _shareState.value = ShareState(
-            error = "Server error: HTTP ${response.code()}"
+            error = "Server error: HTTP ${response.code()}",
           )
         }
       } catch (e: Exception) {
         _shareState.value = ShareState(
-          error = "Network error: ${e.message ?: "Unknown error"}"
+          error = "Network error: ${e.message ?: "Unknown error"}",
         )
       }
     }
@@ -153,21 +163,21 @@ class ShareViewModel : ViewModel() {
           if (responseBody?.success == true) {
             _shareState.value = ShareState(
               isSuccess = true,
-              message = "File processed successfully!"
+              message = "File processed successfully!",
             )
           } else {
             _shareState.value = ShareState(
-              error = "Processing failed: ${responseBody?.error ?: "Unknown error"}"
+              error = "Processing failed: ${responseBody?.error ?: "Unknown error"}",
             )
           }
         } else {
           _shareState.value = ShareState(
-            error = "Server error: HTTP ${response.code()}"
+            error = "Server error: HTTP ${response.code()}",
           )
         }
       } catch (e: Exception) {
         _shareState.value = ShareState(
-          error = "Network error: ${e.message ?: "Unknown error"}"
+          error = "Network error: ${e.message ?: "Unknown error"}",
         )
       }
     }

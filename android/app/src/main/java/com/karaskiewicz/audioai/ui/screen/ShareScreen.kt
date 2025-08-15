@@ -27,14 +27,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.karaskiewicz.audioai.R
 import com.karaskiewicz.audioai.ui.theme.AudioAITheme
 import com.karaskiewicz.audioai.ui.viewmodel.ShareState
 import com.karaskiewicz.audioai.ui.viewmodel.ShareViewModel
@@ -45,7 +43,7 @@ fun ShareScreen(
   intent: android.content.Intent,
   onDismiss: () -> Unit,
   onNavigateToSettings: () -> Unit,
-  viewModel: ShareViewModel = viewModel()
+  viewModel: ShareViewModel = viewModel(),
 ) {
   val context = LocalContext.current
   val shareState by viewModel.shareState.collectAsState()
@@ -65,7 +63,7 @@ fun ShareScreen(
   ShareDialog(
     state = shareState,
     onDismiss = onDismiss,
-    onNavigateToSettings = onNavigateToSettings
+    onNavigateToSettings = onNavigateToSettings,
   )
 }
 
@@ -73,26 +71,26 @@ fun ShareScreen(
 private fun ShareDialog(
   state: ShareState,
   onDismiss: () -> Unit,
-  onNavigateToSettings: () -> Unit
+  onNavigateToSettings: () -> Unit,
 ) {
   Dialog(onDismissRequest = onDismiss) {
     Box(
       modifier = Modifier
         .fillMaxSize()
         .background(Color.Black.copy(alpha = 0.8f)),
-      contentAlignment = Alignment.Center
+      contentAlignment = Alignment.Center,
     ) {
       Card(
         modifier = Modifier
           .fillMaxWidth()
           .padding(32.dp)
           .clip(RoundedCornerShape(16.dp)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
       ) {
         Column(
           modifier = Modifier.padding(24.dp),
           horizontalAlignment = Alignment.CenterHorizontally,
-          verticalArrangement = Arrangement.spacedBy(16.dp)
+          verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
           // Title
           Text(
@@ -102,7 +100,7 @@ private fun ShareDialog(
               else -> "Processing Content"
             },
             style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
           )
 
           // Progress or Status
@@ -114,7 +112,7 @@ private fun ShareDialog(
           Text(
             text = state.error ?: state.message,
             style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
           )
 
           Spacer(modifier = Modifier.height(8.dp))
@@ -126,7 +124,7 @@ private fun ShareDialog(
               Arrangement.SpaceBetween
             } else {
               Arrangement.End
-            }
+            },
           ) {
             if (state.error != null && state.error.contains("configure")) {
               Button(onClick = onNavigateToSettings) {
@@ -153,7 +151,7 @@ fun ShareDialogPreview() {
     ShareDialog(
       state = ShareState(isLoading = true, message = "Processing content..."),
       onDismiss = {},
-      onNavigateToSettings = {}
+      onNavigateToSettings = {},
     )
   }
 }
@@ -165,7 +163,7 @@ fun ShareDialogErrorPreview() {
     ShareDialog(
       state = ShareState(error = "Please configure your server URL in settings first"),
       onDismiss = {},
-      onNavigateToSettings = {}
+      onNavigateToSettings = {},
     )
   }
 }

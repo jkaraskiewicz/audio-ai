@@ -22,7 +22,7 @@ class ShareActivity : ComponentActivity() {
           onNavigateToSettings = {
             startActivity(Intent(this@ShareActivity, SettingsActivity::class.java))
             finish()
-          }
+          },
         )
       }
     }

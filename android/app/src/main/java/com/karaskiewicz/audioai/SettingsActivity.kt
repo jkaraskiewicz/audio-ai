@@ -16,7 +16,7 @@ class SettingsActivity : ComponentActivity() {
     setContent {
       AudioAITheme {
         SettingsScreen(
-          onNavigateBack = { finish() }
+          onNavigateBack = { finish() },
         )
       }
     }

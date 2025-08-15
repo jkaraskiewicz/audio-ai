@@ -24,7 +24,7 @@ interface ApiService {
   @POST("process")
   @Headers("Content-Type: application/json")
   suspend fun processText(
-    @Body request: ProcessTextRequest
+    @Body request: ProcessTextRequest,
   ): Response<ProcessResponse>
 
   /**
@@ -34,6 +34,6 @@ interface ApiService {
   @POST("process-file")
   suspend fun processFile(
     @Part file: MultipartBody.Part,
-    @Part("transcript") transcript: RequestBody? = null
+    @Part("transcript") transcript: RequestBody? = null,
   ): Response<ProcessResponse>
 }

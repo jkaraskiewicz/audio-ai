@@ -13,9 +13,12 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import kotlin.test.assertFalse
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import kotlin.test.assertTrue
 
 @ExperimentalCoroutinesApi
+@RunWith(RobolectricTestRunner::class)
 class MainViewModelTest {
 
   @get:Rule
@@ -42,17 +45,20 @@ class MainViewModelTest {
     // When
     viewModel.loadConfiguration(context)
 
+    // Wait for the Flow collection to emit at least one value
+    testScheduler.advanceUntilIdle()
+
     // Then
-    // Default state should have empty server URL
-    assertFalse(viewModel.isConfigured.value)
+    // Default state should be configured with default URL
+    assertTrue(viewModel.isConfigured.value)
   }
 
   @Test
-  fun `isApiConfigured returns false for unconfigured context`() {
+  fun `isApiConfigured returns true for context with default URL`() {
     // When
     val isConfigured = viewModel.isApiConfigured(context)
 
     // Then
-    assertFalse(isConfigured)
+    assertTrue(isConfigured)
   }
 }

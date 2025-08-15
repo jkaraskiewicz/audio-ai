@@ -6,11 +6,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -52,7 +51,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun SettingsScreen(
   onNavigateBack: () -> Unit,
-  viewModel: SettingsViewModel = viewModel()
+  viewModel: SettingsViewModel = viewModel(),
 ) {
   val context = LocalContext.current
   val scope = rememberCoroutineScope()
@@ -95,35 +94,35 @@ fun SettingsScreen(
         navigationIcon = {
           IconButton(onClick = onNavigateBack) {
             Icon(
-              imageVector = Icons.Default.ArrowBack,
-              contentDescription = "Back"
+              imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+              contentDescription = "Back",
             )
           }
-        }
+        },
       )
     },
-    snackbarHost = { SnackbarHost(snackbarHostState) }
+    snackbarHost = { SnackbarHost(snackbarHostState) },
   ) { paddingValues ->
     Column(
       modifier = Modifier
         .fillMaxSize()
         .padding(paddingValues)
         .padding(16.dp),
-      verticalArrangement = Arrangement.spacedBy(16.dp)
+      verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
       // Server Configuration Card
       Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
       ) {
         Column(
           modifier = Modifier.padding(16.dp),
-          verticalArrangement = Arrangement.spacedBy(16.dp)
+          verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
           Text(
             text = stringResource(R.string.server_configuration),
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
           )
 
           OutlinedTextField(
@@ -133,7 +132,7 @@ fun SettingsScreen(
             supportingText = { Text(stringResource(R.string.server_url_summary)) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
             modifier = Modifier.fillMaxWidth(),
-            singleLine = true
+            singleLine = true,
           )
 
           Button(
@@ -143,18 +142,18 @@ fun SettingsScreen(
               }
             },
             modifier = Modifier.fillMaxWidth(),
-            enabled = urlInputValue != serverUrl && urlInputValue.isNotBlank()
+            enabled = urlInputValue != serverUrl && urlInputValue.isNotBlank(),
           ) {
             Text("Save URL")
           }
 
           Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
           ) {
             Button(
               onClick = { viewModel.testConnection(context) },
-              enabled = !connectionTestState.isLoading && serverUrl.isNotBlank()
+              enabled = !connectionTestState.isLoading && serverUrl.isNotBlank(),
             ) {
               Text(stringResource(R.string.test_connection))
             }
@@ -171,27 +170,27 @@ fun SettingsScreen(
       // About Card
       Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
       ) {
         Column(
           modifier = Modifier.padding(16.dp),
-          verticalArrangement = Arrangement.spacedBy(8.dp)
+          verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
           Text(
             text = stringResource(R.string.about),
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
           )
 
           Text(
             text = "Version ${BuildConfig.VERSION_NAME}",
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyMedium,
           )
 
           Text(
             text = stringResource(R.string.app_description),
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
         }
       }

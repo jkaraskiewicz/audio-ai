@@ -2,7 +2,6 @@ package com.karaskiewicz.audioai.ui.screen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -40,7 +39,7 @@ import com.karaskiewicz.audioai.ui.viewmodel.MainViewModel
 @Composable
 fun MainScreen(
   onNavigateToSettings: () -> Unit,
-  viewModel: MainViewModel = viewModel()
+  viewModel: MainViewModel = viewModel(),
 ) {
   val context = LocalContext.current
   val serverUrl by viewModel.serverUrl.collectAsState()
@@ -55,7 +54,7 @@ fun MainScreen(
       .fillMaxSize()
       .padding(16.dp),
     horizontalAlignment = Alignment.CenterHorizontally,
-    verticalArrangement = Arrangement.spacedBy(16.dp)
+    verticalArrangement = Arrangement.spacedBy(16.dp),
   ) {
     Spacer(modifier = Modifier.height(32.dp))
 
@@ -63,14 +62,14 @@ fun MainScreen(
     Image(
       painter = painterResource(id = R.drawable.ic_launcher),
       contentDescription = stringResource(R.string.app_name),
-      modifier = Modifier.size(80.dp)
+      modifier = Modifier.size(80.dp),
     )
 
     // App Title
     Text(
       text = stringResource(R.string.app_name),
       style = MaterialTheme.typography.headlineMedium,
-      fontWeight = FontWeight.Bold
+      fontWeight = FontWeight.Bold,
     )
 
     // App Description
@@ -78,7 +77,7 @@ fun MainScreen(
       text = stringResource(R.string.app_description),
       style = MaterialTheme.typography.bodyLarge,
       textAlign = TextAlign.Center,
-      modifier = Modifier.padding(horizontal = 24.dp)
+      modifier = Modifier.padding(horizontal = 24.dp),
     )
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -86,29 +85,29 @@ fun MainScreen(
     // Instructions Card
     Card(
       modifier = Modifier.fillMaxWidth(),
-      elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+      elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
     ) {
       Column(
         modifier = Modifier.padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
       ) {
         Text(
           text = "How to use:",
           style = MaterialTheme.typography.titleMedium,
-          fontWeight = FontWeight.Bold
+          fontWeight = FontWeight.Bold,
         )
 
         val instructions = listOf(
           "1. Select text in any app and tap Share",
           "2. Select files in file manager and tap Share",
           "3. Choose 'Audio AI' from the list",
-          "4. Content will be processed by your backend"
+          "4. Content will be processed by your backend",
         )
 
         instructions.forEach { instruction ->
           Text(
             text = instruction,
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyMedium,
           )
         }
       }
@@ -119,12 +118,12 @@ fun MainScreen(
     // Settings Button
     Button(
       onClick = onNavigateToSettings,
-      modifier = Modifier.fillMaxWidth()
+      modifier = Modifier.fillMaxWidth(),
     ) {
       Icon(
         imageVector = Icons.Default.Settings,
         contentDescription = null,
-        modifier = Modifier.padding(end = 8.dp)
+        modifier = Modifier.padding(end = 8.dp),
       )
       Text(stringResource(R.string.settings))
     }
@@ -133,7 +132,7 @@ fun MainScreen(
     Text(
       text = stringResource(R.string.version, BuildConfig.VERSION_NAME),
       style = MaterialTheme.typography.bodySmall,
-      color = MaterialTheme.colorScheme.onSurfaceVariant
+      color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
   }
 }
