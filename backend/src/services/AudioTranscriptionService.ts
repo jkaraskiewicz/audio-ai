@@ -36,9 +36,10 @@ export class AudioTranscriptionService {
       const result = await this.provider.transcribe(file);
 
       // Log transcription result with preview for debugging
-      const transcriptionPreview = result.extractedText.length > 200 
-        ? result.extractedText.substring(0, 200) + '...'
-        : result.extractedText;
+      const transcriptionPreview =
+        result.extractedText.length > 200
+          ? result.extractedText.substring(0, 200) + '...'
+          : result.extractedText;
 
       logger.info('Successfully transcribed audio file', {
         filename: file.originalname,

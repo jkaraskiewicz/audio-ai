@@ -89,25 +89,36 @@ export class OpenAIWhisperWebserviceProvider implements AudioTranscriptionProvid
         throw new Error(`OpenAI Whisper Webservice API error: ${response.status} ${errorText}`);
       }
 
-      const result = await response.json();
+      // Check if response is JSON or plain text
+      const contentType = response.headers.get('content-type') || '';
+      let transcription: string;
+      let language = 'auto-detected';
       
-      // The webservice returns: { "text": "transcribed text" }
-      if (!result.text || result.text.trim().length === 0) {
+      if (contentType.includes('application/json')) {
+        const result = await response.json();
+        transcription = result.text || result.transcript || '';
+        language = result.language || 'auto-detected';
+      } else {
+        // Handle plain text response
+        transcription = await response.text();
+      }
+      
+      if (!transcription || transcription.trim().length === 0) {
         throw new Error('Empty transcription result from OpenAI Whisper Webservice');
       }
 
-      const transcription = result.text.trim();
+      transcription = transcription.trim();
 
       logger.info('OpenAI Whisper Webservice transcription completed', {
         filename: file.originalname,
         transcriptionLength: transcription.length,
-        language: result.language || 'auto-detected',
+        language,
       });
 
       return {
         extractedText: transcription,
         fileType: FileType.AUDIO,
-        processingMethod: `openai_whisper_webservice_${result.language || 'auto'}`,
+        processingMethod: `openai_whisper_webservice_${language}`,
       };
     } catch (error) {
       logger.error('OpenAI Whisper Webservice transcription failed', {

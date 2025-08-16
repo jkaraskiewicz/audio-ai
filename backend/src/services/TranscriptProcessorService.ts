@@ -17,11 +17,10 @@ export class TranscriptProcessorService {
     }
 
     // Create preview for logging
-    const transcriptPreview = transcript.length > 300 
-      ? transcript.substring(0, 300) + '...'
-      : transcript;
+    const transcriptPreview =
+      transcript.length > 300 ? transcript.substring(0, 300) + '...' : transcript;
 
-    logger.info('Starting transcript processing', { 
+    logger.info('Starting transcript processing', {
       transcriptLength: transcript.length,
       transcriptPreview,
     });
@@ -72,9 +71,8 @@ export class TranscriptProcessorService {
         processingSource = `${fileResult.processingMethod} from file: ${file.originalname}`;
 
         // Create preview for logging
-        const textPreview = textToProcess.length > 300 
-          ? textToProcess.substring(0, 300) + '...'
-          : textToProcess;
+        const textPreview =
+          textToProcess.length > 300 ? textToProcess.substring(0, 300) + '...' : textToProcess;
 
         logger.info('File processed successfully, extracted text for AI processing', {
           filename: file.originalname,
@@ -96,9 +94,8 @@ export class TranscriptProcessorService {
         processingSource = 'direct text input';
 
         // Log direct transcript input
-        const textPreview = textToProcess.length > 300 
-          ? textToProcess.substring(0, 300) + '...'
-          : textToProcess;
+        const textPreview =
+          textToProcess.length > 300 ? textToProcess.substring(0, 300) + '...' : textToProcess;
 
         logger.info('Processing direct transcript input', {
           transcriptLength: textToProcess.length,
