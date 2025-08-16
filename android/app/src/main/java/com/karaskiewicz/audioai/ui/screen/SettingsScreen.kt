@@ -1,29 +1,47 @@
 package com.karaskiewicz.audioai.ui.screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.CloudUpload
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -90,110 +108,258 @@ fun SettingsScreen(
   Scaffold(
     topBar = {
       TopAppBar(
-        title = { Text(stringResource(R.string.settings)) },
+        title = { 
+          Text(
+            text = stringResource(R.string.settings),
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.SemiBold
+          ) 
+        },
         navigationIcon = {
           IconButton(onClick = onNavigateBack) {
             Icon(
               imageVector = Icons.AutoMirrored.Filled.ArrowBack,
               contentDescription = "Back",
+              tint = MaterialTheme.colorScheme.onSurface
             )
           }
         },
+        colors = TopAppBarDefaults.topAppBarColors(
+          containerColor = MaterialTheme.colorScheme.surface,
+          titleContentColor = MaterialTheme.colorScheme.onSurface
+        )
       )
     },
     snackbarHost = { SnackbarHost(snackbarHostState) },
+    containerColor = MaterialTheme.colorScheme.surfaceContainer
   ) { paddingValues ->
     Column(
       modifier = Modifier
         .fillMaxSize()
         .padding(paddingValues)
-        .padding(16.dp),
-      verticalArrangement = Arrangement.spacedBy(16.dp),
+        .verticalScroll(rememberScrollState())
+        .padding(horizontal = 20.dp, vertical = 12.dp),
+      verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
+      // Header Section
+      Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+      ) {
+        Row(
+          modifier = Modifier.padding(20.dp),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+          Box(
+            modifier = Modifier
+              .size(48.dp)
+              .background(
+                MaterialTheme.colorScheme.primary,
+                RoundedCornerShape(12.dp)
+              ),
+            contentAlignment = Alignment.Center
+          ) {
+            Icon(
+              imageVector = Icons.Default.Settings,
+              contentDescription = null,
+              tint = MaterialTheme.colorScheme.onPrimary,
+              modifier = Modifier.size(24.dp)
+            )
+          }
+          
+          Column {
+            Text(
+              text = "Audio AI Settings",
+              style = MaterialTheme.typography.headlineSmall,
+              fontWeight = FontWeight.SemiBold,
+              color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+              text = "Configure your server connection",
+              style = MaterialTheme.typography.bodyMedium,
+              color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+          }
+        }
+      }
+
       // Server Configuration Card
       Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(
+          containerColor = MaterialTheme.colorScheme.surface
+        )
       ) {
         Column(
-          modifier = Modifier.padding(16.dp),
-          verticalArrangement = Arrangement.spacedBy(16.dp),
+          modifier = Modifier.padding(24.dp),
+          verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-          Text(
-            text = stringResource(R.string.server_configuration),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-          )
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+          ) {
+            Icon(
+              imageVector = Icons.Default.Link,
+              contentDescription = null,
+              tint = MaterialTheme.colorScheme.primary,
+              modifier = Modifier.size(20.dp)
+            )
+            Text(
+              text = stringResource(R.string.server_configuration),
+              style = MaterialTheme.typography.titleMedium,
+              fontWeight = FontWeight.SemiBold,
+              color = MaterialTheme.colorScheme.onSurface
+            )
+          }
 
           OutlinedTextField(
             value = urlInputValue,
             onValueChange = { urlInputValue = it },
-            label = { Text(stringResource(R.string.server_url)) },
-            supportingText = { Text(stringResource(R.string.server_url_summary)) },
+            label = { 
+              Text(
+                stringResource(R.string.server_url),
+                style = MaterialTheme.typography.bodyMedium
+              )
+            },
+            supportingText = { 
+              Text(
+                stringResource(R.string.server_url_summary),
+                style = MaterialTheme.typography.bodySmall
+              )
+            },
+            leadingIcon = {
+              Icon(
+                imageVector = Icons.Default.CloudUpload,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+              )
+            },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
+            shape = RoundedCornerShape(12.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+              focusedBorderColor = MaterialTheme.colorScheme.primary,
+              unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+            )
           )
 
-          Button(
-            onClick = {
-              if (urlInputValue != serverUrl) {
-                viewModel.updateServerUrl(context, urlInputValue)
-              }
-            },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = urlInputValue != serverUrl && urlInputValue.isNotBlank(),
-          ) {
-            Text("Save URL")
-          }
-
           Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
           ) {
             Button(
-              onClick = { viewModel.testConnection(context) },
-              enabled = !connectionTestState.isLoading && serverUrl.isNotBlank(),
+              onClick = {
+                if (urlInputValue != serverUrl) {
+                  viewModel.updateServerUrl(context, urlInputValue)
+                }
+              },
+              modifier = Modifier.weight(1f),
+              enabled = urlInputValue != serverUrl && urlInputValue.isNotBlank(),
+              shape = RoundedCornerShape(12.dp),
+              colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary
+              )
             ) {
-              Text(stringResource(R.string.test_connection))
+              Icon(
+                imageVector = Icons.Default.CheckCircle,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp)
+              )
+              Spacer(modifier = Modifier.width(8.dp))
+              Text(
+                "Save URL",
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Medium
+              )
             }
 
-            if (connectionTestState.isLoading) {
-              CircularProgressIndicator()
+            FilledTonalButton(
+              onClick = { viewModel.testConnection(context) },
+              enabled = !connectionTestState.isLoading && serverUrl.isNotBlank(),
+              modifier = Modifier.weight(1f),
+              shape = RoundedCornerShape(12.dp)
+            ) {
+              if (connectionTestState.isLoading) {
+                CircularProgressIndicator(
+                  modifier = Modifier.size(16.dp),
+                  strokeWidth = 2.dp
+                )
+              } else {
+                Text(
+                  stringResource(R.string.test_connection),
+                  style = MaterialTheme.typography.labelLarge,
+                  fontWeight = FontWeight.Medium
+                )
+              }
             }
           }
         }
       }
-
-      Spacer(modifier = Modifier.weight(1f))
 
       // About Card
       Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(
+          containerColor = MaterialTheme.colorScheme.surface
+        )
       ) {
         Column(
-          modifier = Modifier.padding(16.dp),
-          verticalArrangement = Arrangement.spacedBy(8.dp),
+          modifier = Modifier.padding(24.dp),
+          verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-          Text(
-            text = stringResource(R.string.about),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-          )
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+          ) {
+            Icon(
+              imageVector = Icons.Default.Info,
+              contentDescription = null,
+              tint = MaterialTheme.colorScheme.primary,
+              modifier = Modifier.size(20.dp)
+            )
+            Text(
+              text = stringResource(R.string.about),
+              style = MaterialTheme.typography.titleMedium,
+              fontWeight = FontWeight.SemiBold,
+              color = MaterialTheme.colorScheme.onSurface
+            )
+          }
 
-          Text(
-            text = "Version ${BuildConfig.VERSION_NAME}",
-            style = MaterialTheme.typography.bodyMedium,
-          )
+          Surface(
+            shape = RoundedCornerShape(12.dp),
+            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+          ) {
+            Column(
+              modifier = Modifier.padding(16.dp),
+              verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+              Text(
+                text = "Version ${BuildConfig.VERSION_NAME}",
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.primary
+              )
 
-          Text(
-            text = stringResource(R.string.app_description),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-          )
+              Text(
+                text = stringResource(R.string.app_description),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.3
+              )
+            }
+          }
         }
       }
+      
+      // Bottom spacing
+      Spacer(modifier = Modifier.height(20.dp))
     }
   }
 }

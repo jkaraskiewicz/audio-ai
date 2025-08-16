@@ -16,7 +16,7 @@ class PreferencesDataStore(private val context: Context) {
 
   companion object {
     val SERVER_URL_KEY = stringPreferencesKey("server_url")
-    private const val DEFAULT_SERVER_URL = "http://192.168.1.100:3000"
+    private const val DEFAULT_SERVER_URL = "http://192.168.1.100:1993"
   }
 
   val serverUrl: Flow<String> = context.dataStore.data

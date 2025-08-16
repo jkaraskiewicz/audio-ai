@@ -13,7 +13,13 @@ const execAsync = promisify(exec);
  */
 export class AudioConverter {
   private static readonly SUPPORTED_INPUT_FORMATS = [
-    'm4a', 'aac', 'wav', 'flac', 'ogg', 'mp3', 'wma'
+    'm4a',
+    'aac',
+    'wav',
+    'flac',
+    'ogg',
+    'mp3',
+    'wma',
   ];
 
   private static readonly OPTIMAL_OUTPUT_FORMAT = 'mp3';
@@ -23,9 +29,9 @@ export class AudioConverter {
   /**
    * Check if audio format conversion might be beneficial for Whisper
    */
-  static shouldConvert(filename: string, mimetype?: string): boolean {
+  static shouldConvert(filename: string, _mimetype?: string): boolean {
     const extension = this.getFileExtension(filename);
-    
+
     // Convert m4a, aac, and other formats that may cause issues
     const problematicFormats = ['m4a', 'aac', 'wma', 'flac'];
     return problematicFormats.includes(extension.toLowerCase());
@@ -35,11 +41,11 @@ export class AudioConverter {
    * Convert audio file to optimal format for Whisper processing
    */
   static async convertForWhisper(
-    fileBuffer: Buffer, 
+    fileBuffer: Buffer,
     originalFilename: string
   ): Promise<{ buffer: Buffer; filename: string; mimetype: string }> {
     const inputExtension = this.getFileExtension(originalFilename);
-    
+
     if (!this.SUPPORTED_INPUT_FORMATS.includes(inputExtension.toLowerCase())) {
       throw new Error(`Unsupported audio format: ${inputExtension}`);
     }
@@ -62,20 +68,26 @@ export class AudioConverter {
       // Convert using ffmpeg with optimal settings for Whisper
       const ffmpegCommand = [
         'ffmpeg',
-        '-i', `"${inputPath}"`,
-        '-ar', this.OPTIMAL_SAMPLE_RATE.toString(), // Sample rate
-        '-ac', this.OPTIMAL_CHANNELS.toString(),     // Mono
-        '-acodec', 'mp3',                            // MP3 codec
-        '-ab', '128k',                               // Bitrate
-        '-f', 'mp3',                                 // Force MP3 format
-        '-y',                                        // Overwrite output
-        `"${outputPath}"`
+        '-i',
+        `"${inputPath}"`,
+        '-ar',
+        this.OPTIMAL_SAMPLE_RATE.toString(), // Sample rate
+        '-ac',
+        this.OPTIMAL_CHANNELS.toString(), // Mono
+        '-acodec',
+        'mp3', // MP3 codec
+        '-ab',
+        '128k', // Bitrate
+        '-f',
+        'mp3', // Force MP3 format
+        '-y', // Overwrite output
+        `"${outputPath}"`,
       ].join(' ');
 
       logger.debug('Executing ffmpeg conversion', { command: ffmpegCommand });
 
-      const { stdout, stderr } = await execAsync(ffmpegCommand);
-      
+      const { stderr } = await execAsync(ffmpegCommand);
+
       if (stderr && stderr.includes('Error')) {
         throw new Error(`FFmpeg conversion error: ${stderr}`);
       }
@@ -83,7 +95,7 @@ export class AudioConverter {
       // Read converted file
       const convertedBuffer = readFileSync(outputPath);
       const convertedFilename = originalFilename.replace(
-        `.${inputExtension}`, 
+        `.${inputExtension}`,
         `.${this.OPTIMAL_OUTPUT_FORMAT}`
       );
 
@@ -99,13 +111,14 @@ export class AudioConverter {
         filename: convertedFilename,
         mimetype: 'audio/mpeg',
       };
-
     } catch (error) {
       logger.error('Audio conversion failed', {
         originalFormat: inputExtension,
         error: error instanceof Error ? error.message : 'Unknown error',
       });
-      throw new Error(`Audio conversion failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Audio conversion failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     } finally {
       // Clean up temporary files
       try {

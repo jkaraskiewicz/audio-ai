@@ -25,6 +25,9 @@ export interface ContentTypePrompts {
     technical: PromptConfig;
     problemSolving: PromptConfig;
     reflection: PromptConfig;
+    shopping: PromptConfig;
+    travel: PromptConfig;
+    finance: PromptConfig;
   };
 }
 
@@ -46,12 +49,16 @@ export const PROMPTS: ContentTypePrompts = {
 CRITICAL: You must decide whether this content would benefit from AI commentary/analysis. Use your expert judgment:
 
 **Include Commentary For:**
-- Pure questions → Provide comprehensive, accurate answers
+- Pure questions → Provide comprehensive, accurate answers with practical details
 - Mixed content with embedded questions → Answer questions contextually within broader analysis
 - Project ideas → Feasibility analysis, recommendations, market insights
 - Problem-solving → Solution approaches, best practices, troubleshooting steps
 - Technical content → Explanations, best practices, learning resources
 - Complex thoughts requiring insights → Thoughtful analysis and perspectives
+- Shopping/purchasing → Include current price ranges, best places to buy, product comparisons
+- Travel planning → Include estimated costs, specific locations, practical logistics
+- Financial topics → Include current market data, price trends, practical investment guidance
+- Entertainment/activities → Include pricing, locations, booking information
 
 **NO Commentary For:**
 - Simple tasks/reminders (e.g., "buy groceries", "call mom")
@@ -86,10 +93,17 @@ commentary_needed: {{commentary_decision}}
 [INCLUDE THIS SECTION ONLY if commentary_needed: true]
 {{commentary_placeholder}}
 
+**IMPORTANT: When providing commentary, be practical and specific:**
+- For shopping topics: Include realistic price ranges, specific stores/websites, product comparisons
+- For travel planning: Include cost estimates, specific locations, booking advice, logistics
+- For financial discussions: Include current market context, price trends, practical investment guidance
+- For entertainment/activities: Include pricing information, locations, booking details
+- Always aim to provide actionable, real-world information rather than generic advice
+
 ## Tags
 {{tags_placeholder}}
 
-**Categories to choose from:** projects, daily, personal, work, notes, questions, learning, technical, problem-solving, travel, finance, health, or create your own.
+**Categories to choose from:** projects, daily, personal, work, notes, questions, learning, technical, problem-solving, travel, finance, health, shopping, investment, entertainment, research, or create your own.
 
 Return ONLY the markdown content with NO additional explanations.`,
     variables: ['transcript'],
@@ -271,6 +285,130 @@ Provide thoughtful, supportive commentary that:
 
 Be empathetic and supportive while providing valuable insights that help with personal growth and self-understanding.`,
       variables: ['reflection_text'],
+    },
+
+    /**
+     * For shopping and purchasing decisions
+     */
+    shopping: {
+      name: 'shopping_commentary',
+      description: 'Provides practical shopping guidance with prices and comparisons',
+      version: '1.0.0',
+      template: `The user is discussing shopping or purchasing decisions that need practical guidance:
+
+Shopping content: {{shopping_text}}
+
+Provide comprehensive shopping commentary including:
+
+1. **Product Analysis**
+   - Key features and specifications to consider
+   - Quality indicators and what to look for
+   - Common variants and options available
+
+2. **Pricing Information**
+   - Current market price ranges (estimate based on typical market conditions)
+   - Where to find the best deals (online vs retail, specific stores)
+   - Seasonal pricing patterns and best times to buy
+   - Budget alternatives and premium options
+
+3. **Purchase Recommendations**
+   - Specific brands or models to consider
+   - Reliable retailers and marketplaces
+   - What to avoid or watch out for
+   - Warranty and return policy considerations
+
+4. **Practical Next Steps**
+   - How to research further before buying
+   - Questions to ask sellers
+   - Comparison shopping strategies
+   - Timeline recommendations
+
+Focus on actionable, money-saving advice that helps make informed purchasing decisions.`,
+      variables: ['shopping_text'],
+    },
+
+    /**
+     * For travel planning and logistics
+     */
+    travel: {
+      name: 'travel_commentary',
+      description: 'Provides practical travel guidance with costs and logistics',
+      version: '1.0.0',
+      template: `The user is planning travel that needs practical guidance and cost estimates:
+
+Travel content: {{travel_text}}
+
+Provide comprehensive travel commentary including:
+
+1. **Destination Information**
+   - Specific locations and attractions mentioned
+   - Best times to visit and seasonal considerations
+   - Local highlights and must-see spots
+   - Cultural tips and practical considerations
+
+2. **Cost Estimates & Budget Planning**
+   - Estimated costs for accommodation (budget to luxury ranges)
+   - Transportation costs (flights, gas, tolls, parking)
+   - Food and dining budget expectations
+   - Activity and attraction pricing
+   - Total estimated trip cost ranges
+
+3. **Logistics & Planning**
+   - Recommended booking platforms and apps
+   - How far in advance to book for best prices
+   - Transportation options and routes
+   - Accommodation recommendations by area
+   - Packing suggestions and preparation tips
+
+4. **Practical Travel Tips**
+   - Money-saving strategies and deals to look for
+   - Local transportation options
+   - Safety considerations and precautions
+   - Contact information for key services if available
+
+Provide realistic cost estimates and actionable planning advice to make the trip both enjoyable and budget-friendly.`,
+      variables: ['travel_text'],
+    },
+
+    /**
+     * For financial topics and investment discussions
+     */
+    finance: {
+      name: 'finance_commentary',
+      description: 'Provides financial guidance with current market context',
+      version: '1.0.0',
+      template: `The user is discussing financial topics that need practical guidance and market context:
+
+Financial content: {{finance_text}}
+
+Provide comprehensive financial commentary including:
+
+1. **Market Context & Current Conditions**
+   - Current market trends and recent performance for mentioned assets
+   - General market sentiment and key factors affecting prices
+   - Recent news or events impacting the financial instruments discussed
+   - Historical context and typical price ranges
+
+2. **Investment Analysis**
+   - Risk assessment and considerations
+   - Diversification implications
+   - Time horizon considerations
+   - Tax implications to be aware of
+
+3. **Practical Guidance**
+   - Reputable platforms and brokers for execution
+   - Cost considerations (fees, commissions, expense ratios)
+   - How to research further before making decisions
+   - Dollar-cost averaging and timing strategies
+
+4. **Risk Management & Education**
+   - Important disclaimers about investment risks
+   - Suggested educational resources
+   - When to consult with financial professionals
+   - Portfolio allocation considerations
+
+IMPORTANT: Always include appropriate disclaimers about investment risks and the importance of doing personal research. Focus on education rather than specific investment recommendations.`,
+      variables: ['finance_text'],
     },
   },
 };

@@ -110,10 +110,10 @@ class ShareViewModel : ViewModel() {
 
         if (response.isSuccessful) {
           val body = response.body()
-          if (body?.success == true) {
+          if (body?.isSuccess == true) {
             _shareState.value = ShareState(
               isSuccess = true,
-              message = "Text processed successfully!",
+              message = "Text processed successfully!\nSaved to: ${body.savedTo}",
             )
           } else {
             _shareState.value = ShareState(
@@ -160,10 +160,10 @@ class ShareViewModel : ViewModel() {
 
         if (response.isSuccessful) {
           val responseBody = response.body()
-          if (responseBody?.success == true) {
+          if (responseBody?.isSuccess == true) {
             _shareState.value = ShareState(
               isSuccess = true,
-              message = "File processed successfully!",
+              message = "File processed successfully!\nSaved to: ${responseBody.savedTo}",
             )
           } else {
             _shareState.value = ShareState(

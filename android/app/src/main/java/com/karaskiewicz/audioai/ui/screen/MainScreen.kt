@@ -1,21 +1,33 @@
 package com.karaskiewicz.audioai.ui.screen
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -49,91 +61,163 @@ fun MainScreen(
     viewModel.loadConfiguration(context)
   }
 
-  Column(
-    modifier = Modifier
-      .fillMaxSize()
-      .padding(16.dp),
-    horizontalAlignment = Alignment.CenterHorizontally,
-    verticalArrangement = Arrangement.spacedBy(16.dp),
+  Surface(
+    modifier = Modifier.fillMaxSize(),
+    color = MaterialTheme.colorScheme.surfaceContainer
   ) {
-    Spacer(modifier = Modifier.height(32.dp))
-
-    // App Icon
-    Image(
-      painter = painterResource(id = R.drawable.ic_launcher),
-      contentDescription = stringResource(R.string.app_name),
-      modifier = Modifier.size(80.dp),
-    )
-
-    // App Title
-    Text(
-      text = stringResource(R.string.app_name),
-      style = MaterialTheme.typography.headlineMedium,
-      fontWeight = FontWeight.Bold,
-    )
-
-    // App Description
-    Text(
-      text = stringResource(R.string.app_description),
-      style = MaterialTheme.typography.bodyLarge,
-      textAlign = TextAlign.Center,
-      modifier = Modifier.padding(horizontal = 24.dp),
-    )
-
-    Spacer(modifier = Modifier.height(16.dp))
-
-    // Instructions Card
-    Card(
-      modifier = Modifier.fillMaxWidth(),
-      elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+    Column(
+      modifier = Modifier
+        .fillMaxSize()
+        .verticalScroll(rememberScrollState())
+        .padding(20.dp),
+      horizontalAlignment = Alignment.CenterHorizontally,
+      verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
-      Column(
-        modifier = Modifier.padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+      Spacer(modifier = Modifier.height(20.dp))
+
+      // Hero Section
+      Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
       ) {
-        Text(
-          text = "How to use:",
-          style = MaterialTheme.typography.titleMedium,
-          fontWeight = FontWeight.Bold,
-        )
+        Column(
+          modifier = Modifier.padding(32.dp),
+          horizontalAlignment = Alignment.CenterHorizontally,
+          verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+          // App Icon with background
+          Box(
+            modifier = Modifier
+              .size(80.dp)
+              .background(
+                MaterialTheme.colorScheme.surface,
+                RoundedCornerShape(20.dp)
+              ),
+            contentAlignment = Alignment.Center
+          ) {
+            Image(
+              painter = painterResource(id = R.mipmap.ic_launcher),
+              contentDescription = stringResource(R.string.app_name),
+              modifier = Modifier.size(64.dp),
+            )
+          }
 
-        val instructions = listOf(
-          "1. Select text in any app and tap Share",
-          "2. Select files in file manager and tap Share",
-          "3. Choose 'Audio AI' from the list",
-          "4. Content will be processed by your backend",
-        )
-
-        instructions.forEach { instruction ->
+          // App Title
           Text(
-            text = instruction,
-            style = MaterialTheme.typography.bodyMedium,
+            text = stringResource(R.string.app_name),
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+          )
+
+          // App Description
+          Text(
+            text = stringResource(R.string.app_description),
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.3
           )
         }
       }
-    }
 
-    Spacer(modifier = Modifier.weight(1f))
-
-    // Settings Button
-    Button(
-      onClick = onNavigateToSettings,
-      modifier = Modifier.fillMaxWidth(),
-    ) {
-      Icon(
-        imageVector = Icons.Default.Settings,
-        contentDescription = null,
-        modifier = Modifier.padding(end = 8.dp),
+      // Feature Cards
+      val features = listOf(
+        Triple(Icons.Default.Share, "Share Content", "Select text or files and share to Audio AI"),
+        Triple(Icons.Default.Mic, "AI Processing", "Advanced transcription and content analysis"),
+        Triple(Icons.Default.PlayArrow, "Auto-Save", "Processed content saved as organized notes")
       )
-      Text(stringResource(R.string.settings))
-    }
 
-    // Version Info
-    Text(
-      text = stringResource(R.string.version, BuildConfig.VERSION_NAME),
-      style = MaterialTheme.typography.bodySmall,
-      color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
+      features.forEach { (icon, title, description) ->
+        Card(
+          modifier = Modifier.fillMaxWidth(),
+          shape = RoundedCornerShape(16.dp),
+          elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+          colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+          )
+        ) {
+          Row(
+            modifier = Modifier.padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+          ) {
+            Box(
+              modifier = Modifier
+                .size(40.dp)
+                .background(
+                  MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                  RoundedCornerShape(10.dp)
+                ),
+              contentAlignment = Alignment.Center
+            ) {
+              Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp)
+              )
+            }
+            
+            Column {
+              Text(
+                text = title,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
+              )
+              Text(
+                text = description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+              )
+            }
+          }
+        }
+      }
+
+      Spacer(modifier = Modifier.height(8.dp))
+
+      // Settings Button
+      Button(
+        onClick = onNavigateToSettings,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = ButtonDefaults.buttonColors(
+          containerColor = MaterialTheme.colorScheme.primary
+        ),
+        contentPadding = ButtonDefaults.ContentPadding
+      ) {
+        Icon(
+          imageVector = Icons.Default.Settings,
+          contentDescription = null,
+          modifier = Modifier.size(20.dp)
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+          stringResource(R.string.settings),
+          style = MaterialTheme.typography.labelLarge,
+          fontWeight = FontWeight.Medium
+        )
+      }
+
+      // Version Info
+      Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+      ) {
+        Text(
+          text = stringResource(R.string.version, BuildConfig.VERSION_NAME),
+          style = MaterialTheme.typography.labelMedium,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+          modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+          fontWeight = FontWeight.Medium
+        )
+      }
+      
+      Spacer(modifier = Modifier.height(20.dp))
+    }
   }
 }
 

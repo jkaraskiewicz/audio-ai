@@ -14,18 +14,22 @@ data class ProcessTextRequest(
  * Response model for processing requests
  */
 data class ProcessResponse(
-  @SerializedName("success")
-  val success: Boolean,
+  @SerializedName("result")
+  val result: String?,
 
   @SerializedName("message")
   val message: String?,
 
-  @SerializedName("savedPath")
-  val savedPath: String?,
+  @SerializedName("saved_to")
+  val savedTo: String?,
 
   @SerializedName("error")
   val error: String?,
-)
+) {
+  // Helper property to check if processing was successful
+  val isSuccess: Boolean
+    get() = result != null && savedTo != null && error == null
+}
 
 /**
  * Health check response model

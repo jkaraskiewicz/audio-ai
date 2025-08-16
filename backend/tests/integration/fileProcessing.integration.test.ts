@@ -15,7 +15,7 @@ describe('File Processing Integration Tests', () => {
       expect(response.body).toHaveProperty('saved_to');
       expect(response.body.message).toContain('direct_text_extraction');
       expect(response.body.result).toContain('# ');
-    });
+    }, 30000);
 
     it('should handle markdown file upload', async () => {
       const markdownContent = `# Project Ideas
@@ -37,7 +37,7 @@ describe('File Processing Integration Tests', () => {
       expect(response.body).toHaveProperty('result');
       expect(response.body).toHaveProperty('saved_to');
       expect(response.body.message).toContain('direct_text_extraction');
-    });
+    }, 30000);
 
     it('should handle transcript text without file', async () => {
       const transcript = 'I need to organize my study schedule for next semester.';
@@ -50,7 +50,7 @@ describe('File Processing Integration Tests', () => {
       expect(response.body).toHaveProperty('result');
       expect(response.body).toHaveProperty('saved_to');
       expect(response.body.message).toContain('direct text input');
-    });
+    }, 30000);
 
     it('should reject requests with both file and transcript', async () => {
       const response = await request(app)
@@ -100,7 +100,7 @@ describe('File Processing Integration Tests', () => {
         .expect(200); // Should work for reasonable size
 
       expect(response.body).toHaveProperty('result');
-    });
+    }, 30000);
   });
 
   describe('Error Handling', () => {
