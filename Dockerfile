@@ -17,6 +17,9 @@ RUN npm run build
 # Stage 2: Production
 FROM node:20-alpine AS production
 
+# Install ffmpeg for audio conversion
+RUN apk add --no-cache ffmpeg
+
 WORKDIR /usr/src/app
 
 # Copy built backend files
@@ -31,6 +34,9 @@ CMD [ "node", "dist/index.js" ]
 
 # Stage 3: Development
 FROM node:20-alpine AS development
+
+# Install ffmpeg for audio conversion
+RUN apk add --no-cache ffmpeg
 
 WORKDIR /usr/src/app
 

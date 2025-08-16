@@ -1,6 +1,7 @@
 import { AudioTranscriptionProvider } from '../../interfaces/AudioTranscriptionProvider';
 import { FileProcessingResult, FileType } from '../../types';
 import { logger } from '../../utils/logger';
+import { AudioConverter } from '../../utils/audioConverter';
 
 /**
  * OpenAI Whisper ASR Webservice Provider
@@ -67,17 +68,40 @@ export class OpenAIWhisperWebserviceProvider implements AudioTranscriptionProvid
     });
 
     try {
+      // Check if audio conversion is needed for better Whisper compatibility
+      let audioBuffer = file.buffer;
+      let audioFilename = file.originalname;
+      let audioMimetype = file.mimetype;
+
+      if (AudioConverter.shouldConvert(file.originalname, file.mimetype)) {
+        logger.info('Converting audio format for better Whisper compatibility', {
+          originalFormat: file.originalname,
+          originalMimetype: file.mimetype,
+        });
+
+        const converted = await AudioConverter.convertForWhisper(file.buffer, file.originalname);
+        audioBuffer = converted.buffer;
+        audioFilename = converted.filename;
+        audioMimetype = converted.mimetype;
+
+        logger.info('Audio conversion completed', {
+          originalSize: file.buffer.length,
+          convertedSize: audioBuffer.length,
+          convertedFormat: audioFilename,
+        });
+      }
+
       // Create form data for the webservice
       const formData = new FormData();
       
-      // Create a blob from the file buffer
-      const audioBlob = new Blob([new Uint8Array(file.buffer)], { type: file.mimetype });
-      formData.append('audio_file', audioBlob, file.originalname);
+      // Create a blob from the (possibly converted) audio buffer
+      const audioBlob = new Blob([new Uint8Array(audioBuffer)], { type: audioMimetype });
+      formData.append('audio_file', audioBlob, audioFilename);
       
       // Optional parameters that the webservice supports
       formData.append('task', 'transcribe'); // transcribe or translate
-      formData.append('language', 'auto'); // auto-detect language
-      formData.append('output', 'json'); // json or txt
+      // Don't set language parameter for auto-detection
+      formData.append('output', 'txt'); // json or txt
 
       const response = await fetch(`${this.whisperUrl}/asr`, {
         method: 'POST',

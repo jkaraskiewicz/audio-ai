@@ -1,31 +1,97 @@
 services:
+  # Audio-AI Backend Service
   audio-ai:
     build:
       context: .
+      dockerfile: Dockerfile
       target: production
     ports:
-      - "3000:3000"
+      - "${AUDIO_AI_PORT:-3000}:3000"
     volumes:
-      # Mount external directory for persistent idea storage
+      # Mount processed files to host for easy access
       - ./processed:/usr/src/app/processed
+      # Optional: Mount for custom configuration
+      - ./backend/.env:/usr/src/app/.env:ro
     environment:
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      # Core Configuration
+      - NODE_ENV=production
+      - PORT=3000
+      
+      # Transcription Provider Configuration
       - TRANSCRIPTION_PROVIDER=${TRANSCRIPTION_PROVIDER:-free_web_speech}
-      - WHISPER_SERVICE_URL=${WHISPER_SERVICE_URL}
+      
+      # External Whisper Service (when using openai_whisper_webservice)
+      - WHISPER_SERVICE_URL=${WHISPER_SERVICE_URL:-http://whisper:9000}
+      
+      # API Keys for External Services
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - HUGGINGFACE_API_TOKEN=${HUGGINGFACE_API_TOKEN}
+      
+      # Optional Settings
+      - MAX_FILE_SIZE_MB=${MAX_FILE_SIZE_MB:-100}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    networks:
+      - audio-ai-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-  # Development service (optional)
-  app-dev:
+  # Local Whisper ASR Webservice (optional)
+  whisper:
+    image: onerahmet/openai-whisper-asr-webservice:${WHISPER_MODEL:-latest}
+    ports:
+      - "${WHISPER_PORT:-9000}:9000"
+    environment:
+      - ASR_MODEL=${ASR_MODEL:-base}
+      - ASR_ENGINE=${ASR_ENGINE:-openai_whisper}
+    volumes:
+      # Cache models to avoid re-downloading
+      - whisper_models:/app/models
+    networks:
+      - audio-ai-network
+    restart: unless-stopped
+    profiles:
+      - whisper
+      - full
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/docs"]
+      interval: 60s
+      timeout: 30s
+      retries: 3
+      start_period: 60s
+
+  # Development Service (for development only)
+  audio-ai-dev:
     build:
       context: .
+      dockerfile: Dockerfile
       target: development
     ports:
-      - "3001:3000"
+      - "${AUDIO_AI_DEV_PORT:-3001}:3000"
     volumes:
-      - .:/usr/src/app
+      - ./backend/src:/usr/src/app/src
       - ./processed:/usr/src/app/processed
+      - ./backend/.env:/usr/src/app/.env:ro
     environment:
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - NODE_ENV=development
+      - PORT=3000
       - TRANSCRIPTION_PROVIDER=${TRANSCRIPTION_PROVIDER:-free_web_speech}
-      - WHISPER_SERVICE_URL=${WHISPER_SERVICE_URL}
-    command: npm run dev
+      - WHISPER_SERVICE_URL=${WHISPER_SERVICE_URL:-http://whisper:9000}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - HUGGINGFACE_API_TOKEN=${HUGGINGFACE_API_TOKEN}
+    networks:
+      - audio-ai-network
+    profiles:
+      - dev
+    command: ["npm", "run", "dev"]
+
+volumes:
+  whisper_models:
+    driver: local
+
+networks:
+  audio-ai-network:
+    driver: bridge

@@ -1,28 +1,34 @@
 # Dependencies
 node_modules/
-npm-debug.log
-yarn-error.log
+*/node_modules/
 
-# Build outputs
+# Production builds
 backend/dist/
-backend/build/
 android/app/build/
-android/.gradle/
-android/local.properties
+android/build/
 
-# Environment and config
-backend/.env
-backend/.env.local
-backend/.env.production
-backend/.env.test
+# Environment files
 .env
+.env.local
+.env.production
+.env.test
 
-# IDE and editor files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Processed files (user's transcriptions)
+processed/
+!processed/.gitkeep
+
+# Test artifacts
+test-*.txt
+sample-*.m4a
+whisper_*.txt
+language_detect.txt
 
 # OS generated files
 .DS_Store
@@ -33,41 +39,40 @@ backend/.env.test
 ehthumbs.db
 Thumbs.db
 
-# Test artifacts and temporary files
-test-*.mp3
-test-*.wav
-test-*.m4a
-test-*.ogg
-test-*.flac
-backend/test-deployment.sh
-backend/idea.md
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Docker volumes
+whisper_models/
+
+# Temporary files
+tmp/
+temp/
 *.tmp
 
+# Android specific
+android/.gradle/
+android/local.properties
+android/app/build/
+android/build/
+android/captures/
+android/.navigation/
+android/output.json
+
+# iOS (if added later)
+ios/Pods/
+ios/build/
+
 # Coverage reports
-backend/coverage/
+coverage/
 *.lcov
 
-# Logs
-logs/
-*.log
+# Package lock files (keep one)
+yarn.lock
 
-# Processed files directories (contains generated content)
-backend/processed/
-backend/saved_ideas/
-processed/
-
-# Android specific
-android/app/release/
-android/app/debug/
-android/.cxx/
-
-# Runtime data
-pids
-*.pid
-*.seed
-
-# Optional npm cache directory
-.npm
-
-# Optional REPL history
-.node_repl_history
+# Backup files
+*.bak
