@@ -108,30 +108,30 @@ fun SettingsScreen(
   Scaffold(
     topBar = {
       TopAppBar(
-        title = { 
+        title = {
           Text(
             text = stringResource(R.string.settings),
             style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.SemiBold
-          ) 
+            fontWeight = FontWeight.SemiBold,
+          )
         },
         navigationIcon = {
           IconButton(onClick = onNavigateBack) {
             Icon(
               imageVector = Icons.AutoMirrored.Filled.ArrowBack,
               contentDescription = "Back",
-              tint = MaterialTheme.colorScheme.onSurface
+              tint = MaterialTheme.colorScheme.onSurface,
             )
           }
         },
         colors = TopAppBarDefaults.topAppBarColors(
           containerColor = MaterialTheme.colorScheme.surface,
-          titleContentColor = MaterialTheme.colorScheme.onSurface
-        )
+          titleContentColor = MaterialTheme.colorScheme.onSurface,
+        ),
       )
     },
     snackbarHost = { SnackbarHost(snackbarHostState) },
-    containerColor = MaterialTheme.colorScheme.surfaceContainer
+    containerColor = MaterialTheme.colorScheme.surfaceContainer,
   ) { paddingValues ->
     Column(
       modifier = Modifier
@@ -145,41 +145,41 @@ fun SettingsScreen(
       Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
       ) {
         Row(
           modifier = Modifier.padding(20.dp),
           verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(16.dp)
+          horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
           Box(
             modifier = Modifier
               .size(48.dp)
               .background(
                 MaterialTheme.colorScheme.primary,
-                RoundedCornerShape(12.dp)
+                RoundedCornerShape(12.dp),
               ),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
           ) {
             Icon(
               imageVector = Icons.Default.Settings,
               contentDescription = null,
               tint = MaterialTheme.colorScheme.onPrimary,
-              modifier = Modifier.size(24.dp)
+              modifier = Modifier.size(24.dp),
             )
           }
-          
+
           Column {
             Text(
               text = "Audio AI Settings",
               style = MaterialTheme.typography.headlineSmall,
               fontWeight = FontWeight.SemiBold,
-              color = MaterialTheme.colorScheme.onSurface
+              color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
               text = "Configure your server connection",
               style = MaterialTheme.typography.bodyMedium,
-              color = MaterialTheme.colorScheme.onSurfaceVariant
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
           }
         }
@@ -191,8 +191,8 @@ fun SettingsScreen(
         shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(
-          containerColor = MaterialTheme.colorScheme.surface
-        )
+          containerColor = MaterialTheme.colorScheme.surface,
+        ),
       ) {
         Column(
           modifier = Modifier.padding(24.dp),
@@ -200,42 +200,42 @@ fun SettingsScreen(
         ) {
           Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
           ) {
             Icon(
               imageVector = Icons.Default.Link,
               contentDescription = null,
               tint = MaterialTheme.colorScheme.primary,
-              modifier = Modifier.size(20.dp)
+              modifier = Modifier.size(20.dp),
             )
             Text(
               text = stringResource(R.string.server_configuration),
               style = MaterialTheme.typography.titleMedium,
               fontWeight = FontWeight.SemiBold,
-              color = MaterialTheme.colorScheme.onSurface
+              color = MaterialTheme.colorScheme.onSurface,
             )
           }
 
           OutlinedTextField(
             value = urlInputValue,
             onValueChange = { urlInputValue = it },
-            label = { 
+            label = {
               Text(
                 stringResource(R.string.server_url),
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
               )
             },
-            supportingText = { 
+            supportingText = {
               Text(
                 stringResource(R.string.server_url_summary),
-                style = MaterialTheme.typography.bodySmall
+                style = MaterialTheme.typography.bodySmall,
               )
             },
             leadingIcon = {
               Icon(
                 imageVector = Icons.Default.CloudUpload,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
               )
             },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
@@ -244,8 +244,8 @@ fun SettingsScreen(
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
               focusedBorderColor = MaterialTheme.colorScheme.primary,
-              unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-            )
+              unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+            ),
           )
 
           Row(
@@ -262,19 +262,19 @@ fun SettingsScreen(
               enabled = urlInputValue != serverUrl && urlInputValue.isNotBlank(),
               shape = RoundedCornerShape(12.dp),
               colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary
-              )
+                containerColor = MaterialTheme.colorScheme.primary,
+              ),
             ) {
               Icon(
                 imageVector = Icons.Default.CheckCircle,
                 contentDescription = null,
-                modifier = Modifier.size(18.dp)
+                modifier = Modifier.size(18.dp),
               )
               Spacer(modifier = Modifier.width(8.dp))
               Text(
                 "Save URL",
                 style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Medium
+                fontWeight = FontWeight.Medium,
               )
             }
 
@@ -282,18 +282,18 @@ fun SettingsScreen(
               onClick = { viewModel.testConnection(context) },
               enabled = !connectionTestState.isLoading && serverUrl.isNotBlank(),
               modifier = Modifier.weight(1f),
-              shape = RoundedCornerShape(12.dp)
+              shape = RoundedCornerShape(12.dp),
             ) {
               if (connectionTestState.isLoading) {
                 CircularProgressIndicator(
                   modifier = Modifier.size(16.dp),
-                  strokeWidth = 2.dp
+                  strokeWidth = 2.dp,
                 )
               } else {
                 Text(
                   stringResource(R.string.test_connection),
                   style = MaterialTheme.typography.labelLarge,
-                  fontWeight = FontWeight.Medium
+                  fontWeight = FontWeight.Medium,
                 )
               }
             }
@@ -307,8 +307,8 @@ fun SettingsScreen(
         shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(
-          containerColor = MaterialTheme.colorScheme.surface
-        )
+          containerColor = MaterialTheme.colorScheme.surface,
+        ),
       ) {
         Column(
           modifier = Modifier.padding(24.dp),
@@ -316,48 +316,48 @@ fun SettingsScreen(
         ) {
           Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
           ) {
             Icon(
               imageVector = Icons.Default.Info,
               contentDescription = null,
               tint = MaterialTheme.colorScheme.primary,
-              modifier = Modifier.size(20.dp)
+              modifier = Modifier.size(20.dp),
             )
             Text(
               text = stringResource(R.string.about),
               style = MaterialTheme.typography.titleMedium,
               fontWeight = FontWeight.SemiBold,
-              color = MaterialTheme.colorScheme.onSurface
+              color = MaterialTheme.colorScheme.onSurface,
             )
           }
 
           Surface(
             shape = RoundedCornerShape(12.dp),
-            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
           ) {
             Column(
               modifier = Modifier.padding(16.dp),
-              verticalArrangement = Arrangement.spacedBy(8.dp)
+              verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
               Text(
                 text = "Version ${BuildConfig.VERSION_NAME}",
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
               )
 
               Text(
                 text = stringResource(R.string.app_description),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.3
+                lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.3,
               )
             }
           }
         }
       }
-      
+
       // Bottom spacing
       Spacer(modifier = Modifier.height(20.dp))
     }

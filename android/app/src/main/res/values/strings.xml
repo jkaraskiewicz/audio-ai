@@ -18,4 +18,21 @@
     <string name="about">About</string>
     <string name="app_description">Share text and files to your Scribely backend for processing and analysis.</string>
     <string name="version">Version %s</string>
+    
+    <!-- Recording Feature -->
+    <string name="record_audio">Record Audio</string>
+    <string name="start_recording">Start Recording</string>
+    <string name="pause_recording">Pause</string>
+    <string name="resume_recording">Resume</string>
+    <string name="finish_recording">Finish Recording</string>
+    <string name="recording_status">Recording: %s</string>
+    <string name="recording_paused">Recording paused</string>
+    <string name="recording_active">Recording...</string>
+    <string name="recording_stopped">Recording stopped</string>
+    <string name="uploading_recording">Uploading recording...</string>
+    <string name="recording_uploaded">Recording uploaded successfully!</string>
+    <string name="recording_saved_locally">Recording saved locally due to network issue</string>
+    <string name="recording_failed">Recording failed: %s</string>
+    <string name="permission_required">Audio recording permission is required</string>
+    <string name="grant_permission">Grant Permission</string>
 </resources>

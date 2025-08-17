@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -28,28 +27,22 @@ import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -101,23 +94,23 @@ private fun ShareDialog(
     targetValue = 1f,
     animationSpec = spring(
       dampingRatio = Spring.DampingRatioMediumBouncy,
-      stiffness = Spring.StiffnessLow
+      stiffness = Spring.StiffnessLow,
     ),
-    label = "dialogScale"
+    label = "dialogScale",
   )
 
   val backgroundAlpha by animateFloatAsState(
     targetValue = 0.6f,
     animationSpec = tween(300),
-    label = "backgroundAlpha"
+    label = "backgroundAlpha",
   )
 
   Dialog(
     onDismissRequest = if (!state.isLoading) onDismiss else { {} },
     properties = DialogProperties(
       dismissOnBackPress = !state.isLoading,
-      dismissOnClickOutside = !state.isLoading
-    )
+      dismissOnClickOutside = !state.isLoading,
+    ),
   ) {
     Box(
       modifier = Modifier
@@ -144,7 +137,7 @@ private fun ShareDialog(
           AnimatedVisibility(
             visible = true,
             enter = scaleIn(spring(dampingRatio = Spring.DampingRatioMediumBouncy)) + fadeIn(),
-            exit = scaleOut() + fadeOut()
+            exit = scaleOut() + fadeOut(),
           ) {
             StatusIcon(state = state)
           }
@@ -166,12 +159,12 @@ private fun ShareDialog(
           AnimatedVisibility(
             visible = state.isLoading,
             enter = fadeIn() + scaleIn(),
-            exit = fadeOut() + scaleOut()
+            exit = fadeOut() + scaleOut(),
           ) {
             CircularProgressIndicator(
               modifier = Modifier.size(24.dp),
               strokeWidth = 2.5.dp,
-              color = MaterialTheme.colorScheme.primary
+              color = MaterialTheme.colorScheme.primary,
             )
           }
 
@@ -185,19 +178,19 @@ private fun ShareDialog(
               state.isSuccess -> MaterialTheme.colorScheme.primary
               else -> MaterialTheme.colorScheme.onSurfaceVariant
             },
-            lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.1
+            lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.1,
           )
 
           // Action Buttons
           AnimatedVisibility(
             visible = !state.isLoading,
             enter = fadeIn(tween(400)) + scaleIn(spring()),
-            exit = fadeOut() + scaleOut()
+            exit = fadeOut() + scaleOut(),
           ) {
             ActionButtons(
               state = state,
               onDismiss = onDismiss,
-              onNavigateToSettings = onNavigateToSettings
+              onNavigateToSettings = onNavigateToSettings,
             )
           }
         }
@@ -225,7 +218,7 @@ private fun StatusIcon(state: ShareState) {
       imageVector = it,
       contentDescription = null,
       modifier = Modifier.size(32.dp),
-      tint = iconColor
+      tint = iconColor,
     )
   }
 }
@@ -234,7 +227,7 @@ private fun StatusIcon(state: ShareState) {
 private fun ActionButtons(
   state: ShareState,
   onDismiss: () -> Unit,
-  onNavigateToSettings: () -> Unit
+  onNavigateToSettings: () -> Unit,
 ) {
   Row(
     modifier = Modifier.fillMaxWidth(),
@@ -249,18 +242,18 @@ private fun ActionButtons(
         onClick = onNavigateToSettings,
         modifier = Modifier.weight(1f),
         colors = ButtonDefaults.filledTonalButtonColors(
-          containerColor = MaterialTheme.colorScheme.primaryContainer
-        )
+          containerColor = MaterialTheme.colorScheme.primaryContainer,
+        ),
       ) {
         Icon(
           imageVector = Icons.Default.Settings,
           contentDescription = null,
-          modifier = Modifier.size(16.dp)
+          modifier = Modifier.size(16.dp),
         )
         Spacer(modifier = Modifier.width(6.dp))
         Text(
           "Settings",
-          style = MaterialTheme.typography.labelLarge
+          style = MaterialTheme.typography.labelLarge,
         )
       }
     }
@@ -277,13 +270,13 @@ private fun ActionButtons(
           MaterialTheme.colorScheme.primary
         } else {
           MaterialTheme.colorScheme.secondary
-        }
-      )
+        },
+      ),
     ) {
       Text(
         text = if (state.isSuccess) "Done" else "Close",
         style = MaterialTheme.typography.labelLarge,
-        fontWeight = FontWeight.Medium
+        fontWeight = FontWeight.Medium,
       )
     }
   }
