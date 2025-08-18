@@ -90,6 +90,10 @@ dependencies {
   // Coroutines
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
+  // Koin for dependency injection
+  implementation("io.insert-koin:koin-android:3.5.3")
+  implementation("io.insert-koin:koin-androidx-compose:3.5.3")
+
   // Testing
   testImplementation("junit:junit:4.13.2")
   testImplementation("org.mockito:mockito-core:5.8.0")

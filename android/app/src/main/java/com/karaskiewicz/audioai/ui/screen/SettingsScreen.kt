@@ -26,6 +26,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,12 +36,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.karaskiewicz.audioai.ui.theme.UIConfig
+import com.karaskiewicz.audioai.ui.viewmodel.SettingsViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 // Test connection status enum
 sealed class TestStatus {
@@ -52,27 +57,34 @@ sealed class TestStatus {
 @Composable
 fun SettingsScreen(
   onNavigateBack: () -> Unit = {},
+  viewModel: SettingsViewModel = koinViewModel(),
 ) {
-  var serverUrl by remember { mutableStateOf("https://api.example.com/upload") }
+  val context = LocalContext.current
+  val serverUrl by viewModel.serverUrl.collectAsState()
+  val connectionTestState by viewModel.connectionTestState.collectAsState()
+  var editableServerUrl by remember { mutableStateOf("") }
   var saveDir by remember { mutableStateOf("/storage/emulated/0/Scribely/") }
-  var testStatus by remember { mutableStateOf<TestStatus>(TestStatus.Idle) }
   var saveStatus by remember { mutableStateOf("") }
+
+  // Update editable URL when serverUrl changes
+  LaunchedEffect(serverUrl) {
+    editableServerUrl = serverUrl
+  }
 
   val scope = rememberCoroutineScope()
 
+  LaunchedEffect(Unit) {
+    viewModel.loadSettings()
+  }
+
   // Helper function to handle test connection
   fun handleTestConnection() {
-    scope.launch {
-      testStatus = TestStatus.Testing
-      delay(1500) // Simulate API call
-      testStatus = if (Math.random() > 0.3) TestStatus.Success else TestStatus.Error
-      delay(2000) // Show result
-      testStatus = TestStatus.Idle
-    }
+    viewModel.testConnection(context)
   }
 
   // Helper function to handle save
-  fun handleSave() {
+  fun handleSave(url: String) {
+    viewModel.updateServerUrl(url)
     scope.launch {
       saveStatus = "Settings saved!"
       delay(2000)
@@ -149,8 +161,8 @@ fun SettingsScreen(
             verticalAlignment = Alignment.CenterVertically,
           ) {
             OutlinedTextField(
-              value = serverUrl,
-              onValueChange = { serverUrl = it },
+              value = editableServerUrl,
+              onValueChange = { editableServerUrl = it },
               modifier = Modifier.weight(1f),
               textStyle = MaterialTheme.typography.bodyMedium,
               singleLine = true,
@@ -159,15 +171,15 @@ fun SettingsScreen(
 
             Button(
               onClick = { handleTestConnection() },
-              enabled = testStatus == TestStatus.Idle,
+              enabled = !connectionTestState.isLoading,
               colors = ButtonDefaults.buttonColors(
                 containerColor = UIConfig.Colors.ScribelyGray,
                 contentColor = UIConfig.Colors.WhiteBackground,
               ),
               shape = RoundedCornerShape(UIConfig.Sizing.InputCornerRadius),
             ) {
-              when (testStatus) {
-                TestStatus.Testing -> {
+              when {
+                connectionTestState.isLoading -> {
                   CircularProgressIndicator(
                     modifier = Modifier.size(16.dp),
                     color = UIConfig.Colors.WhiteBackground,
@@ -185,22 +197,21 @@ fun SettingsScreen(
           }
 
           // Status message
-          when (testStatus) {
-            TestStatus.Success -> {
+          when {
+            connectionTestState.isSuccess == true -> {
               Text(
                 text = "Connection successful!",
                 style = MaterialTheme.typography.bodySmall,
                 color = Color(0xFF059669), // Green color
               )
             }
-            TestStatus.Error -> {
+            connectionTestState.error != null -> {
               Text(
-                text = "Connection failed.",
+                text = "Connection failed: ${connectionTestState.error}",
                 style = MaterialTheme.typography.bodySmall,
                 color = UIConfig.Colors.ScribelyRed,
               )
             }
-            else -> {}
           }
         }
 
@@ -263,7 +274,7 @@ fun SettingsScreen(
           verticalArrangement = Arrangement.spacedBy(UIConfig.Spacing.MediumSpacing),
         ) {
           Button(
-            onClick = { handleSave() },
+            onClick = { handleSave(editableServerUrl) },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
               containerColor = UIConfig.Colors.ScribelyRed,

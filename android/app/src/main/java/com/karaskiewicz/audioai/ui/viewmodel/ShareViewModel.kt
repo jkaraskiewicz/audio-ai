@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.karaskiewicz.audioai.data.ApiClient
 import com.karaskiewicz.audioai.data.ProcessTextRequest
+import com.karaskiewicz.audioai.domain.usecase.RecordingUseCase
 import com.karaskiewicz.audioai.utils.FileUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,7 +24,9 @@ data class ShareState(
   val message: String = "",
 )
 
-class ShareViewModel : ViewModel() {
+class ShareViewModel(
+  private val recordingUseCase: RecordingUseCase,
+) : ViewModel() {
 
   private val _shareState = MutableStateFlow(ShareState(message = "Preparing..."))
   val shareState: StateFlow<ShareState> = _shareState.asStateFlow()

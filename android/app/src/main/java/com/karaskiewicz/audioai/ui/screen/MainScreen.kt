@@ -13,13 +13,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
+import org.koin.androidx.compose.koinViewModel
 import com.karaskiewicz.audioai.ui.components.AppHeader
 import com.karaskiewicz.audioai.ui.components.MessageCards
 import com.karaskiewicz.audioai.ui.components.RecordingControls
@@ -49,7 +50,7 @@ import com.karaskiewicz.audioai.ui.viewmodel.MainViewModel
 @Composable
 fun MainScreen(
   onNavigateToSettings: () -> Unit = {},
-  viewModel: MainViewModel = viewModel(),
+  viewModel: MainViewModel = koinViewModel(),
 ) {
   // 🎨 State Management (Clean Architecture)
   val context = LocalContext.current
@@ -57,6 +58,11 @@ fun MainScreen(
   val recordingDuration by viewModel.recordingDuration.collectAsState()
   val errorMessage by viewModel.errorMessage.collectAsState()
   val successMessage by viewModel.successMessage.collectAsState()
+
+  // Initialize ViewModel configuration
+  LaunchedEffect(Unit) {
+    viewModel.loadConfiguration()
+  }
 
   // 🎨 Permission Handling (Single Responsibility)
   val permissionLauncher = rememberLauncherForActivityResult(

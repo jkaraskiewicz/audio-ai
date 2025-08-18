@@ -49,7 +49,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.lifecycle.viewmodel.compose.viewModel
+import org.koin.androidx.compose.koinViewModel
 import com.karaskiewicz.audioai.ui.theme.AudioAITheme
 import com.karaskiewicz.audioai.ui.viewmodel.ShareState
 import com.karaskiewicz.audioai.ui.viewmodel.ShareViewModel
@@ -60,7 +60,7 @@ fun ShareScreen(
   intent: android.content.Intent,
   onDismiss: () -> Unit,
   onNavigateToSettings: () -> Unit,
-  viewModel: ShareViewModel = viewModel(),
+  viewModel: ShareViewModel = koinViewModel(),
 ) {
   val context = LocalContext.current
   val shareState by viewModel.shareState.collectAsState()

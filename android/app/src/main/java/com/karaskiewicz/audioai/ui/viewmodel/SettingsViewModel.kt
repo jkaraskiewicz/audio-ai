@@ -16,7 +16,9 @@ data class ConnectionTestState(
   val error: String? = null,
 )
 
-class SettingsViewModel : ViewModel() {
+class SettingsViewModel(
+  private val preferencesDataStore: PreferencesDataStore,
+) : ViewModel() {
 
   private val _serverUrl = MutableStateFlow("")
   val serverUrl: StateFlow<String> = _serverUrl.asStateFlow()
@@ -24,8 +26,7 @@ class SettingsViewModel : ViewModel() {
   private val _connectionTestState = MutableStateFlow(ConnectionTestState())
   val connectionTestState: StateFlow<ConnectionTestState> = _connectionTestState.asStateFlow()
 
-  fun loadSettings(context: Context) {
-    val preferencesDataStore = PreferencesDataStore(context)
+  fun loadSettings() {
     viewModelScope.launch {
       preferencesDataStore.serverUrl.collect { url ->
         _serverUrl.value = url
@@ -33,8 +34,7 @@ class SettingsViewModel : ViewModel() {
     }
   }
 
-  fun updateServerUrl(context: Context, url: String) {
-    val preferencesDataStore = PreferencesDataStore(context)
+  fun updateServerUrl(url: String) {
     viewModelScope.launch {
       preferencesDataStore.updateServerUrl(url.trim())
     }

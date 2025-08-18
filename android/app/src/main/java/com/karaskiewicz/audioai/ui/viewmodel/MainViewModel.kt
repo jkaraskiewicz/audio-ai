@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.karaskiewicz.audioai.data.PreferencesDataStore
-import com.karaskiewicz.audioai.data.repository.RecordingRepositoryImpl
 import com.karaskiewicz.audioai.domain.model.RecordingConstants
 import com.karaskiewicz.audioai.domain.model.RecordingResult
 import com.karaskiewicz.audioai.domain.model.RecordingState
@@ -21,21 +20,9 @@ import kotlinx.coroutines.launch
  * Follows MVVM pattern and delegates business logic to use cases.
  */
 class MainViewModel(
-  private val recordingUseCase: RecordingUseCase? = null,
+  private val recordingUseCase: RecordingUseCase,
+  private val preferencesDataStore: PreferencesDataStore,
 ) : ViewModel() {
-
-  // Keep a single instance of the use case to maintain state
-  private var _recordingUseCase: RecordingUseCase? = null
-
-  // Lazy initialization for dependency injection
-  private fun getRecordingUseCase(context: Context): RecordingUseCase {
-    if (_recordingUseCase == null) {
-      _recordingUseCase = recordingUseCase ?: RecordingUseCase(
-        RecordingRepositoryImpl(context),
-      )
-    }
-    return _recordingUseCase!!
-  }
 
   // Configuration state
   private val _serverUrl = MutableStateFlow("")
@@ -62,8 +49,7 @@ class MainViewModel(
   private var pausedDuration: Long = 0
   private var lastPauseTime: Long = 0
 
-  fun loadConfiguration(context: Context) {
-    val preferencesDataStore = PreferencesDataStore(context)
+  fun loadConfiguration() {
     viewModelScope.launch {
       preferencesDataStore.serverUrl.collect { url ->
         _serverUrl.value = url
@@ -72,9 +58,8 @@ class MainViewModel(
     }
   }
 
-  fun isApiConfigured(context: Context): Boolean {
+  fun isApiConfigured(): Boolean {
     return runCatching {
-      val preferencesDataStore = PreferencesDataStore(context)
       // Use blocking call for simple boolean check
       kotlinx.coroutines.runBlocking {
         preferencesDataStore.getServerUrl().isNotBlank()
@@ -86,10 +71,9 @@ class MainViewModel(
    * Starts a new recording session.
    */
   fun startRecording(context: Context) {
-    val useCase = getRecordingUseCase(context)
     clearMessages()
 
-    when (val result = useCase.startRecording(context)) {
+    when (val result = recordingUseCase.startRecording(context)) {
       is RecordingResult.Success -> {
         _recordingState.value = RecordingState.RECORDING
         recordingStartTime = System.currentTimeMillis()
@@ -108,9 +92,7 @@ class MainViewModel(
    * Pauses the current recording.
    */
   fun pauseRecording(context: Context) {
-    val useCase = getRecordingUseCase(context)
-
-    when (val result = useCase.pauseRecording()) {
+    when (val result = recordingUseCase.pauseRecording()) {
       is RecordingResult.Success -> {
         lastPauseTime = System.currentTimeMillis()
         _recordingState.value = RecordingState.PAUSED
@@ -125,9 +107,7 @@ class MainViewModel(
    * Resumes recording after a pause.
    */
   fun resumeRecording(context: Context) {
-    val useCase = getRecordingUseCase(context)
-
-    when (val result = useCase.resumeRecording(context)) {
+    when (val result = recordingUseCase.resumeRecording(context)) {
       is RecordingResult.Success -> {
         pausedDuration += System.currentTimeMillis() - lastPauseTime
         _recordingState.value = RecordingState.RECORDING
@@ -144,12 +124,10 @@ class MainViewModel(
    * Finishes the current recording and processes it.
    */
   fun finishRecording(context: Context) {
-    val useCase = getRecordingUseCase(context)
-
-    when (val result = useCase.finishRecording()) {
+    when (val result = recordingUseCase.finishRecording()) {
       is RecordingResult.Success -> {
         _recordingState.value = RecordingState.PROCESSING
-        processRecording(context, useCase)
+        processRecording(context)
       }
       is RecordingResult.Error -> {
         Log.e(RecordingConstants.LOG_TAG, "Recording finish failed: ${result.message}")
@@ -162,9 +140,9 @@ class MainViewModel(
   /**
    * Processes and uploads the completed recording.
    */
-  private fun processRecording(context: Context, useCase: RecordingUseCase) {
+  private fun processRecording(context: Context) {
     viewModelScope.launch {
-      when (val result = useCase.uploadRecording()) {
+      when (val result = recordingUseCase.uploadRecording()) {
         is UploadResult.UploadSuccess -> {
           _successMessage.value = "Recording uploaded successfully!"
           resetToIdleAfterDelay()
@@ -223,8 +201,7 @@ class MainViewModel(
    * Resets all recording-related state.
    */
   fun resetRecording(context: Context) {
-    val useCase = getRecordingUseCase(context)
-    useCase.resetRecording()
+    recordingUseCase.resetRecording()
     resetRecordingState()
   }
 
