@@ -29,27 +29,28 @@ private val DarkColorScheme = darkColorScheme(
   onSurfaceVariant = AudioAccentDark,
 )
 
+// Updated color scheme for new Scribely design
 private val LightColorScheme = lightColorScheme(
-  primary = AudioBlue,
-  onPrimary = AudioBackground,
-  primaryContainer = AudioBlueVariant,
-  onPrimaryContainer = AudioBackground,
-  secondary = AudioSecondary,
-  onSecondary = AudioBackground,
-  secondaryContainer = AudioAccent,
-  onSecondaryContainer = AudioBackgroundDark,
-  tertiary = AudioSuccess,
-  onTertiary = AudioBackgroundDark,
-  error = AudioError,
-  onError = AudioBackground,
-  errorContainer = RecordingActive,
-  onErrorContainer = AudioBackground,
-  background = AudioBackground,
-  onBackground = AudioSecondary,
-  surface = AudioSurface,
-  onSurface = AudioSecondary,
-  surfaceVariant = AudioSecondary,
-  onSurfaceVariant = AudioBlueVariant,
+  primary = UIConfig.Colors.ScribelyRed,
+  onPrimary = UIConfig.Colors.WhiteBackground,
+  primaryContainer = UIConfig.Colors.ScribelyRedLight,
+  onPrimaryContainer = UIConfig.Colors.PrimaryTextColor,
+  secondary = UIConfig.Colors.ScribelyGray,
+  onSecondary = UIConfig.Colors.WhiteBackground,
+  secondaryContainer = UIConfig.Colors.ScribelyGrayLight,
+  onSecondaryContainer = UIConfig.Colors.PrimaryTextColor,
+  tertiary = UIConfig.Colors.ScribelyRedLight,
+  onTertiary = UIConfig.Colors.PrimaryTextColor,
+  error = UIConfig.Colors.ScribelyRed,
+  onError = UIConfig.Colors.WhiteBackground,
+  errorContainer = UIConfig.Colors.ScribelyRedLight,
+  onErrorContainer = UIConfig.Colors.PrimaryTextColor,
+  background = UIConfig.Colors.DefaultBackground,
+  onBackground = UIConfig.Colors.PrimaryTextColor,
+  surface = UIConfig.Colors.WhiteBackground,
+  onSurface = UIConfig.Colors.PrimaryTextColor,
+  surfaceVariant = UIConfig.Colors.DefaultBackground,
+  onSurfaceVariant = UIConfig.Colors.SecondaryTextColor,
 )
 
 @Composable
@@ -64,7 +65,7 @@ fun AudioAITheme(
 
   MaterialTheme(
     colorScheme = colorScheme,
-    typography = Typography,
+    typography = ScribelyTypography,
     content = content,
   )
 }

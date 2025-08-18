@@ -1,0 +1,191 @@
+package com.karaskiewicz.audioai.ui.theme
+
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+/**
+ * UI Configuration for Scribely App
+ *
+ * 🎨 DEVELOPER NOTE: This file contains all UI customization constants.
+ * Modify these values to quickly change the app's appearance without hunting through code.
+ */
+object UIConfig {
+
+  // ===========================================
+  // 🎨 COLORS - Easy to modify app colors
+  // ===========================================
+
+  object Colors {
+    // Main brand colors (updated for new JetBrains Mono design)
+    val ScribelyRed = Color(0xFFDC2626) // Primary red from design
+    val ScribelyRedLight = Color(0xFFF87171) // Lighter red for wave animation
+    val ScribelyGray = Color(0xFF4A5568) // Dark gray from design
+    val ScribelyGrayLight = Color(0xFF6B7280) // Lighter gray
+
+    // Background colors
+    val DefaultBackground = Color(0xFFF9FAFB) // Light gray background
+    val WhiteBackground = Color.White // Pure white for cards/buttons
+    val RecordingBackground = Color(0xFFF9FAFB) // Same as default
+
+    // Text colors (monospace theme)
+    val PrimaryTextColor = Color(0xFF2D3748) // Dark text from design
+    val SecondaryTextColor = Color(0xFF4A5568) // Secondary gray text
+    val TimerTextColor = Color(0xFF374151) // Timer display color
+    val PausedTextColor = Color(0xFF6B7280) // Muted text
+
+    // UI accents
+    val WaveformColor = ScribelyRedLight // Animated wave bars
+    val PlayheadColor = ScribelyRed // Timeline indicator
+    val TimeMarkerColor = Color(0xFF9CA3AF) // Time markers
+    val BorderColor = Color(0xFFD1D5DB) // Input borders
+    val ShadowColor = Color.Black.copy(alpha = 0.1f) // Button shadows
+  }
+
+  // ===========================================
+  // 📏 SPACING & SIZING - Layout dimensions
+  // ===========================================
+
+  object Spacing {
+    // Screen layout (new centered design)
+    val ScreenPadding = 16.dp
+    val HeaderPadding = 20.dp
+    val FooterHeight = 40.dp
+
+    // Logo positioning (TOP LEFT as specified)
+    val LogoPadding = 20.dp // Distance from edges
+    val HeaderHeight = 70.dp // Fixed header height
+
+    // Timer section (centered layout)
+    val TimerBottomMargin = 64.dp // Space below timer
+    val TimerSectionHeight = 128.dp // Fixed height for timer area
+
+    // Controls section
+    val ControlsHeight = 112.dp // Fixed height for controls
+    val ButtonSpacing = 16.dp // Space between buttons
+    val ControlsBottomPadding = 40.dp // Bottom spacing
+
+    // Wave animation positioning
+    val WaveTopOffset = (-30).dp // Above timer like design
+    val WaveSpacing = 7.dp // Between wave bars
+
+    // Settings screen
+    val SettingsVerticalSpacing = 32.dp // Between sections
+    val SettingsInputSpacing = 8.dp // Input to button spacing
+    val SettingsMaxWidth = 400.dp // Max width for settings
+
+    // General spacing
+    val SmallSpacing = 8.dp
+    val MediumSpacing = 16.dp
+    val LargeSpacing = 24.dp
+    val XLargeSpacing = 32.dp
+  }
+
+  object Sizing {
+    // Logo dimensions (new Scribely logo with waveform graphic)
+    val LogoWidth = 180.dp // Scaled down from 210dp for mobile
+    val LogoHeight = 42.dp // Scaled proportionally
+    val LogoTextSize = 24.sp // Scaled down from 32sp
+
+    // Timer display (large monospace)
+    val TimerTextSize = 56.sp // Large timer display
+    val TimerTextSizeLarge = 64.sp // Even larger for tablets
+
+    // Button sizes (updated for new design)
+    val MainButtonSize = 80.dp // Larger buttons like design
+    val SecondaryButtonSize = 64.dp // Secondary actions
+    val RecordButtonSize = 96.dp // Big record button
+    val ButtonElevation = 8.dp // More prominent shadows
+    val ButtonCornerRadius = 50.dp // Fully rounded
+
+    // Icon sizes
+    val ButtonIconSize = 32.dp // Larger icons
+    val RecordIconSize = 48.dp // Big record icon
+    val SettingsIconSize = 28.dp // Settings icon
+
+    // Wave animation (matching design)
+    val WaveBarWidth = 4.dp
+    val WaveBarMaxHeight = 20.dp
+    val WaveBarMinHeight = 4.dp
+    val WaveBarCornerRadius = 2.dp
+    val WaveAnimationDuration = 1200 // 1.2s like in design
+
+    // Input fields (settings screen)
+    val InputCornerRadius = 6.dp
+    val InputPadding = 12.dp
+    val InputHeight = 48.dp
+
+    // Cards and containers
+    val CardCornerRadius = 8.dp
+    val ContainerPadding = 16.dp
+  }
+
+  // ===========================================
+  // 🔤 TYPOGRAPHY - Text styling
+  // ===========================================
+
+  object Typography {
+    // JetBrains Mono font properties
+    val MonospaceLetterSpacing = 0.1.sp // Tight spacing for monospace
+    val TimerLetterSpacing = 0.2.sp // Slightly wider for large timer
+    val DefaultLetterSpacing = 0.sp // Standard monospace spacing
+    val WideLetterSpacing = 1.sp // For emphasis
+
+    // Font weights (JetBrains Mono supports these weights)
+    val LightWeight = 300 // For timer display
+    val NormalWeight = 400 // For body text
+    val BoldWeight = 700 // For headers and emphasis
+  }
+
+  // ===========================================
+  // ⚙️ BEHAVIOR - UI behavior settings
+  // ===========================================
+
+  object Behavior {
+    // Timeline behavior
+    val TimelineWindowDuration = 10000L // 10 seconds visible window
+    val WaveformBarsCount = 80 // Number of waveform bars
+
+    // Animation durations (milliseconds)
+    val ButtonAnimationDuration = 200
+    val ColorAnimationDuration = 300
+    val WaveformAnimationDuration = 200
+  }
+
+  // ===========================================
+  // 📱 LAYOUT PRESETS - Quick layout changes
+  // ===========================================
+
+  object LayoutPresets {
+    // Logo position options
+    enum class LogoPosition { TOP_CENTER, TOP_LEFT, TOP_RIGHT }
+    val currentLogoPosition = LogoPosition.TOP_LEFT // Positioned in top left as specified
+
+    // Controls layout options
+    enum class ControlsLayout { TWO_BUTTONS, SINGLE_BUTTON, THREE_BUTTONS }
+    val currentControlsLayout = ControlsLayout.THREE_BUTTONS // New design uses 3 buttons
+
+    // Timeline position options
+    enum class TimelinePosition { CENTER, TOP, BOTTOM }
+    val currentTimelinePosition = TimelinePosition.CENTER
+  }
+}
+
+/**
+ * 🚀 DEVELOPER QUICK REFERENCE:
+ *
+ * Want to change the app's main color?
+ * → Modify UIConfig.Colors.ScribelyRed
+ *
+ * Want to make buttons bigger?
+ * → Modify UIConfig.Sizing.MainButtonSize
+ *
+ * Want more space around the logo?
+ * → Modify UIConfig.Spacing.LogoPadding
+ *
+ * Want to change timeline duration?
+ * → Modify UIConfig.Behavior.TimelineWindowDuration
+ *
+ * Want to move the logo position?
+ * → Change UIConfig.LayoutPresets.currentLogoPosition
+ */

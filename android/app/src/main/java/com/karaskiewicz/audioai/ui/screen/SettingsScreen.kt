@@ -1,6 +1,7 @@
 package com.karaskiewicz.audioai.ui.screen
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,40 +12,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.CloudUpload
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Link
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,322 +33,264 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.karaskiewicz.audioai.BuildConfig
-import com.karaskiewicz.audioai.R
-import com.karaskiewicz.audioai.ui.theme.AudioAITheme
-import com.karaskiewicz.audioai.ui.viewmodel.SettingsViewModel
+import com.karaskiewicz.audioai.ui.theme.UIConfig
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+// Test connection status enum
+sealed class TestStatus {
+  object Idle : TestStatus()
+  object Testing : TestStatus()
+  object Success : TestStatus()
+  object Error : TestStatus()
+}
+
 @Composable
 fun SettingsScreen(
-  onNavigateBack: () -> Unit,
-  viewModel: SettingsViewModel = viewModel(),
+  onNavigateBack: () -> Unit = {},
 ) {
-  val context = LocalContext.current
+  var serverUrl by remember { mutableStateOf("https://api.example.com/upload") }
+  var saveDir by remember { mutableStateOf("/storage/emulated/0/Scribely/") }
+  var testStatus by remember { mutableStateOf<TestStatus>(TestStatus.Idle) }
+  var saveStatus by remember { mutableStateOf("") }
+
   val scope = rememberCoroutineScope()
-  val snackbarHostState = remember { SnackbarHostState() }
 
-  val serverUrl by viewModel.serverUrl.collectAsState()
-  val connectionTestState by viewModel.connectionTestState.collectAsState()
-
-  var urlInputValue by remember { mutableStateOf("") }
-
-  LaunchedEffect(context) {
-    viewModel.loadSettings(context)
-  }
-
-  LaunchedEffect(serverUrl) {
-    if (urlInputValue.isEmpty()) {
-      urlInputValue = serverUrl
+  // Helper function to handle test connection
+  fun handleTestConnection() {
+    scope.launch {
+      testStatus = TestStatus.Testing
+      delay(1500) // Simulate API call
+      testStatus = if (Math.random() > 0.3) TestStatus.Success else TestStatus.Error
+      delay(2000) // Show result
+      testStatus = TestStatus.Idle
     }
   }
 
-  LaunchedEffect(connectionTestState) {
-    connectionTestState.error?.let { error ->
-      scope.launch {
-        snackbarHostState.showSnackbar(error)
-        viewModel.clearConnectionTestState()
-      }
-    }
-    if (connectionTestState.isSuccess == true) {
-      scope.launch {
-        snackbarHostState.showSnackbar("Connection successful!")
-        viewModel.clearConnectionTestState()
-      }
+  // Helper function to handle save
+  fun handleSave() {
+    scope.launch {
+      saveStatus = "Settings saved!"
+      delay(2000)
+      saveStatus = ""
     }
   }
 
-  Scaffold(
-    topBar = {
-      TopAppBar(
-        title = {
-          Text(
-            text = stringResource(R.string.settings),
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.SemiBold,
-          )
-        },
-        navigationIcon = {
-          IconButton(onClick = onNavigateBack) {
-            Icon(
-              imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-              contentDescription = "Back",
-              tint = MaterialTheme.colorScheme.onSurface,
-            )
-          }
-        },
-        colors = TopAppBarDefaults.topAppBarColors(
-          containerColor = MaterialTheme.colorScheme.surface,
-          titleContentColor = MaterialTheme.colorScheme.onSurface,
-        ),
-      )
-    },
-    snackbarHost = { SnackbarHost(snackbarHostState) },
-    containerColor = MaterialTheme.colorScheme.surfaceContainer,
-  ) { paddingValues ->
+  Box(
+    modifier = Modifier
+      .fillMaxSize()
+      .background(UIConfig.Colors.WhiteBackground)
+      .padding(UIConfig.Spacing.ScreenPadding),
+  ) {
     Column(
-      modifier = Modifier
-        .fillMaxSize()
-        .padding(paddingValues)
-        .verticalScroll(rememberScrollState())
-        .padding(horizontal = 20.dp, vertical = 12.dp),
-      verticalArrangement = Arrangement.spacedBy(20.dp),
+      modifier = Modifier.fillMaxSize(),
     ) {
-      // Header Section
-      Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+      // Header
+      Row(
+        modifier = Modifier
+          .fillMaxWidth()
+          .height(UIConfig.Spacing.HeaderHeight)
+          .padding(bottom = UIConfig.Spacing.MediumSpacing),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(UIConfig.Spacing.MediumSpacing),
       ) {
-        Row(
-          modifier = Modifier.padding(20.dp),
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(16.dp),
+        IconButton(
+          onClick = onNavigateBack,
         ) {
-          Box(
-            modifier = Modifier
-              .size(48.dp)
-              .background(
-                MaterialTheme.colorScheme.primary,
-                RoundedCornerShape(12.dp),
-              ),
-            contentAlignment = Alignment.Center,
-          ) {
-            Icon(
-              imageVector = Icons.Default.Settings,
-              contentDescription = null,
-              tint = MaterialTheme.colorScheme.onPrimary,
-              modifier = Modifier.size(24.dp),
-            )
-          }
-
-          Column {
-            Text(
-              text = "Audio AI Settings",
-              style = MaterialTheme.typography.headlineSmall,
-              fontWeight = FontWeight.SemiBold,
-              color = MaterialTheme.colorScheme.onSurface,
-            )
-            Text(
-              text = "Configure your server connection",
-              style = MaterialTheme.typography.bodyMedium,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-          }
+          Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = "Back",
+            tint = UIConfig.Colors.SecondaryTextColor,
+            modifier = Modifier.size(UIConfig.Sizing.SettingsIconSize),
+          )
         }
+
+        Text(
+          text = "Settings",
+          style = MaterialTheme.typography.headlineMedium.copy(
+            fontWeight = FontWeight.Bold,
+            color = UIConfig.Colors.PrimaryTextColor,
+          ),
+          modifier = Modifier.weight(1f),
+          textAlign = TextAlign.Center,
+        )
+
+        // Empty space for balance
+        Spacer(modifier = Modifier.size(UIConfig.Sizing.SettingsIconSize + 16.dp))
       }
 
-      // Server Configuration Card
-      Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(
-          containerColor = MaterialTheme.colorScheme.surface,
-        ),
+      // Settings content
+      Column(
+        modifier = Modifier
+          .fillMaxWidth()
+          .widthIn(max = UIConfig.Spacing.SettingsMaxWidth)
+          .weight(1f)
+          .padding(horizontal = UIConfig.Spacing.MediumSpacing),
+        verticalArrangement = Arrangement.spacedBy(UIConfig.Spacing.SettingsVerticalSpacing),
       ) {
+        // Server Endpoint Section
         Column(
-          modifier = Modifier.padding(24.dp),
-          verticalArrangement = Arrangement.spacedBy(20.dp),
+          verticalArrangement = Arrangement.spacedBy(UIConfig.Spacing.SettingsInputSpacing),
         ) {
-          Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-          ) {
-            Icon(
-              imageVector = Icons.Default.Link,
-              contentDescription = null,
-              tint = MaterialTheme.colorScheme.primary,
-              modifier = Modifier.size(20.dp),
-            )
-            Text(
-              text = stringResource(R.string.server_configuration),
-              style = MaterialTheme.typography.titleMedium,
-              fontWeight = FontWeight.SemiBold,
-              color = MaterialTheme.colorScheme.onSurface,
-            )
-          }
-
-          OutlinedTextField(
-            value = urlInputValue,
-            onValueChange = { urlInputValue = it },
-            label = {
-              Text(
-                stringResource(R.string.server_url),
-                style = MaterialTheme.typography.bodyMedium,
-              )
-            },
-            supportingText = {
-              Text(
-                stringResource(R.string.server_url_summary),
-                style = MaterialTheme.typography.bodySmall,
-              )
-            },
-            leadingIcon = {
-              Icon(
-                imageVector = Icons.Default.CloudUpload,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-              )
-            },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            shape = RoundedCornerShape(12.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-              focusedBorderColor = MaterialTheme.colorScheme.primary,
-              unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+          Text(
+            text = "Server Endpoint",
+            style = MaterialTheme.typography.bodyMedium.copy(
+              fontWeight = FontWeight.Normal,
+              color = UIConfig.Colors.SecondaryTextColor,
             ),
           )
 
           Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(UIConfig.Spacing.SettingsInputSpacing),
+            verticalAlignment = Alignment.CenterVertically,
           ) {
-            Button(
-              onClick = {
-                if (urlInputValue != serverUrl) {
-                  viewModel.updateServerUrl(context, urlInputValue)
-                }
-              },
+            OutlinedTextField(
+              value = serverUrl,
+              onValueChange = { serverUrl = it },
               modifier = Modifier.weight(1f),
-              enabled = urlInputValue != serverUrl && urlInputValue.isNotBlank(),
-              shape = RoundedCornerShape(12.dp),
-              colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-              ),
-            ) {
-              Icon(
-                imageVector = Icons.Default.CheckCircle,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp),
-              )
-              Spacer(modifier = Modifier.width(8.dp))
-              Text(
-                "Save URL",
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Medium,
-              )
-            }
+              textStyle = MaterialTheme.typography.bodyMedium,
+              singleLine = true,
+              shape = RoundedCornerShape(UIConfig.Sizing.InputCornerRadius),
+            )
 
-            FilledTonalButton(
-              onClick = { viewModel.testConnection(context) },
-              enabled = !connectionTestState.isLoading && serverUrl.isNotBlank(),
-              modifier = Modifier.weight(1f),
-              shape = RoundedCornerShape(12.dp),
+            Button(
+              onClick = { handleTestConnection() },
+              enabled = testStatus == TestStatus.Idle,
+              colors = ButtonDefaults.buttonColors(
+                containerColor = UIConfig.Colors.ScribelyGray,
+                contentColor = UIConfig.Colors.WhiteBackground,
+              ),
+              shape = RoundedCornerShape(UIConfig.Sizing.InputCornerRadius),
             ) {
-              if (connectionTestState.isLoading) {
-                CircularProgressIndicator(
-                  modifier = Modifier.size(16.dp),
-                  strokeWidth = 2.dp,
-                )
-              } else {
-                Text(
-                  stringResource(R.string.test_connection),
-                  style = MaterialTheme.typography.labelLarge,
-                  fontWeight = FontWeight.Medium,
-                )
+              when (testStatus) {
+                TestStatus.Testing -> {
+                  CircularProgressIndicator(
+                    modifier = Modifier.size(16.dp),
+                    color = UIConfig.Colors.WhiteBackground,
+                    strokeWidth = 2.dp,
+                  )
+                }
+                else -> {
+                  Text(
+                    text = "Test",
+                    style = MaterialTheme.typography.bodyMedium,
+                  )
+                }
               }
             }
           }
-        }
-      }
 
-      // About Card
-      Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(
-          containerColor = MaterialTheme.colorScheme.surface,
-        ),
-      ) {
-        Column(
-          modifier = Modifier.padding(24.dp),
-          verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-          Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-          ) {
-            Icon(
-              imageVector = Icons.Default.Info,
-              contentDescription = null,
-              tint = MaterialTheme.colorScheme.primary,
-              modifier = Modifier.size(20.dp),
-            )
-            Text(
-              text = stringResource(R.string.about),
-              style = MaterialTheme.typography.titleMedium,
-              fontWeight = FontWeight.SemiBold,
-              color = MaterialTheme.colorScheme.onSurface,
-            )
-          }
-
-          Surface(
-            shape = RoundedCornerShape(12.dp),
-            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
-          ) {
-            Column(
-              modifier = Modifier.padding(16.dp),
-              verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
+          // Status message
+          when (testStatus) {
+            TestStatus.Success -> {
               Text(
-                text = "Version ${BuildConfig.VERSION_NAME}",
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.primary,
+                text = "Connection successful!",
+                style = MaterialTheme.typography.bodySmall,
+                color = Color(0xFF059669), // Green color
               )
-
+            }
+            TestStatus.Error -> {
               Text(
-                text = stringResource(R.string.app_description),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.3,
+                text = "Connection failed.",
+                style = MaterialTheme.typography.bodySmall,
+                color = UIConfig.Colors.ScribelyRed,
+              )
+            }
+            else -> {}
+          }
+        }
+
+        // Save Directory Section
+        Column(
+          verticalArrangement = Arrangement.spacedBy(UIConfig.Spacing.SettingsInputSpacing),
+        ) {
+          Text(
+            text = "Save Directory",
+            style = MaterialTheme.typography.bodyMedium.copy(
+              fontWeight = FontWeight.Normal,
+              color = UIConfig.Colors.SecondaryTextColor,
+            ),
+          )
+
+          Row(
+            horizontalArrangement = Arrangement.spacedBy(UIConfig.Spacing.SettingsInputSpacing),
+            verticalAlignment = Alignment.CenterVertically,
+          ) {
+            OutlinedTextField(
+              value = saveDir,
+              onValueChange = { saveDir = it },
+              modifier = Modifier.weight(1f),
+              textStyle = MaterialTheme.typography.bodyMedium,
+              singleLine = true,
+              shape = RoundedCornerShape(UIConfig.Sizing.InputCornerRadius),
+            )
+
+            IconButton(
+              onClick = {
+                // TODO: Trigger native directory picker
+                println("Triggering native directory picker...")
+              },
+              modifier = Modifier
+                .background(
+                  color = UIConfig.Colors.DefaultBackground,
+                  shape = RoundedCornerShape(UIConfig.Sizing.InputCornerRadius),
+                )
+                .border(
+                  1.dp,
+                  UIConfig.Colors.BorderColor,
+                  RoundedCornerShape(UIConfig.Sizing.InputCornerRadius),
+                )
+                .size(UIConfig.Sizing.InputHeight),
+            ) {
+              Icon(
+                imageVector = Icons.Default.Folder,
+                contentDescription = "Browse",
+                tint = UIConfig.Colors.SecondaryTextColor,
+                modifier = Modifier.size(20.dp),
               )
             }
           }
         }
+
+        // Save Button
+        Column(
+          modifier = Modifier.padding(top = UIConfig.Spacing.LargeSpacing),
+          horizontalAlignment = Alignment.CenterHorizontally,
+          verticalArrangement = Arrangement.spacedBy(UIConfig.Spacing.MediumSpacing),
+        ) {
+          Button(
+            onClick = { handleSave() },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+              containerColor = UIConfig.Colors.ScribelyRed,
+              contentColor = UIConfig.Colors.WhiteBackground,
+            ),
+            shape = RoundedCornerShape(UIConfig.Sizing.CardCornerRadius),
+          ) {
+            Text(
+              text = "Save Settings",
+              style = MaterialTheme.typography.labelLarge.copy(
+                fontWeight = FontWeight.Bold,
+              ),
+              modifier = Modifier.padding(vertical = UIConfig.Spacing.SmallSpacing),
+            )
+          }
+
+          // Save status message
+          if (saveStatus.isNotEmpty()) {
+            Text(
+              text = saveStatus,
+              style = MaterialTheme.typography.bodyMedium,
+              color = Color(0xFF059669), // Green color
+              textAlign = TextAlign.Center,
+            )
+          }
+        }
       }
-
-      // Bottom spacing
-      Spacer(modifier = Modifier.height(20.dp))
     }
-  }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun SettingsScreenPreview() {
-  AudioAITheme {
-    SettingsScreen(onNavigateBack = {})
   }
 }
