@@ -4,6 +4,9 @@ import android.media.MediaCodec
 import android.media.MediaExtractor
 import android.media.MediaFormat
 import android.media.MediaMuxer
+import com.karaskiewicz.scribely.utils.safeMediaOperation
+import com.karaskiewicz.scribely.utils.safeFileOperation
+import com.karaskiewicz.scribely.utils.mapToResult
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -27,12 +30,12 @@ class AudioComposer {
       return copyFile(segments.first(), outputFile)
     }
 
-    return try {
+    return safeMediaOperation("combine audio files") {
       combine3GPFiles(segments, outputFile)
-    } catch (e: Exception) {
-      Timber.e(e, "Failed to combine audio files")
-      false
-    }
+    }.mapToResult(
+      onSuccess = { result -> result },
+      onFailure = { _ -> false },
+    )
   }
 
   /**
@@ -42,19 +45,19 @@ class AudioComposer {
     inputFile: File,
     outputFile: File,
   ): Boolean {
-    return try {
+    return safeMediaOperation("convert 3GP to M4A") {
       convertWith3GPToM4A(inputFile, outputFile)
-    } catch (e: Exception) {
-      Timber.e(e, "Failed to convert 3GP to M4A")
-      false
-    }
+    }.mapToResult(
+      onSuccess = { result -> result },
+      onFailure = { _ -> false },
+    )
   }
 
   private fun combine3GPFiles(
     segments: List<File>,
     outputFile: File,
-  ): Boolean {
-    return try {
+  ): Boolean =
+    runCatching {
       val muxer = MediaMuxer(outputFile.absolutePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_3GPP)
       var trackIndex = -1
       var totalDurationUs = 0L
@@ -108,17 +111,16 @@ class AudioComposer {
       muxer.stop()
       muxer.release()
       true
-    } catch (e: Exception) {
-      Timber.e(e, "Error in combine3GPFiles")
+    }.getOrElse { exception ->
+      Timber.e(exception, "Error in combine3GPFiles")
       false
     }
-  }
 
   private fun convertWith3GPToM4A(
     inputFile: File,
     outputFile: File,
-  ): Boolean {
-    return try {
+  ): Boolean =
+    runCatching {
       val extractor = MediaExtractor()
       extractor.setDataSource(inputFile.absolutePath)
 
@@ -154,26 +156,25 @@ class AudioComposer {
       muxer.release()
       extractor.release()
       true
-    } catch (e: Exception) {
-      Timber.e(e, "Error converting 3GP to M4A")
+    }.getOrElse { exception ->
+      Timber.e(exception, "Error converting 3GP to M4A")
       false
     }
-  }
 
   private fun copyFile(
     source: File,
     destination: File,
   ): Boolean {
-    return try {
+    return safeFileOperation("copy file") {
       FileInputStream(source).use { input ->
         FileOutputStream(destination).use { output ->
           input.copyTo(output)
         }
       }
       true
-    } catch (e: Exception) {
-      Timber.e(e, "Failed to copy file")
-      false
-    }
+    }.mapToResult(
+      onSuccess = { result -> result },
+      onFailure = { _ -> false },
+    )
   }
 }

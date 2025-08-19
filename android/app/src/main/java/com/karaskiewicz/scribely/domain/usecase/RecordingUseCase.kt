@@ -20,8 +20,17 @@ class RecordingUseCase(
   private val mediaRecorderFactory: MediaRecorderFactory,
   private val fileManager: FileManager,
 ) {
-  private var mediaRecorder: MediaRecorder? = null
-  private var outputFile: File? = null
+  private sealed class RecordingState {
+    object Idle : RecordingState()
+
+    data class Recording(val mediaRecorder: MediaRecorder, val outputFile: File) : RecordingState()
+
+    data class Paused(val mediaRecorder: MediaRecorder, val outputFile: File) : RecordingState()
+
+    data class Finished(val outputFile: File) : RecordingState()
+  }
+
+  private var state: RecordingState = RecordingState.Idle
 
   /**
    * Starts a new recording session.
@@ -29,34 +38,32 @@ class RecordingUseCase(
   fun startRecording(): RecordingResult {
     return try {
       resetRecording()
-      outputFile = fileManager.createRecordingFile()
+      val outputFile = fileManager.createRecordingFile()
 
       // Ensure parent directory exists
-      outputFile!!.parentFile?.let { parentDir ->
+      outputFile.parentFile?.let { parentDir ->
         if (!parentDir.exists()) {
           parentDir.mkdirs()
         }
       }
 
-      try {
-        mediaRecorder = mediaRecorderFactory.createMediaRecorder(outputFile!!)
-        mediaRecorder!!.prepare()
-        mediaRecorder!!.start()
-      } catch (e: Exception) {
-        Timber.e(e, "Failed to setup MediaRecorder")
-        throw e
-      }
+      val mediaRecorder =
+        try {
+          val recorder = mediaRecorderFactory.createMediaRecorder(outputFile)
+          recorder.prepare()
+          recorder.start()
+          recorder
+        } catch (e: Exception) {
+          Timber.e(e, "Failed to setup MediaRecorder")
+          throw e
+        }
 
       Thread.sleep(100)
+      state = RecordingState.Recording(mediaRecorder, outputFile)
       RecordingResult.Success
     } catch (e: Exception) {
       Timber.e(e, "Failed to start recording")
-      // Only cleanup if we actually created a recorder
-      if (mediaRecorder != null) {
-        cleanupRecorder()
-      }
-      // Reset state on failure
-      outputFile = null
+      resetRecording()
       RecordingResult.Error("Failed to start recording: ${e.message}", e)
     }
   }
@@ -65,62 +72,92 @@ class RecordingUseCase(
    * Pauses the current recording using MediaRecorder's native pause() method.
    */
   fun pauseRecording(): RecordingResult =
-    try {
-      mediaRecorder?.pause()
-      RecordingResult.Success
-    } catch (e: Exception) {
-      Timber.e(e, "Failed to pause recording")
-      RecordingResult.Error("Failed to pause recording: ${e.message}", e)
+    when (val currentState = state) {
+      is RecordingState.Recording ->
+        try {
+          currentState.mediaRecorder.pause()
+          state = RecordingState.Paused(currentState.mediaRecorder, currentState.outputFile)
+          RecordingResult.Success
+        } catch (e: Exception) {
+          Timber.e(e, "Failed to pause recording")
+          RecordingResult.Error("Failed to pause recording: ${e.message}", e)
+        }
+      else -> {
+        Timber.w("Attempted to pause recording when not in recording state")
+        RecordingResult.Error("No active recording to pause")
+      }
     }
 
   /**
    * Resumes the current recording using MediaRecorder's native resume() method.
    */
-  fun resumeRecording(context: Context): RecordingResult {
-    return try {
-      mediaRecorder?.resume()
-      RecordingResult.Success
-    } catch (e: Exception) {
-      Timber.e(e, "Failed to resume recording")
-      RecordingResult.Error("Failed to resume recording: ${e.message}", e)
+  fun resumeRecording(context: Context): RecordingResult =
+    when (val currentState = state) {
+      is RecordingState.Paused ->
+        try {
+          currentState.mediaRecorder.resume()
+          state = RecordingState.Recording(currentState.mediaRecorder, currentState.outputFile)
+          RecordingResult.Success
+        } catch (e: Exception) {
+          Timber.e(e, "Failed to resume recording")
+          RecordingResult.Error("Failed to resume recording: ${e.message}", e)
+        }
+      else -> {
+        Timber.w("Attempted to resume recording when not in paused state")
+        RecordingResult.Error("No paused recording to resume")
+      }
     }
-  }
 
   /**
    * Finishes recording and returns the final file.
    */
   fun finishRecording(): RecordingResult {
-    return try {
-      mediaRecorder?.apply {
-        stop()
-        release()
+    return when (val currentState = state) {
+      is RecordingState.Recording, is RecordingState.Paused -> {
+        val outputFile =
+          when (currentState) {
+            is RecordingState.Recording -> currentState.outputFile
+            is RecordingState.Paused -> currentState.outputFile
+            else -> throw IllegalStateException("Unexpected state")
+          }
+        val mediaRecorder =
+          when (currentState) {
+            is RecordingState.Recording -> currentState.mediaRecorder
+            is RecordingState.Paused -> currentState.mediaRecorder
+            else -> throw IllegalStateException("Unexpected state")
+          }
+
+        try {
+          mediaRecorder.stop()
+          mediaRecorder.release()
+
+          // Wait a moment for file system to sync
+          Thread.sleep(100)
+
+          if (!outputFile.exists()) {
+            Timber.e("Recording file not found: ${outputFile.absolutePath}")
+            state = RecordingState.Idle
+            return RecordingResult.Error("Recording file not found")
+          }
+
+          if (outputFile.length() == 0L) {
+            Timber.e("Recording file is empty")
+            state = RecordingState.Idle
+            return RecordingResult.Error("Recording file is empty")
+          }
+
+          state = RecordingState.Finished(outputFile)
+          RecordingResult.Success
+        } catch (e: Exception) {
+          Timber.e(e, "Failed to finish recording")
+          resetRecording()
+          RecordingResult.Error("Failed to finish recording: ${e.message}", e)
+        }
       }
-      mediaRecorder = null
-
-      // Wait a moment for file system to sync
-      Thread.sleep(100)
-
-      val finalFile = outputFile
-      if (finalFile == null) {
-        Timber.e("No output file found - recording may not have started properly")
-        return RecordingResult.Error("No recording file found")
+      else -> {
+        Timber.w("Attempted to finish recording when not recording")
+        RecordingResult.Error("No active recording to finish")
       }
-
-      if (!finalFile.exists()) {
-        Timber.e("Recording file not found: ${finalFile.absolutePath}")
-        return RecordingResult.Error("Recording file not found")
-      }
-
-      if (finalFile.length() == 0L) {
-        Timber.e("Recording file is empty")
-        return RecordingResult.Error("Recording file is empty")
-      }
-
-      RecordingResult.Success
-    } catch (e: Exception) {
-      Timber.e(e, "Failed to finish recording")
-      cleanupRecorder()
-      RecordingResult.Error("Failed to finish recording: ${e.message}", e)
     }
   }
 
@@ -128,49 +165,66 @@ class RecordingUseCase(
    * Uploads the completed recording.
    */
   suspend fun uploadRecording(): UploadResult {
-    val recordingFile = outputFile?.takeIf { it.exists() }
-    if (recordingFile == null) {
-      Timber.e("Upload failed - no recording file available")
-      return UploadResult.Error("No recording file available for upload")
+    return when (val currentState = state) {
+      is RecordingState.Finished -> {
+        val recordingFile = currentState.outputFile
+        if (!recordingFile.exists()) {
+          Timber.e("Upload failed - recording file no longer exists")
+          return UploadResult.Error("Recording file no longer exists")
+        }
+
+        // Convert to M4A for upload
+        val uploadFile = fileManager.createUploadFile()
+        val audioComposer = AudioComposer()
+        val conversionSuccess = audioComposer.convertToM4A(recordingFile, uploadFile)
+
+        if (!conversionSuccess || !uploadFile.exists()) {
+          Timber.e("Failed to convert recording to M4A format")
+          return UploadResult.Error("Failed to prepare recording for upload")
+        }
+
+        val result = recordingRepository.uploadRecording(uploadFile)
+
+        // Cleanup files
+        fileManager.deleteFileIfExists(uploadFile)
+        if (result is UploadResult.UploadSuccess) {
+          fileManager.deleteFileIfExists(recordingFile)
+          state = RecordingState.Idle
+        }
+        result
+      }
+      else -> {
+        Timber.e("Upload failed - no finished recording available")
+        UploadResult.Error("No finished recording available for upload")
+      }
     }
-
-    // Convert to M4A for upload
-    val uploadFile = fileManager.createUploadFile()
-    val audioComposer = AudioComposer()
-    val conversionSuccess = audioComposer.convertToM4A(recordingFile, uploadFile)
-
-    if (!conversionSuccess || !uploadFile.exists()) {
-      Timber.e("Failed to convert recording to M4A format")
-      return UploadResult.Error("Failed to prepare recording for upload")
-    }
-
-    val result = recordingRepository.uploadRecording(uploadFile)
-
-    // Cleanup files
-    fileManager.deleteFileIfExists(uploadFile)
-    if (result is UploadResult.UploadSuccess) {
-      fileManager.deleteFileIfExists(recordingFile)
-    }
-    return result
   }
 
   /**
    * Resets the recording state and cleans up resources.
    */
   fun resetRecording() {
-    cleanupRecorder()
-    outputFile = null
-  }
-
-  private fun cleanupRecorder() {
-    val result =
-      runCatching {
-        mediaRecorder?.stop()
-        mediaRecorder?.release()
+    when (val currentState = state) {
+      is RecordingState.Recording -> {
+        runCatching {
+          currentState.mediaRecorder.stop()
+          currentState.mediaRecorder.release()
+        }.onFailure { e ->
+          Timber.w(e, "Error stopping recorder during reset")
+        }
       }
-    result.onFailure { e ->
-      Timber.w(e, "Error stopping recorder")
+      is RecordingState.Paused -> {
+        runCatching {
+          currentState.mediaRecorder.stop()
+          currentState.mediaRecorder.release()
+        }.onFailure { e ->
+          Timber.w(e, "Error stopping recorder during reset")
+        }
+      }
+      else -> {
+        // No cleanup needed for Idle or Finished states
+      }
     }
-    mediaRecorder = null
+    state = RecordingState.Idle
   }
 }

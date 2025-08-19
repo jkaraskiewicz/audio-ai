@@ -4,6 +4,9 @@ import com.karaskiewicz.scribely.domain.model.RecordingConstants
 import com.karaskiewicz.scribely.domain.model.UploadResult
 import com.karaskiewicz.scribely.domain.service.FileManager
 import com.karaskiewicz.scribely.network.ApiServiceManager
+import com.karaskiewicz.scribely.utils.safeSuspendNetworkCall
+import com.karaskiewicz.scribely.utils.safeFileOperation
+import com.karaskiewicz.scribely.utils.mapToResult
 import java.io.File
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -19,44 +22,52 @@ class RecordingRepositoryImpl(
   private val apiServiceManager: ApiServiceManager,
 ) : RecordingRepository {
   override suspend fun uploadRecording(audioFile: File): UploadResult {
-    return try {
-      val apiService = apiServiceManager.createApiService()
-      val response = uploadToServer(apiService, audioFile)
-
-      if (response.isSuccessful && response.body()?.isSuccess == true) {
-        Timber.d("Recording uploaded successfully")
-        UploadResult.UploadSuccess
-      } else {
-        Timber.w("Upload failed, saving locally")
-        saveLocally(audioFile)
+    val uploadResult =
+      safeSuspendNetworkCall("upload recording") {
+        val apiService = apiServiceManager.createApiService()
+        uploadToServer(apiService, audioFile)
       }
-    } catch (e: Exception) {
-      Timber.e(e, "Upload failed with exception")
-      saveLocally(audioFile)
-    }
+
+    return uploadResult.mapToResult(
+      onSuccess = { response ->
+        if (response.isSuccessful && response.body()?.isSuccess == true) {
+          Timber.d("Recording uploaded successfully")
+          UploadResult.UploadSuccess
+        } else {
+          Timber.w("Upload failed, saving locally")
+          saveLocally(audioFile)
+        }
+      },
+      onFailure = { exception ->
+        Timber.e(exception, "Upload failed with exception")
+        saveLocally(audioFile)
+      },
+    )
   }
 
   private suspend fun uploadToServer(
     apiService: com.karaskiewicz.scribely.network.ApiService,
     audioFile: File,
-  ) = try {
+  ) = runCatching {
     val requestFile = audioFile.asRequestBody(RecordingConstants.AUDIO_FORMAT_UPLOAD.toMediaTypeOrNull())
     val filePart = MultipartBody.Part.createFormData("file", audioFile.name, requestFile)
     apiService.processFile(filePart)
-  } catch (e: Exception) {
-    Timber.e(e, "Network upload failed")
-    throw e
-  }
+  }.getOrThrow()
 
-  private fun saveLocally(audioFile: File): UploadResult =
-    try {
+  private fun saveLocally(audioFile: File): UploadResult {
+    return safeFileOperation("save recording locally") {
       val localFile = fileManager.createPublicFile()
       audioFile.copyTo(localFile, overwrite = true)
-
-      Timber.d("Recording saved locally: ${localFile.absolutePath}")
-      UploadResult.LocalSave(localFile.absolutePath)
-    } catch (e: Exception) {
-      Timber.e(e, "Failed to save recording locally")
-      UploadResult.Error("Failed to save recording: ${e.message}", e)
-    }
+      localFile
+    }.mapToResult(
+      onSuccess = { localFile ->
+        Timber.d("Recording saved locally: ${localFile.absolutePath}")
+        UploadResult.LocalSave(localFile.absolutePath)
+      },
+      onFailure = { exception ->
+        Timber.e(exception, "Failed to save recording locally")
+        UploadResult.Error("Failed to save recording: ${exception.message}", exception)
+      },
+    )
+  }
 }

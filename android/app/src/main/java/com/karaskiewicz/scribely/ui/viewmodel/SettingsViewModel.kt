@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.karaskiewicz.scribely.network.ApiServiceManager
 import com.karaskiewicz.scribely.utils.PreferencesDataStore
+import com.karaskiewicz.scribely.utils.safeSuspendNetworkCall
+import com.karaskiewicz.scribely.utils.mapToResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -43,23 +45,30 @@ class SettingsViewModel(
     viewModelScope.launch {
       _connectionTestState.value = ConnectionTestState(isLoading = true)
 
-      try {
-        val apiService = apiServiceManager.createApiService()
-        val response = apiService.healthCheck()
-        if (response.isSuccessful) {
-          _connectionTestState.value = ConnectionTestState(isSuccess = true)
-        } else {
+      val result =
+        safeSuspendNetworkCall("test connection") {
+          val apiService = apiServiceManager.createApiService()
+          apiService.healthCheck()
+        }
+
+      result.mapToResult(
+        onSuccess = { response ->
+          if (response.isSuccessful) {
+            _connectionTestState.value = ConnectionTestState(isSuccess = true)
+          } else {
+            _connectionTestState.value =
+              ConnectionTestState(
+                error = "HTTP ${response.code()}: ${response.message()}",
+              )
+          }
+        },
+        onFailure = { exception ->
           _connectionTestState.value =
             ConnectionTestState(
-              error = "HTTP ${response.code()}: ${response.message()}",
+              error = exception.message ?: "Unknown error occurred",
             )
-        }
-      } catch (e: Exception) {
-        _connectionTestState.value =
-          ConnectionTestState(
-            error = e.message ?: "Unknown error occurred",
-          )
-      }
+        },
+      )
     }
   }
 

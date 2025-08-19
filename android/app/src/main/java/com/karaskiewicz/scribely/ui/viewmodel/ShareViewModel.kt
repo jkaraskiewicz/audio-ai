@@ -9,6 +9,9 @@ import com.karaskiewicz.scribely.data.ProcessTextRequest
 import com.karaskiewicz.scribely.network.ApiServiceManager
 import com.karaskiewicz.scribely.domain.usecase.RecordingUseCase
 import com.karaskiewicz.scribely.utils.FileUtils
+import com.karaskiewicz.scribely.utils.safeSuspendNetworkCall
+import com.karaskiewicz.scribely.utils.safeFileOperation
+import com.karaskiewicz.scribely.utils.mapToResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -111,37 +114,46 @@ class ShareViewModel(
     viewModelScope.launch {
       _shareState.value = ShareState(isLoading = true, message = "Processing text...")
 
-      try {
-        val apiService = apiServiceManager.createApiService()
-        val request = ProcessTextRequest(text)
-        val response = apiService.processText(request)
+      val result =
+        safeSuspendNetworkCall("process text") {
+          val apiService = apiServiceManager.createApiService()
+          val request = ProcessTextRequest(text)
+          apiService.processText(request)
+        }
 
-        if (response.isSuccessful) {
-          val body = response.body()
-          if (body?.isSuccess == true) {
-            _shareState.value =
-              ShareState(
-                isSuccess = true,
-                message = "Text processed successfully!\nSaved to: ${body.savedTo}",
-              )
-          } else {
-            _shareState.value =
-              ShareState(
-                error = "Processing failed: ${body?.error ?: "Unknown error"}",
-              )
+      result.mapToResult(
+        onSuccess = { response ->
+          when {
+            response.isSuccessful -> {
+              val body = response.body()
+              if (body?.isSuccess == true) {
+                _shareState.value =
+                  ShareState(
+                    isSuccess = true,
+                    message = "Text processed successfully!\nSaved to: ${body.savedTo}",
+                  )
+              } else {
+                _shareState.value =
+                  ShareState(
+                    error = "Processing failed: ${body?.error ?: "Unknown error"}",
+                  )
+              }
+            }
+            else -> {
+              _shareState.value =
+                ShareState(
+                  error = "Server error: HTTP ${response.code()}",
+                )
+            }
           }
-        } else {
+        },
+        onFailure = { exception ->
           _shareState.value =
             ShareState(
-              error = "Server error: HTTP ${response.code()}",
+              error = "Network error: ${exception.message ?: "Unknown error"}",
             )
-        }
-      } catch (e: Exception) {
-        _shareState.value =
-          ShareState(
-            error = "Network error: ${e.message ?: "Unknown error"}",
-          )
-      }
+        },
+      )
     }
   }
 
@@ -152,48 +164,70 @@ class ShareViewModel(
     viewModelScope.launch {
       _shareState.value = ShareState(isLoading = true, message = "Processing file...")
 
-      try {
-        val file = FileUtils.copyUriToTempFile(context, uri)
-        if (file == null) {
-          _shareState.value = ShareState(error = "Failed to read file")
-          return@launch
+      val fileResult =
+        safeFileOperation("copy URI to temp file") {
+          FileUtils.copyUriToTempFile(context, uri)
         }
 
-        val apiService = apiServiceManager.createApiService()
-        val requestFile = file.asRequestBody("*/*".toMediaTypeOrNull())
-        val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
-
-        val response = apiService.processFile(body)
-
-        // Clean up temp file
-        file.delete()
-
-        if (response.isSuccessful) {
-          val responseBody = response.body()
-          if (responseBody?.isSuccess == true) {
-            _shareState.value =
-              ShareState(
-                isSuccess = true,
-                message = "File processed successfully!\nSaved to: ${responseBody.savedTo}",
-              )
-          } else {
-            _shareState.value =
-              ShareState(
-                error = "Processing failed: ${responseBody?.error ?: "Unknown error"}",
-              )
+      fileResult.mapToResult(
+        onSuccess = { file ->
+          if (file == null) {
+            _shareState.value = ShareState(error = "Failed to read file")
+            return@mapToResult
           }
-        } else {
+
+          val networkResult =
+            safeSuspendNetworkCall("process file") {
+              val apiService = apiServiceManager.createApiService()
+              val requestFile = file.asRequestBody("*/*".toMediaTypeOrNull())
+              val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
+              apiService.processFile(body)
+            }
+
+          // Clean up temp file
+          file.delete()
+
+          networkResult.mapToResult(
+            onSuccess = { response ->
+              when {
+                response.isSuccessful -> {
+                  val responseBody = response.body()
+                  if (responseBody?.isSuccess == true) {
+                    _shareState.value =
+                      ShareState(
+                        isSuccess = true,
+                        message = "File processed successfully!\nSaved to: ${responseBody.savedTo}",
+                      )
+                  } else {
+                    _shareState.value =
+                      ShareState(
+                        error = "Processing failed: ${responseBody?.error ?: "Unknown error"}",
+                      )
+                  }
+                }
+                else -> {
+                  _shareState.value =
+                    ShareState(
+                      error = "Server error: HTTP ${response.code()}",
+                    )
+                }
+              }
+            },
+            onFailure = { exception ->
+              _shareState.value =
+                ShareState(
+                  error = "Network error: ${exception.message ?: "Unknown error"}",
+                )
+            },
+          )
+        },
+        onFailure = { exception ->
           _shareState.value =
             ShareState(
-              error = "Server error: HTTP ${response.code()}",
+              error = "File error: ${exception.message ?: "Unknown error"}",
             )
-        }
-      } catch (e: Exception) {
-        _shareState.value =
-          ShareState(
-            error = "Network error: ${e.message ?: "Unknown error"}",
-          )
-      }
+        },
+      )
     }
   }
 }

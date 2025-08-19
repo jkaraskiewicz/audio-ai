@@ -7,14 +7,13 @@ import android.provider.OpenableColumns
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
-import timber.log.Timber
 
 object FileUtils {
   fun copyUriToTempFile(
     context: Context,
     uri: Uri,
   ): File? {
-    return try {
+    return safeFileOperation("copy URI to temp file") {
       val fileName = getFileName(context, uri) ?: "shared_file"
       val tempFile = File(context.cacheDir, fileName)
 
@@ -28,35 +27,33 @@ object FileUtils {
       }
 
       tempFile
-    } catch (e: Exception) {
-      Timber.e(e, "Error copying file")
-      null
-    }
+    }.getOrNull()
   }
 
   private fun getFileName(
     context: Context,
     uri: Uri,
   ): String? {
-    var name: String? = null
+    // Try to get filename from content resolver first
     if (uri.scheme == ContentResolver.SCHEME_CONTENT) {
-      val cursor = context.contentResolver.query(uri, null, null, null, null)
-      cursor?.use {
-        if (it.moveToFirst()) {
-          val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+      context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+        if (cursor.moveToFirst()) {
+          val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
           if (nameIndex >= 0) {
-            name = it.getString(nameIndex)
+            cursor.getString(nameIndex)?.let { return it }
           }
         }
       }
     }
-    if (name == null) {
-      name = uri.path
-      val cut = name?.lastIndexOf('/') ?: -1
-      if (cut != -1) {
-        name = name?.substring(cut + 1)
+
+    // Fallback to extracting from URI path
+    return uri.path?.let { path ->
+      val lastSlash = path.lastIndexOf('/')
+      if (lastSlash != -1 && lastSlash < path.length - 1) {
+        path.substring(lastSlash + 1)
+      } else {
+        path
       }
     }
-    return name
   }
 }
