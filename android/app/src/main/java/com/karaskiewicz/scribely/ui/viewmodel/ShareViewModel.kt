@@ -6,7 +6,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.karaskiewicz.scribely.data.ProcessTextRequest
-import com.karaskiewicz.scribely.network.ApiService
+import com.karaskiewicz.scribely.network.ApiServiceManager
 import com.karaskiewicz.scribely.domain.usecase.RecordingUseCase
 import com.karaskiewicz.scribely.utils.FileUtils
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,7 +26,7 @@ data class ShareState(
 
 class ShareViewModel(
   private val recordingUseCase: RecordingUseCase,
-  private val apiService: ApiService,
+  private val apiServiceManager: ApiServiceManager,
 ) : ViewModel() {
   private val _shareState = MutableStateFlow(ShareState(message = "Preparing..."))
   val shareState: StateFlow<ShareState> = _shareState.asStateFlow()
@@ -112,6 +112,7 @@ class ShareViewModel(
       _shareState.value = ShareState(isLoading = true, message = "Processing text...")
 
       try {
+        val apiService = apiServiceManager.createApiService()
         val request = ProcessTextRequest(text)
         val response = apiService.processText(request)
 
@@ -158,6 +159,7 @@ class ShareViewModel(
           return@launch
         }
 
+        val apiService = apiServiceManager.createApiService()
         val requestFile = file.asRequestBody("*/*".toMediaTypeOrNull())
         val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
 

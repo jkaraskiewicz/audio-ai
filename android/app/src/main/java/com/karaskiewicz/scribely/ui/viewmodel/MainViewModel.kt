@@ -1,7 +1,10 @@
 package com.karaskiewicz.scribely.ui.viewmodel
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.util.Log
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.karaskiewicz.scribely.domain.model.RecordingConstants
@@ -71,6 +74,14 @@ class MainViewModel(
    */
   fun startRecording(context: Context) {
     clearMessages()
+
+    // Check for audio recording permission
+    if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO)
+      != PackageManager.PERMISSION_GRANTED
+    ) {
+      _errorMessage.value = "Audio recording permission is required"
+      return
+    }
 
     when (val result = recordingUseCase.startRecording()) {
       is RecordingResult.Success -> {

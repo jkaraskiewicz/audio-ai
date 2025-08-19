@@ -22,8 +22,6 @@ class RecordingUseCase(
 ) {
   private var mediaRecorder: MediaRecorder? = null
   private var outputFile: File? = null
-  private val recordingSegments = mutableListOf<File>()
-  private var finalRecordingFile: File? = null
 
   /**
    * Starts a new recording session.
@@ -49,8 +47,6 @@ class RecordingUseCase(
         throw e
       }
 
-      recordingSegments.add(outputFile!!)
-
       Thread.sleep(100)
       RecordingResult.Success
     } catch (e: Exception) {
@@ -60,20 +56,17 @@ class RecordingUseCase(
         cleanupRecorder()
       }
       // Reset state on failure
-      recordingSegments.clear()
       outputFile = null
       RecordingResult.Error("Failed to start recording: ${e.message}", e)
     }
   }
 
+  /**
+   * Pauses the current recording using MediaRecorder's native pause() method.
+   */
   fun pauseRecording(): RecordingResult =
     try {
-      mediaRecorder?.apply {
-        stop()
-        release()
-      }
-      mediaRecorder = null
-
+      mediaRecorder?.pause()
       RecordingResult.Success
     } catch (e: Exception) {
       Timber.e(e, "Failed to pause recording")
@@ -81,23 +74,11 @@ class RecordingUseCase(
     }
 
   /**
-   * Resumes recording by creating a new segment.
+   * Resumes the current recording using MediaRecorder's native resume() method.
    */
   fun resumeRecording(context: Context): RecordingResult {
     return try {
-      val segmentFile = fileManager.createSegmentFile()
-
-      // Ensure parent directory exists
-      segmentFile.parentFile?.let { parentDir ->
-        if (!parentDir.exists()) {
-          parentDir.mkdirs()
-        }
-      }
-
-      mediaRecorder = mediaRecorderFactory.createMediaRecorder(segmentFile)
-      mediaRecorder!!.prepare()
-      mediaRecorder!!.start()
-      recordingSegments.add(segmentFile)
+      mediaRecorder?.resume()
       RecordingResult.Success
     } catch (e: Exception) {
       Timber.e(e, "Failed to resume recording")
@@ -119,30 +100,22 @@ class RecordingUseCase(
       // Wait a moment for file system to sync
       Thread.sleep(100)
 
-      finalRecordingFile =
-        if (recordingSegments.size > 1) {
-          combineAudioSegments(recordingSegments)
-        } else {
-          recordingSegments.firstOrNull()
-        }
-
-      if (finalRecordingFile == null) {
-        return if (recordingSegments.isEmpty()) {
-          RecordingResult.Error("No recording segments found - recording may not have started properly")
-        } else {
-          RecordingResult.Error("Failed to process recording segments")
-        }
+      val finalFile = outputFile
+      if (finalFile == null) {
+        Timber.e("No output file found - recording may not have started properly")
+        return RecordingResult.Error("No recording file found")
       }
 
-      if (!finalRecordingFile!!.exists()) {
-        Timber.e("Recording file not found: ${finalRecordingFile!!.absolutePath}")
+      if (!finalFile.exists()) {
+        Timber.e("Recording file not found: ${finalFile.absolutePath}")
         return RecordingResult.Error("Recording file not found")
       }
 
-      if (finalRecordingFile!!.length() == 0L) {
+      if (finalFile.length() == 0L) {
         Timber.e("Recording file is empty")
         return RecordingResult.Error("Recording file is empty")
       }
+
       RecordingResult.Success
     } catch (e: Exception) {
       Timber.e(e, "Failed to finish recording")
@@ -155,8 +128,8 @@ class RecordingUseCase(
    * Uploads the completed recording.
    */
   suspend fun uploadRecording(): UploadResult {
-    val finalFile = finalRecordingFile?.takeIf { it.exists() }
-    if (finalFile == null) {
+    val recordingFile = outputFile?.takeIf { it.exists() }
+    if (recordingFile == null) {
       Timber.e("Upload failed - no recording file available")
       return UploadResult.Error("No recording file available for upload")
     }
@@ -164,7 +137,7 @@ class RecordingUseCase(
     // Convert to M4A for upload
     val uploadFile = fileManager.createUploadFile()
     val audioComposer = AudioComposer()
-    val conversionSuccess = audioComposer.convertToM4A(finalFile, uploadFile)
+    val conversionSuccess = audioComposer.convertToM4A(recordingFile, uploadFile)
 
     if (!conversionSuccess || !uploadFile.exists()) {
       Timber.e("Failed to convert recording to M4A format")
@@ -176,10 +149,8 @@ class RecordingUseCase(
     // Cleanup files
     fileManager.deleteFileIfExists(uploadFile)
     if (result is UploadResult.UploadSuccess) {
-      fileManager.deleteFileIfExists(finalRecordingFile)
+      fileManager.deleteFileIfExists(recordingFile)
     }
-    cleanupSegments()
-    finalRecordingFile = null
     return result
   }
 
@@ -188,9 +159,7 @@ class RecordingUseCase(
    */
   fun resetRecording() {
     cleanupRecorder()
-    cleanupSegments()
     outputFile = null
-    finalRecordingFile = null
   }
 
   private fun cleanupRecorder() {
@@ -203,34 +172,5 @@ class RecordingUseCase(
       Timber.w(e, "Error stopping recorder")
     }
     mediaRecorder = null
-  }
-
-  private fun cleanupSegments() {
-    fileManager.deleteFiles(recordingSegments)
-    recordingSegments.clear()
-  }
-
-  private fun combineAudioSegments(segments: List<File>): File? {
-    if (segments.isEmpty()) return null
-    if (segments.size == 1) return segments.first()
-
-    return try {
-      val outputFile = fileManager.createFinalRecordingFile()
-      val audioComposer = AudioComposer()
-      val success = audioComposer.combineAudioFiles(segments, outputFile)
-
-      if (success && outputFile.exists() && outputFile.length() > 0) {
-        Timber.d("Successfully combined ${segments.size} audio segments into ${outputFile.name}")
-        outputFile
-      } else {
-        Timber.e("Failed to combine audio segments")
-        // Fallback to first segment if combining fails
-        segments.firstOrNull()
-      }
-    } catch (e: Exception) {
-      Timber.e(e, "Error combining audio segments, using first segment as fallback")
-      // Fallback to first segment if combining fails
-      segments.firstOrNull()
-    }
   }
 }

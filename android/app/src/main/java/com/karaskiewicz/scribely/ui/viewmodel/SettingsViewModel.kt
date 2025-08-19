@@ -2,7 +2,7 @@ package com.karaskiewicz.scribely.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.karaskiewicz.scribely.network.ApiService
+import com.karaskiewicz.scribely.network.ApiServiceManager
 import com.karaskiewicz.scribely.utils.PreferencesDataStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +17,7 @@ data class ConnectionTestState(
 
 class SettingsViewModel(
   private val preferencesDataStore: PreferencesDataStore,
-  private val apiService: ApiService,
+  private val apiServiceManager: ApiServiceManager,
 ) : ViewModel() {
   private val _serverUrl = MutableStateFlow("")
   val serverUrl: StateFlow<String> = _serverUrl.asStateFlow()
@@ -44,6 +44,7 @@ class SettingsViewModel(
       _connectionTestState.value = ConnectionTestState(isLoading = true)
 
       try {
+        val apiService = apiServiceManager.createApiService()
         val response = apiService.healthCheck()
         if (response.isSuccessful) {
           _connectionTestState.value = ConnectionTestState(isSuccess = true)

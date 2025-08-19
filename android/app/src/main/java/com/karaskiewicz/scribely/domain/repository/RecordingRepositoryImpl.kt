@@ -3,7 +3,7 @@ package com.karaskiewicz.scribely.domain.repository
 import com.karaskiewicz.scribely.domain.model.RecordingConstants
 import com.karaskiewicz.scribely.domain.model.UploadResult
 import com.karaskiewicz.scribely.domain.service.FileManager
-import com.karaskiewicz.scribely.network.ApiService
+import com.karaskiewicz.scribely.network.ApiServiceManager
 import java.io.File
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -16,10 +16,11 @@ import timber.log.Timber
  */
 class RecordingRepositoryImpl(
   private val fileManager: FileManager,
-  private val apiService: ApiService,
+  private val apiServiceManager: ApiServiceManager,
 ) : RecordingRepository {
   override suspend fun uploadRecording(audioFile: File): UploadResult {
     return try {
+      val apiService = apiServiceManager.createApiService()
       val response = uploadToServer(apiService, audioFile)
 
       if (response.isSuccessful && response.body()?.isSuccess == true) {
@@ -36,7 +37,7 @@ class RecordingRepositoryImpl(
   }
 
   private suspend fun uploadToServer(
-    apiService: ApiService,
+    apiService: com.karaskiewicz.scribely.network.ApiService,
     audioFile: File,
   ) = try {
     val requestFile = audioFile.asRequestBody(RecordingConstants.AUDIO_FORMAT_UPLOAD.toMediaTypeOrNull())
