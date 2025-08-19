@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.karaskiewicz.scribely.ui.screen.PixelSettingsScreen
+import com.karaskiewicz.scribely.ui.screen.SettingsScreen
 import com.karaskiewicz.scribely.ui.theme.ScribelyTheme
 
 class SettingsActivity : ComponentActivity() {
@@ -14,7 +14,7 @@ class SettingsActivity : ComponentActivity() {
 
     setContent {
       ScribelyTheme {
-        PixelSettingsScreen(
+        SettingsScreen(
           onNavigateBack = { finish() },
         )
       }

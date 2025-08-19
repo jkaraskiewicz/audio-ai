@@ -1,12 +1,9 @@
 package com.karaskiewicz.scribely.ui.screen
 
-import android.Manifest
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,41 +16,27 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.content.ContextCompat
-import org.koin.androidx.compose.koinViewModel
-import com.karaskiewicz.scribely.ui.components.AppHeader
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.karaskiewicz.scribely.domain.model.RecordingState
+import com.karaskiewicz.scribely.ui.components.AnimatedWave
 import com.karaskiewicz.scribely.ui.components.MessageCards
-import com.karaskiewicz.scribely.ui.components.RecordingControls
-import com.karaskiewicz.scribely.ui.components.TimerDisplay
+import com.karaskiewicz.scribely.ui.components.PixelButton
+import com.karaskiewicz.scribely.ui.components.PixelClickableText
+import com.karaskiewicz.scribely.ui.components.PixelHeaderText
+import com.karaskiewicz.scribely.ui.components.PixelTimerDisplay
 import com.karaskiewicz.scribely.ui.theme.UIConfig
 import com.karaskiewicz.scribely.ui.viewmodel.MainViewModel
+import org.koin.androidx.compose.koinViewModel
 
-/**
- * 🎨 DEVELOPER-FRIENDLY: Clean Main Screen
- *
- * Uncle Bob's Principles Applied:
- * ✅ Single Responsibility: Each component handles one concern
- * ✅ DRY: No code duplication, reusable components
- * ✅ Clean Architecture: Clear separation of concerns
- *
- * Easy UI Customization:
- * - All styling controlled by UIConfig.kt
- * - Modular components for easy modifications
- * - Clear component boundaries
- *
- * Quick Customization Guide:
- * - Background: UIConfig.Colors.DefaultBackground
- * - Layout spacing: UIConfig.Spacing.*
- * - Component positioning: Modify alignment values below
- * - Add/remove features: Comment out component sections
- */
 @Composable
 fun MainScreen(
-  onNavigateToSettings: () -> Unit = {},
+  onNavigateToSettings: () -> Unit,
   viewModel: MainViewModel = koinViewModel(),
 ) {
-  // 🎨 State Management (Clean Architecture)
   val context = LocalContext.current
+
+  // Collect state from ViewModel
   val recordingState by viewModel.recordingState.collectAsState()
   val recordingDuration by viewModel.recordingDuration.collectAsState()
   val errorMessage by viewModel.errorMessage.collectAsState()
@@ -64,103 +47,157 @@ fun MainScreen(
     viewModel.loadConfiguration()
   }
 
-  // 🎨 Permission Handling (Single Responsibility)
-  val permissionLauncher =
-    rememberLauncherForActivityResult(
-      contract = ActivityResultContracts.RequestPermission(),
-    ) { isGranted ->
-      if (isGranted) {
-        viewModel.startRecording(context)
-      } else {
-        // TODO: Show permission error message
-      }
-    }
-
-  // 🎨 Recording Actions (Clean Interface)
-  val recordingActions =
-    RecordingActions(
-      onStart = {
-        when (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO)) {
-          android.content.pm.PackageManager.PERMISSION_GRANTED -> {
-            viewModel.startRecording(context)
-          }
-          else -> {
-            permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-          }
-        }
-      },
-      onPause = { viewModel.pauseRecording(context) },
-      onResume = { viewModel.resumeRecording(context) },
-      onStop = { viewModel.finishRecording(context) },
-      onDiscard = { viewModel.resetRecording(context) },
-    )
-
-  // 🎨 Main Layout (Clean Structure)
-  Box(
+  // Main container with pixel art background
+  Column(
     modifier =
       Modifier
         .fillMaxSize()
-        .background(UIConfig.Colors.DefaultBackground) // 🎨 CUSTOMIZE: Background color
-        .padding(UIConfig.Spacing.ScreenPadding),
-    // 🎨 CUSTOMIZE: Screen padding
+        .background(UIConfig.PixelColors.Background)
+        .padding(16.dp),
+    horizontalAlignment = Alignment.CenterHorizontally,
   ) {
-    Column(
-      modifier = Modifier.fillMaxSize(),
+    // Header with Scribely title and Settings
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.SpaceBetween,
+      verticalAlignment = Alignment.CenterVertically,
     ) {
-      // 🎨 Header Section (Logo + Settings)
-      AppHeader(onSettingsClick = onNavigateToSettings)
+      PixelHeaderText(text = "Scribely")
+      PixelClickableText(
+        text = "[Settings]",
+        onClick = onNavigateToSettings,
+      )
+    }
 
-      // 🎨 Main Content (Timer + Controls)
-      Column(
+    // Spacer to push content to center
+    Spacer(modifier = Modifier.weight(1f))
+
+    // Timer Display with pixel art styling
+    PixelTimerDisplay(
+      time = formatDuration(recordingDuration),
+      modifier = Modifier.padding(bottom = 32.dp),
+    )
+
+    // Animated wave visualization
+    if (recordingState == RecordingState.RECORDING) {
+      AnimatedWave(
         modifier =
           Modifier
             .fillMaxWidth()
-            .weight(1f),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-      ) {
-        // 🎨 Timer Section (with animated wave)
-        TimerDisplay(
-          recordingDuration = recordingDuration,
-          recordingState = recordingState,
-        )
-
-        Spacer(modifier = Modifier.height(UIConfig.Spacing.TimerBottomMargin))
-
-        // 🎨 Controls Section
-        RecordingControls(
-          recordingState = recordingState,
-          onStartRecording = recordingActions.onStart,
-          onPauseRecording = recordingActions.onPause,
-          onResumeRecording = recordingActions.onResume,
-          onStopRecording = recordingActions.onStop,
-          onDiscardRecording = recordingActions.onDiscard,
-          modifier = Modifier.height(UIConfig.Spacing.ControlsHeight),
-        )
-      }
-
-      // 🎨 Footer Space
-      Spacer(modifier = Modifier.height(UIConfig.Spacing.FooterHeight))
+            .height(64.dp)
+            .padding(horizontal = 32.dp),
+      )
+    } else {
+      Spacer(modifier = Modifier.height(64.dp))
     }
 
-    // 🎨 Message Cards (Bottom overlay)
+    // Spacer to push controls to bottom
+    Spacer(modifier = Modifier.weight(1f))
+
+    // Recording Controls with pixel art buttons
+    RecordingControlsPixel(
+      recordingState = recordingState,
+      onStartRecording = { viewModel.startRecording(context) },
+      onPauseRecording = { viewModel.pauseRecording(context) },
+      onResumeRecording = { viewModel.resumeRecording(context) },
+      onStopRecording = { viewModel.finishRecording(context) },
+      onDiscardRecording = { viewModel.resetRecording(context) },
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    // Message cards for errors/success
     MessageCards(
       errorMessage = errorMessage,
       successMessage = successMessage,
-      modifier = Modifier.align(Alignment.BottomCenter),
     )
   }
 }
 
-/**
- * 🎨 DEVELOPER-FRIENDLY: Recording Actions Data Class
- * Single Responsibility: Groups all recording actions
- * Makes the component interface clean and testable
- */
-private data class RecordingActions(
-  val onStart: () -> Unit,
-  val onPause: () -> Unit,
-  val onResume: () -> Unit,
-  val onStop: () -> Unit,
-  val onDiscard: () -> Unit,
-)
+@Composable
+private fun RecordingControlsPixel(
+  recordingState: RecordingState,
+  onStartRecording: () -> Unit,
+  onPauseRecording: () -> Unit,
+  onResumeRecording: () -> Unit,
+  onStopRecording: () -> Unit,
+  onDiscardRecording: () -> Unit,
+) {
+  Row(
+    modifier = Modifier.fillMaxWidth(),
+    horizontalArrangement = Arrangement.Center,
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
+    when (recordingState) {
+      RecordingState.IDLE -> {
+        PixelButton(
+          text = "REC",
+          backgroundColor = UIConfig.PixelColors.ButtonRed,
+          shadowColor = UIConfig.PixelColors.ButtonRedShadow,
+          onClick = onStartRecording,
+        )
+      }
+      RecordingState.RECORDING -> {
+        PixelButton(
+          text = "PAUSE",
+          backgroundColor = UIConfig.PixelColors.ButtonBlue,
+          shadowColor = UIConfig.PixelColors.ButtonBlueShadow,
+          onClick = onPauseRecording,
+          modifier = Modifier.padding(end = 16.dp),
+        )
+        PixelButton(
+          text = "STOP",
+          backgroundColor = UIConfig.PixelColors.ButtonRed,
+          shadowColor = UIConfig.PixelColors.ButtonRedShadow,
+          onClick = onStopRecording,
+        )
+      }
+      RecordingState.PAUSED -> {
+        PixelButton(
+          text = "RESUME",
+          backgroundColor = UIConfig.PixelColors.ButtonGreen,
+          shadowColor = UIConfig.PixelColors.ButtonGreenShadow,
+          onClick = onResumeRecording,
+          modifier = Modifier.padding(end = 16.dp),
+        )
+        PixelButton(
+          text = "STOP",
+          backgroundColor = UIConfig.PixelColors.ButtonRed,
+          shadowColor = UIConfig.PixelColors.ButtonRedShadow,
+          onClick = onStopRecording,
+          modifier = Modifier.padding(end = 16.dp),
+        )
+        PixelButton(
+          text = "DISCARD",
+          backgroundColor = UIConfig.PixelColors.ButtonGray,
+          shadowColor = UIConfig.PixelColors.ButtonGrayShadow,
+          onClick = onDiscardRecording,
+        )
+      }
+      RecordingState.PROCESSING -> {
+        PixelButton(
+          text = "PROCESSING...",
+          backgroundColor = UIConfig.PixelColors.ButtonGray,
+          shadowColor = UIConfig.PixelColors.ButtonGrayShadow,
+          onClick = { /* Processing, no action */ },
+          enabled = false,
+        )
+      }
+      RecordingState.FINISHED -> {
+        PixelButton(
+          text = "NEW REC",
+          backgroundColor = UIConfig.PixelColors.ButtonGreen,
+          shadowColor = UIConfig.PixelColors.ButtonGreenShadow,
+          onClick = { /* Reset to IDLE for new recording */ },
+        )
+      }
+    }
+  }
+}
+
+private fun formatDuration(milliseconds: Long): String {
+  val totalSeconds = milliseconds / 1000
+  val minutes = totalSeconds / 60
+  val seconds = totalSeconds % 60
+  return String.format("%02d:%02d", minutes, seconds)
+}
