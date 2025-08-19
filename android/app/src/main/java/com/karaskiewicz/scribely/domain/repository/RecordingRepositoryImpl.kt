@@ -39,7 +39,7 @@ class RecordingRepositoryImpl(
     apiService: ApiService,
     audioFile: File,
   ) = try {
-    val requestFile = audioFile.asRequestBody(RecordingConstants.AUDIO_FORMAT.toMediaTypeOrNull())
+    val requestFile = audioFile.asRequestBody(RecordingConstants.AUDIO_FORMAT_UPLOAD.toMediaTypeOrNull())
     val filePart = MultipartBody.Part.createFormData("file", audioFile.name, requestFile)
     apiService.processFile(filePart)
   } catch (e: Exception) {

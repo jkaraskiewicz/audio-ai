@@ -13,14 +13,28 @@ class FileManager(private val context: Context) {
   fun createRecordingFile(): File {
     val timestamp = TIMESTAMP_FORMAT.format(Date())
     val fileName =
-      "${RecordingConstants.RECORDING_FILE_PREFIX}$timestamp${RecordingConstants.FILE_EXTENSION}"
+      "${RecordingConstants.RECORDING_FILE_PREFIX}$timestamp${RecordingConstants.RECORDING_FILE_EXTENSION}"
     return File(context.cacheDir, fileName)
   }
 
   fun createSegmentFile(): File {
     val timestamp = SEGMENT_TIMESTAMP_FORMAT.format(Date())
     val fileName =
-      "${RecordingConstants.SEGMENT_FILE_PREFIX}$timestamp${RecordingConstants.FILE_EXTENSION}"
+      "${RecordingConstants.SEGMENT_FILE_PREFIX}$timestamp${RecordingConstants.RECORDING_FILE_EXTENSION}"
+    return File(context.cacheDir, fileName)
+  }
+
+  fun createFinalRecordingFile(): File {
+    val timestamp = TIMESTAMP_FORMAT.format(Date())
+    val fileName =
+      "final_${RecordingConstants.RECORDING_FILE_PREFIX}$timestamp${RecordingConstants.RECORDING_FILE_EXTENSION}"
+    return File(context.cacheDir, fileName)
+  }
+
+  fun createUploadFile(): File {
+    val timestamp = TIMESTAMP_FORMAT.format(Date())
+    val fileName =
+      "upload_${RecordingConstants.RECORDING_FILE_PREFIX}$timestamp${RecordingConstants.UPLOAD_FILE_EXTENSION}"
     return File(context.cacheDir, fileName)
   }
 
@@ -40,7 +54,7 @@ class FileManager(private val context: Context) {
     val publicDir = createPublicRecordingsDirectory()
     val timestamp = TIMESTAMP_FORMAT.format(Date())
     val fileName =
-      "${RecordingConstants.LOCAL_FILE_PREFIX}$timestamp${RecordingConstants.FILE_EXTENSION}"
+      "${RecordingConstants.LOCAL_FILE_PREFIX}$timestamp${RecordingConstants.UPLOAD_FILE_EXTENSION}"
     return File(publicDir, fileName)
   }
 

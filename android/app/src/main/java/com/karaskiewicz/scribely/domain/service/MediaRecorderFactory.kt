@@ -32,10 +32,9 @@ class MediaRecorderFactory(private val context: Context) {
 
   private fun MediaRecorder.configureRecorder(outputFile: File) {
     setAudioSource(MediaRecorder.AudioSource.MIC)
-    setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-    setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+    setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
+    setAudioEncoder(MediaRecorder.AudioEncoder.AMR_WB)
     setOutputFile(outputFile.absolutePath)
-    setAudioEncodingBitRate(RecordingConstants.AUDIO_ENCODING_BIT_RATE)
     setAudioSamplingRate(RecordingConstants.AUDIO_SAMPLING_RATE)
   }
 }

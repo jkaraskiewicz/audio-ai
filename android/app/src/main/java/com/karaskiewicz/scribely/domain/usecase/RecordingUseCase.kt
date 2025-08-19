@@ -5,6 +5,7 @@ import android.media.MediaRecorder
 import com.karaskiewicz.scribely.domain.model.RecordingResult
 import com.karaskiewicz.scribely.domain.model.UploadResult
 import com.karaskiewicz.scribely.domain.repository.RecordingRepository
+import com.karaskiewicz.scribely.domain.service.AudioComposer
 import com.karaskiewicz.scribely.domain.service.FileManager
 import com.karaskiewicz.scribely.domain.service.MediaRecorderFactory
 import java.io.File
@@ -159,7 +160,21 @@ class RecordingUseCase(
       Timber.e("Upload failed - no recording file available")
       return UploadResult.Error("No recording file available for upload")
     }
-    val result = recordingRepository.uploadRecording(finalFile)
+
+    // Convert to M4A for upload
+    val uploadFile = fileManager.createUploadFile()
+    val audioComposer = AudioComposer()
+    val conversionSuccess = audioComposer.convertToM4A(finalFile, uploadFile)
+
+    if (!conversionSuccess || !uploadFile.exists()) {
+      Timber.e("Failed to convert recording to M4A format")
+      return UploadResult.Error("Failed to prepare recording for upload")
+    }
+
+    val result = recordingRepository.uploadRecording(uploadFile)
+
+    // Cleanup files
+    fileManager.deleteFileIfExists(uploadFile)
     if (result is UploadResult.UploadSuccess) {
       fileManager.deleteFileIfExists(finalRecordingFile)
     }
@@ -196,9 +211,26 @@ class RecordingUseCase(
   }
 
   private fun combineAudioSegments(segments: List<File>): File? {
-    // For simplicity, we'll use the first segment as the final file
-    // In a production app, you'd want to properly combine the audio segments
-    // using FFmpeg or similar
-    return segments.firstOrNull()
+    if (segments.isEmpty()) return null
+    if (segments.size == 1) return segments.first()
+
+    return try {
+      val outputFile = fileManager.createFinalRecordingFile()
+      val audioComposer = AudioComposer()
+      val success = audioComposer.combineAudioFiles(segments, outputFile)
+
+      if (success && outputFile.exists() && outputFile.length() > 0) {
+        Timber.d("Successfully combined ${segments.size} audio segments into ${outputFile.name}")
+        outputFile
+      } else {
+        Timber.e("Failed to combine audio segments")
+        // Fallback to first segment if combining fails
+        segments.firstOrNull()
+      }
+    } catch (e: Exception) {
+      Timber.e(e, "Error combining audio segments, using first segment as fallback")
+      // Fallback to first segment if combining fails
+      segments.firstOrNull()
+    }
   }
 }
