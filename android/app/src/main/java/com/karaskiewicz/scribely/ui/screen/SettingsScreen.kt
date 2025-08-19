@@ -20,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.karaskiewicz.scribely.ui.components.PixelButton
@@ -28,6 +29,7 @@ import com.karaskiewicz.scribely.ui.components.PixelHeaderText
 import com.karaskiewicz.scribely.ui.components.PixelTextField
 import com.karaskiewicz.scribely.ui.theme.UIConfig
 import com.karaskiewicz.scribely.ui.theme.VT323FontFamily
+import com.karaskiewicz.scribely.ui.viewmodel.ConnectionTestState
 import com.karaskiewicz.scribely.ui.viewmodel.SettingsViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -51,6 +53,102 @@ fun SettingsScreen(
     viewModel.loadSettings()
   }
 
+  SettingsScreenContent(
+    serverUrl = editableServerUrl,
+    saveDir = saveDir,
+    connectionTestState = connectionTestState,
+    onNavigateBack = onNavigateBack,
+    onServerUrlChange = { editableServerUrl = it },
+    onSaveDirChange = { saveDir = it },
+    onTestConnection = { viewModel.testConnection() },
+    onSaveSettings = { viewModel.updateServerUrl(editableServerUrl) },
+  )
+}
+
+// Preview functions for Android Studio
+@Preview(showBackground = true)
+@Composable
+fun SettingsScreenIdlePreview() {
+  com.karaskiewicz.scribely.ui.theme.ScribelyTheme {
+    SettingsScreenContent(
+      serverUrl = "http://localhost:8000",
+      saveDir = "/scribely/audio/",
+      connectionTestState = ConnectionTestState(),
+      onNavigateBack = {},
+      onServerUrlChange = {},
+      onSaveDirChange = {},
+      onTestConnection = {},
+      onSaveSettings = {},
+    )
+  }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SettingsScreenTestingPreview() {
+  com.karaskiewicz.scribely.ui.theme.ScribelyTheme {
+    SettingsScreenContent(
+      serverUrl = "http://localhost:8000",
+      saveDir = "/scribely/audio/",
+      connectionTestState = ConnectionTestState(isLoading = true),
+      onNavigateBack = {},
+      onServerUrlChange = {},
+      onSaveDirChange = {},
+      onTestConnection = {},
+      onSaveSettings = {},
+    )
+  }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SettingsScreenSuccessPreview() {
+  com.karaskiewicz.scribely.ui.theme.ScribelyTheme {
+    SettingsScreenContent(
+      serverUrl = "http://localhost:8000",
+      saveDir = "/scribely/audio/",
+      connectionTestState = ConnectionTestState(isSuccess = true),
+      onNavigateBack = {},
+      onServerUrlChange = {},
+      onSaveDirChange = {},
+      onTestConnection = {},
+      onSaveSettings = {},
+    )
+  }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SettingsScreenErrorPreview() {
+  com.karaskiewicz.scribely.ui.theme.ScribelyTheme {
+    SettingsScreenContent(
+      serverUrl = "http://localhost:8000",
+      saveDir = "/scribely/audio/",
+      connectionTestState =
+        ConnectionTestState(
+          isSuccess = false,
+          error = "Connection refused - server not available",
+        ),
+      onNavigateBack = {},
+      onServerUrlChange = {},
+      onSaveDirChange = {},
+      onTestConnection = {},
+      onSaveSettings = {},
+    )
+  }
+}
+
+@Composable
+private fun SettingsScreenContent(
+  serverUrl: String,
+  saveDir: String,
+  connectionTestState: ConnectionTestState,
+  onNavigateBack: () -> Unit,
+  onServerUrlChange: (String) -> Unit,
+  onSaveDirChange: (String) -> Unit,
+  onTestConnection: () -> Unit,
+  onSaveSettings: () -> Unit,
+) {
   Column(
     modifier =
       Modifier
@@ -79,8 +177,8 @@ fun SettingsScreen(
       Column {
         PixelTextField(
           label = "Server URL:",
-          value = editableServerUrl,
-          onValueChange = { editableServerUrl = it },
+          value = serverUrl,
+          onValueChange = onServerUrlChange,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -94,7 +192,7 @@ fun SettingsScreen(
             text = "TEST",
             backgroundColor = UIConfig.PixelColors.ButtonBlue,
             shadowColor = UIConfig.PixelColors.ButtonBlueShadow,
-            onClick = { viewModel.testConnection() },
+            onClick = onTestConnection,
             enabled = !connectionTestState.isLoading,
           )
 
@@ -147,7 +245,7 @@ fun SettingsScreen(
       PixelTextField(
         label = "Save Directory:",
         value = saveDir,
-        onValueChange = { saveDir = it },
+        onValueChange = onSaveDirChange,
       )
 
       Spacer(modifier = Modifier.height(32.dp))
@@ -161,7 +259,7 @@ fun SettingsScreen(
           text = "SAVE",
           backgroundColor = UIConfig.PixelColors.ButtonGreen,
           shadowColor = UIConfig.PixelColors.ButtonGreenShadow,
-          onClick = { viewModel.updateServerUrl(editableServerUrl) },
+          onClick = onSaveSettings,
         )
       }
     }

@@ -47,71 +47,18 @@ fun MainScreen(
     viewModel.loadConfiguration()
   }
 
-  // Main container with pixel art background
-  Column(
-    modifier =
-      Modifier
-        .fillMaxSize()
-        .background(UIConfig.PixelColors.Background)
-        .padding(16.dp),
-    horizontalAlignment = Alignment.CenterHorizontally,
-  ) {
-    // Header with Scribely title and Settings
-    Row(
-      modifier = Modifier.fillMaxWidth(),
-      horizontalArrangement = Arrangement.SpaceBetween,
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      PixelHeaderText(text = "Scribely")
-      PixelClickableText(
-        text = "[Settings]",
-        onClick = onNavigateToSettings,
-      )
-    }
-
-    // Spacer to push content to center
-    Spacer(modifier = Modifier.weight(1f))
-
-    // Timer Display with pixel art styling
-    PixelTimerDisplay(
-      time = formatDuration(recordingDuration),
-      modifier = Modifier.padding(bottom = 32.dp),
-    )
-
-    // Animated wave visualization
-    if (recordingState == RecordingState.RECORDING) {
-      AnimatedWave(
-        modifier =
-          Modifier
-            .fillMaxWidth()
-            .height(64.dp)
-            .padding(horizontal = 32.dp),
-      )
-    } else {
-      Spacer(modifier = Modifier.height(64.dp))
-    }
-
-    // Spacer to push controls to bottom
-    Spacer(modifier = Modifier.weight(1f))
-
-    // Recording Controls with pixel art buttons
-    RecordingControlsPixel(
-      recordingState = recordingState,
-      onStartRecording = { viewModel.startRecording(context) },
-      onPauseRecording = { viewModel.pauseRecording(context) },
-      onResumeRecording = { viewModel.resumeRecording(context) },
-      onStopRecording = { viewModel.finishRecording(context) },
-      onDiscardRecording = { viewModel.resetRecording(context) },
-    )
-
-    Spacer(modifier = Modifier.height(16.dp))
-
-    // Message cards for errors/success
-    MessageCards(
-      errorMessage = errorMessage,
-      successMessage = successMessage,
-    )
-  }
+  MainScreenContent(
+    recordingState = recordingState,
+    recordingDuration = recordingDuration,
+    errorMessage = errorMessage,
+    successMessage = successMessage,
+    onNavigateToSettings = onNavigateToSettings,
+    onStartRecording = { viewModel.startRecording(context) },
+    onPauseRecording = { viewModel.pauseRecording(context) },
+    onResumeRecording = { viewModel.resumeRecording(context) },
+    onStopRecording = { viewModel.finishRecording(context) },
+    onDiscardRecording = { viewModel.resetRecording(context) },
+  )
 }
 
 @Composable
@@ -200,4 +147,163 @@ private fun formatDuration(milliseconds: Long): String {
   val minutes = totalSeconds / 60
   val seconds = totalSeconds % 60
   return String.format("%02d:%02d", minutes, seconds)
+}
+
+// Preview functions for Android Studio
+@Preview(showBackground = true)
+@Composable
+fun MainScreenIdlePreview() {
+  com.karaskiewicz.scribely.ui.theme.ScribelyTheme {
+    MainScreenContent(
+      recordingState = RecordingState.IDLE,
+      recordingDuration = 0L,
+      errorMessage = null,
+      successMessage = null,
+      onNavigateToSettings = {},
+      onStartRecording = {},
+      onPauseRecording = {},
+      onResumeRecording = {},
+      onStopRecording = {},
+      onDiscardRecording = {},
+    )
+  }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MainScreenRecordingPreview() {
+  com.karaskiewicz.scribely.ui.theme.ScribelyTheme {
+    MainScreenContent(
+      recordingState = RecordingState.RECORDING,
+      // 2:05 minutes
+      recordingDuration = 125000L,
+      errorMessage = null,
+      successMessage = null,
+      onNavigateToSettings = {},
+      onStartRecording = {},
+      onPauseRecording = {},
+      onResumeRecording = {},
+      onStopRecording = {},
+      onDiscardRecording = {},
+    )
+  }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MainScreenPausedPreview() {
+  com.karaskiewicz.scribely.ui.theme.ScribelyTheme {
+    MainScreenContent(
+      recordingState = RecordingState.PAUSED,
+      // 1:07 minutes
+      recordingDuration = 67000L,
+      errorMessage = null,
+      successMessage = null,
+      onNavigateToSettings = {},
+      onStartRecording = {},
+      onPauseRecording = {},
+      onResumeRecording = {},
+      onStopRecording = {},
+      onDiscardRecording = {},
+    )
+  }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MainScreenWithErrorPreview() {
+  com.karaskiewicz.scribely.ui.theme.ScribelyTheme {
+    MainScreenContent(
+      recordingState = RecordingState.IDLE,
+      recordingDuration = 0L,
+      errorMessage = "Failed to start recording",
+      successMessage = null,
+      onNavigateToSettings = {},
+      onStartRecording = {},
+      onPauseRecording = {},
+      onResumeRecording = {},
+      onStopRecording = {},
+      onDiscardRecording = {},
+    )
+  }
+}
+
+@Composable
+private fun MainScreenContent(
+  recordingState: RecordingState,
+  recordingDuration: Long,
+  errorMessage: String?,
+  successMessage: String?,
+  onNavigateToSettings: () -> Unit,
+  onStartRecording: () -> Unit,
+  onPauseRecording: () -> Unit,
+  onResumeRecording: () -> Unit,
+  onStopRecording: () -> Unit,
+  onDiscardRecording: () -> Unit,
+) {
+  // Main container with pixel art background
+  Column(
+    modifier =
+      Modifier
+        .fillMaxSize()
+        .background(UIConfig.PixelColors.Background)
+        .padding(16.dp),
+    horizontalAlignment = Alignment.CenterHorizontally,
+  ) {
+    // Header with Scribely title and Settings
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.SpaceBetween,
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      PixelHeaderText(text = "Scribely")
+      PixelClickableText(
+        text = "[Settings]",
+        onClick = onNavigateToSettings,
+      )
+    }
+
+    // Spacer to push content to center
+    Spacer(modifier = Modifier.weight(1f))
+
+    // Timer Display with pixel art styling
+    PixelTimerDisplay(
+      time = formatDuration(recordingDuration),
+      modifier = Modifier.padding(bottom = 32.dp),
+    )
+
+    // Animated wave visualization
+    if (recordingState == RecordingState.RECORDING) {
+      AnimatedWave(
+        modifier =
+          Modifier
+            .fillMaxWidth()
+            .height(64.dp)
+            .padding(horizontal = 32.dp),
+      )
+    } else {
+      Spacer(modifier = Modifier.height(64.dp))
+    }
+
+    // Spacer to push controls to bottom
+    Spacer(modifier = Modifier.weight(1f))
+
+    // Recording Controls with pixel art buttons
+    RecordingControlsPixel(
+      recordingState = recordingState,
+      onStartRecording = onStartRecording,
+      onPauseRecording = onPauseRecording,
+      onResumeRecording = onResumeRecording,
+      onStopRecording = onStopRecording,
+      onDiscardRecording = onDiscardRecording,
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    // Message cards for errors/success
+    MessageCards(
+      errorMessage = errorMessage,
+      successMessage = successMessage,
+    )
+  }
 }
