@@ -2,12 +2,19 @@ package com.karaskiewicz.scribely.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.karaskiewicz.scribely.R
+
+// VT323 Pixel Art Font Family for Lo-Fi Aesthetic
+val VT323FontFamily =
+  FontFamily(
+    Font(R.font.vt323_regular, FontWeight.Normal),
+  )
 
 // JetBrains Mono font family (using system monospace as fallback)
-// TODO: Add JetBrains Mono font files to res/font/ for exact design match
 val JetBrainsMono = FontFamily.Monospace
 
 // Custom typography using JetBrains Mono

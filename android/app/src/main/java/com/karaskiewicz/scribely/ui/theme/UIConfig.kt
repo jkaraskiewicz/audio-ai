@@ -54,6 +54,34 @@ object UIConfig {
   }
 
   // ============================================
+  // 🎮 PIXEL ART THEME COLORS
+  // ============================================
+
+  object PixelColors {
+    // 🏞️ BACKGROUNDS
+    val Background = LofiBackground
+    val InputBackground = LofiInputBackground
+
+    // 📝 TEXT
+    val Text = LofiText
+    val TimerText = LofiHighlight
+
+    // 🔲 BORDERS & ACCENTS
+    val Border = LofiAccent
+    val Accent = LofiAccent
+
+    // 🔴 BUTTONS
+    val ButtonRed = LofiButtonRed
+    val ButtonRedShadow = LofiButtonRedShadow
+    val ButtonGreen = LofiButtonGreen
+    val ButtonGreenShadow = LofiButtonGreenShadow
+    val ButtonBlue = LofiButtonBlue
+    val ButtonBlueShadow = LofiButtonBlueShadow
+    val ButtonGray = LofiButtonGray
+    val ButtonGrayShadow = LofiButtonGrayShadow
+  }
+
+  // ============================================
   // 📏 SPACING - Layout Dimensions
   // ============================================
 
