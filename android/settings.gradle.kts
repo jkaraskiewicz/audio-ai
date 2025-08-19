@@ -13,5 +13,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Audio AI Share"
+rootProject.name = "Scribely"
+
 include(":app")

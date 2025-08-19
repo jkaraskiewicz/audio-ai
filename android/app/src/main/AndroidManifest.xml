@@ -9,7 +9,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
-        android:name="com.karaskiewicz.audioai.AudioAIApplication"
+        android:name="com.karaskiewicz.scribely.ScribelyApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -21,7 +21,7 @@
 
         <!-- Main Activity -->
         <activity
-            android:name="com.karaskiewicz.audioai.MainActivity"
+            android:name="com.karaskiewicz.scribely.ui.activity.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.AudioAIShare">
             <intent-filter>
@@ -32,7 +32,7 @@
 
         <!-- Share Target Activity for Text -->
         <activity
-            android:name="com.karaskiewicz.audioai.ShareActivity"
+            android:name="com.karaskiewicz.scribely.ui.activity.ShareActivity"
             android:exported="true"
             android:theme="@style/Theme.AudioAIShare.Transparent">
             
@@ -60,13 +60,13 @@
 
         <!-- Settings Activity -->
         <activity
-            android:name="com.karaskiewicz.audioai.SettingsActivity"
+            android:name="com.karaskiewicz.scribely.ui.activity.SettingsActivity"
             android:exported="false"
             android:label="@string/settings"
-            android:parentActivityName="com.karaskiewicz.audioai.MainActivity">
+            android:parentActivityName="com.karaskiewicz.scribely.ui.activity.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.karaskiewicz.audioai.MainActivity" />
+                android:value="com.karaskiewicz.scribely.ui.activity.MainActivity" />
         </activity>
 
 

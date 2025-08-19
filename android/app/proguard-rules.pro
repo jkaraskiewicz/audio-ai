@@ -21,7 +21,7 @@
 #-renamesourcefileattribute SourceFile
 
 # Keep Retrofit and Gson classes
--keep class com.karaskiewicz.audioai.data.** { *; }
+-keep class com.karaskiewicz.scribely.data.** { *; }
 -keepclassmembers,allowshrinking,allowobfuscation class * {
     @com.google.gson.annotations.SerializedName <fields>;
 }
