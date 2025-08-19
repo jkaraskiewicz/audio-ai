@@ -2,8 +2,6 @@ package com.karaskiewicz.scribely.domain.usecase
 
 import android.content.Context
 import android.media.MediaRecorder
-import android.util.Log
-import com.karaskiewicz.scribely.domain.model.RecordingConstants
 import com.karaskiewicz.scribely.domain.model.RecordingResult
 import com.karaskiewicz.scribely.domain.model.UploadResult
 import com.karaskiewicz.scribely.domain.repository.RecordingRepository
@@ -25,7 +23,6 @@ class RecordingUseCase(
   private var outputFile: File? = null
   private val recordingSegments = mutableListOf<File>()
   private var finalRecordingFile: File? = null
-
 
   /**
    * Starts a new recording session.
@@ -68,18 +65,19 @@ class RecordingUseCase(
     }
   }
 
-  fun pauseRecording(): RecordingResult = try {
-    mediaRecorder?.apply {
-      stop()
-      release()
-    }
-    mediaRecorder = null
+  fun pauseRecording(): RecordingResult =
+    try {
+      mediaRecorder?.apply {
+        stop()
+        release()
+      }
+      mediaRecorder = null
 
-    RecordingResult.Success
-  } catch (e: Exception) {
-    Timber.e(e, "Failed to pause recording")
-    RecordingResult.Error("Failed to pause recording: ${e.message}", e)
-  }
+      RecordingResult.Success
+    } catch (e: Exception) {
+      Timber.e(e, "Failed to pause recording")
+      RecordingResult.Error("Failed to pause recording: ${e.message}", e)
+    }
 
   /**
    * Resumes recording by creating a new segment.
@@ -120,11 +118,12 @@ class RecordingUseCase(
       // Wait a moment for file system to sync
       Thread.sleep(100)
 
-      finalRecordingFile = if (recordingSegments.size > 1) {
-        combineAudioSegments(recordingSegments)
-      } else {
-        recordingSegments.firstOrNull()
-      }
+      finalRecordingFile =
+        if (recordingSegments.size > 1) {
+          combineAudioSegments(recordingSegments)
+        } else {
+          recordingSegments.firstOrNull()
+        }
 
       if (finalRecordingFile == null) {
         return if (recordingSegments.isEmpty()) {
@@ -180,10 +179,11 @@ class RecordingUseCase(
   }
 
   private fun cleanupRecorder() {
-    val result = runCatching {
-      mediaRecorder?.stop()
-      mediaRecorder?.release()
-    }
+    val result =
+      runCatching {
+        mediaRecorder?.stop()
+        mediaRecorder?.release()
+      }
     result.onFailure { e ->
       Timber.w(e, "Error stopping recorder")
     }

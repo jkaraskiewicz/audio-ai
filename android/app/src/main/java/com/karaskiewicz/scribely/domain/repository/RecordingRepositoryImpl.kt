@@ -18,7 +18,6 @@ class RecordingRepositoryImpl(
   private val fileManager: FileManager,
   private val apiService: ApiService,
 ) : RecordingRepository {
-
   override suspend fun uploadRecording(audioFile: File): UploadResult {
     return try {
       val response = uploadToServer(apiService, audioFile)
@@ -39,24 +38,24 @@ class RecordingRepositoryImpl(
   private suspend fun uploadToServer(
     apiService: ApiService,
     audioFile: File,
-  ) =
-    try {
-      val requestFile = audioFile.asRequestBody(RecordingConstants.AUDIO_FORMAT.toMediaTypeOrNull())
-      val filePart = MultipartBody.Part.createFormData("file", audioFile.name, requestFile)
-      apiService.processFile(filePart)
-    } catch (e: Exception) {
-      Timber.e(e, "Network upload failed")
-      throw e
-    }
-
-  private fun saveLocally(audioFile: File): UploadResult = try {
-    val localFile = fileManager.createPublicFile()
-    audioFile.copyTo(localFile, overwrite = true)
-
-    Timber.d("Recording saved locally: ${localFile.absolutePath}")
-    UploadResult.LocalSave(localFile.absolutePath)
+  ) = try {
+    val requestFile = audioFile.asRequestBody(RecordingConstants.AUDIO_FORMAT.toMediaTypeOrNull())
+    val filePart = MultipartBody.Part.createFormData("file", audioFile.name, requestFile)
+    apiService.processFile(filePart)
   } catch (e: Exception) {
-    Timber.e(e, "Failed to save recording locally")
-    UploadResult.Error("Failed to save recording: ${e.message}", e)
+    Timber.e(e, "Network upload failed")
+    throw e
   }
+
+  private fun saveLocally(audioFile: File): UploadResult =
+    try {
+      val localFile = fileManager.createPublicFile()
+      audioFile.copyTo(localFile, overwrite = true)
+
+      Timber.d("Recording saved locally: ${localFile.absolutePath}")
+      UploadResult.LocalSave(localFile.absolutePath)
+    } catch (e: Exception) {
+      Timber.e(e, "Failed to save recording locally")
+      UploadResult.Error("Failed to save recording: ${e.message}", e)
+    }
 }

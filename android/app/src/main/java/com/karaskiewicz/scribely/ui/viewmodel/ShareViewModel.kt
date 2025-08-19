@@ -5,8 +5,8 @@ import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.karaskiewicz.scribely.data.ApiClient
 import com.karaskiewicz.scribely.data.ProcessTextRequest
+import com.karaskiewicz.scribely.network.ApiService
 import com.karaskiewicz.scribely.domain.usecase.RecordingUseCase
 import com.karaskiewicz.scribely.utils.FileUtils
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,17 +26,15 @@ data class ShareState(
 
 class ShareViewModel(
   private val recordingUseCase: RecordingUseCase,
+  private val apiService: ApiService,
 ) : ViewModel() {
-
   private val _shareState = MutableStateFlow(ShareState(message = "Preparing..."))
   val shareState: StateFlow<ShareState> = _shareState.asStateFlow()
 
-  fun handleSharedContent(context: Context, intent: Intent) {
-    if (!apiClient.isConfigured(context)) {
-      _shareState.value = ShareState(error = "Please configure your server URL in settings first")
-      return
-    }
-
+  fun handleSharedContent(
+    context: Context,
+    intent: Intent,
+  ) {
     when (intent.action) {
       Intent.ACTION_SEND -> {
         if (intent.type?.startsWith("text/") == true) {
@@ -54,7 +52,10 @@ class ShareViewModel(
     }
   }
 
-  private fun handleTextShare(context: Context, intent: Intent) {
+  private fun handleTextShare(
+    context: Context,
+    intent: Intent,
+  ) {
     val sharedText = intent.getStringExtra(Intent.EXTRA_TEXT)
     if (sharedText.isNullOrBlank()) {
       _shareState.value = ShareState(error = "No text content found")
@@ -64,13 +65,17 @@ class ShareViewModel(
     processText(context, sharedText)
   }
 
-  private fun handleFileShare(context: Context, intent: Intent) {
-    val uri = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-      intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
-    } else {
-      @Suppress("DEPRECATION")
-      intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
-    }
+  private fun handleFileShare(
+    context: Context,
+    intent: Intent,
+  ) {
+    val uri =
+      if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+        intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+      } else {
+        @Suppress("DEPRECATION")
+        intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
+      }
     if (uri == null) {
       _shareState.value = ShareState(error = "No file found")
       return
@@ -79,13 +84,17 @@ class ShareViewModel(
     processFile(context, uri)
   }
 
-  private fun handleMultipleFilesShare(context: Context, intent: Intent) {
-    val uris = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-      intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM, Uri::class.java)
-    } else {
-      @Suppress("DEPRECATION")
-      intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)
-    }
+  private fun handleMultipleFilesShare(
+    context: Context,
+    intent: Intent,
+  ) {
+    val uris =
+      if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+        intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM, Uri::class.java)
+      } else {
+        @Suppress("DEPRECATION")
+        intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)
+      }
     if (uris.isNullOrEmpty()) {
       _shareState.value = ShareState(error = "No files found")
       return
@@ -95,13 +104,10 @@ class ShareViewModel(
     processFile(context, uris[0])
   }
 
-  private fun processText(context: Context, text: String) {
-    val apiService = ApiClient.getInstance().getApiService(context)
-    if (apiService == null) {
-      _shareState.value = ShareState(error = "Failed to create API connection")
-      return
-    }
-
+  private fun processText(
+    context: Context,
+    text: String,
+  ) {
     viewModelScope.launch {
       _shareState.value = ShareState(isLoading = true, message = "Processing text...")
 
@@ -112,35 +118,36 @@ class ShareViewModel(
         if (response.isSuccessful) {
           val body = response.body()
           if (body?.isSuccess == true) {
-            _shareState.value = ShareState(
-              isSuccess = true,
-              message = "Text processed successfully!\nSaved to: ${body.savedTo}",
-            )
+            _shareState.value =
+              ShareState(
+                isSuccess = true,
+                message = "Text processed successfully!\nSaved to: ${body.savedTo}",
+              )
           } else {
-            _shareState.value = ShareState(
-              error = "Processing failed: ${body?.error ?: "Unknown error"}",
-            )
+            _shareState.value =
+              ShareState(
+                error = "Processing failed: ${body?.error ?: "Unknown error"}",
+              )
           }
         } else {
-          _shareState.value = ShareState(
-            error = "Server error: HTTP ${response.code()}",
-          )
+          _shareState.value =
+            ShareState(
+              error = "Server error: HTTP ${response.code()}",
+            )
         }
       } catch (e: Exception) {
-        _shareState.value = ShareState(
-          error = "Network error: ${e.message ?: "Unknown error"}",
-        )
+        _shareState.value =
+          ShareState(
+            error = "Network error: ${e.message ?: "Unknown error"}",
+          )
       }
     }
   }
 
-  private fun processFile(context: Context, uri: Uri) {
-    val apiService = ApiClient.getInstance().getApiService(context)
-    if (apiService == null) {
-      _shareState.value = ShareState(error = "Failed to create API connection")
-      return
-    }
-
+  private fun processFile(
+    context: Context,
+    uri: Uri,
+  ) {
     viewModelScope.launch {
       _shareState.value = ShareState(isLoading = true, message = "Processing file...")
 
@@ -162,24 +169,28 @@ class ShareViewModel(
         if (response.isSuccessful) {
           val responseBody = response.body()
           if (responseBody?.isSuccess == true) {
-            _shareState.value = ShareState(
-              isSuccess = true,
-              message = "File processed successfully!\nSaved to: ${responseBody.savedTo}",
-            )
+            _shareState.value =
+              ShareState(
+                isSuccess = true,
+                message = "File processed successfully!\nSaved to: ${responseBody.savedTo}",
+              )
           } else {
-            _shareState.value = ShareState(
-              error = "Processing failed: ${responseBody?.error ?: "Unknown error"}",
-            )
+            _shareState.value =
+              ShareState(
+                error = "Processing failed: ${responseBody?.error ?: "Unknown error"}",
+              )
           }
         } else {
-          _shareState.value = ShareState(
-            error = "Server error: HTTP ${response.code()}",
-          )
+          _shareState.value =
+            ShareState(
+              error = "Server error: HTTP ${response.code()}",
+            )
         }
       } catch (e: Exception) {
-        _shareState.value = ShareState(
-          error = "Network error: ${e.message ?: "Unknown error"}",
-        )
+        _shareState.value =
+          ShareState(
+            error = "Network error: ${e.message ?: "Unknown error"}",
+          )
       }
     }
   }

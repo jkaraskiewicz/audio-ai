@@ -34,21 +34,24 @@ fun AnimatedWave(modifier: Modifier = Modifier) {
       val animatedHeight by infiniteTransition.animateFloat(
         initialValue = UIConfig.Sizing.WaveBarMinHeight.value,
         targetValue = UIConfig.Sizing.WaveBarMaxHeight.value,
-        animationSpec = infiniteRepeatable(
-          animation = tween(
-            durationMillis = UIConfig.Animations.WaveAnimationDuration,
+        animationSpec =
+          infiniteRepeatable(
+            animation =
+              tween(
+                durationMillis = UIConfig.Animations.WaveAnimationDuration,
+              ),
+            repeatMode = RepeatMode.Reverse,
           ),
-          repeatMode = RepeatMode.Reverse,
-        ),
         label = "waveBar$index",
       )
 
       Box(
-        modifier = Modifier
-          .width(UIConfig.Sizing.WaveBarWidth)
-          .height(animatedHeight.dp)
-          .clip(RoundedCornerShape(UIConfig.Sizing.WaveBarCornerRadius))
-          .background(UIConfig.Colors.WaveformColor),
+        modifier =
+          Modifier
+            .width(UIConfig.Sizing.WaveBarWidth)
+            .height(animatedHeight.dp)
+            .clip(RoundedCornerShape(UIConfig.Sizing.WaveBarCornerRadius))
+            .background(UIConfig.Colors.WaveformColor),
       )
     }
   }

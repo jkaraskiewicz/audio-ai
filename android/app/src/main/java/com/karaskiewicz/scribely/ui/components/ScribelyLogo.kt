@@ -31,54 +31,60 @@ fun ScribelyLogo(modifier: Modifier = Modifier) {
     ) {
       // Bar 1
       Box(
-        modifier = Modifier
-          .width(3.dp)
-          .height(8.dp)
-          .clip(RoundedCornerShape(2.dp))
-          .background(UIConfig.Colors.ScribelyGray),
+        modifier =
+          Modifier
+            .width(3.dp)
+            .height(8.dp)
+            .clip(RoundedCornerShape(2.dp))
+            .background(UIConfig.Colors.ScribelyGray),
       )
       // Bar 2 (taller, red)
       Box(
-        modifier = Modifier
-          .width(3.dp)
-          .height(20.dp)
-          .clip(RoundedCornerShape(2.dp))
-          .background(UIConfig.Colors.ScribelyRed),
+        modifier =
+          Modifier
+            .width(3.dp)
+            .height(20.dp)
+            .clip(RoundedCornerShape(2.dp))
+            .background(UIConfig.Colors.ScribelyRed),
       )
       // Bar 3
       Box(
-        modifier = Modifier
-          .width(3.dp)
-          .height(12.dp)
-          .clip(RoundedCornerShape(2.dp))
-          .background(UIConfig.Colors.ScribelyGray),
+        modifier =
+          Modifier
+            .width(3.dp)
+            .height(12.dp)
+            .clip(RoundedCornerShape(2.dp))
+            .background(UIConfig.Colors.ScribelyGray),
       )
       // Bar 4 (tallest, red)
       Box(
-        modifier = Modifier
-          .width(3.dp)
-          .height(26.dp)
-          .clip(RoundedCornerShape(2.dp))
-          .background(UIConfig.Colors.ScribelyRed),
+        modifier =
+          Modifier
+            .width(3.dp)
+            .height(26.dp)
+            .clip(RoundedCornerShape(2.dp))
+            .background(UIConfig.Colors.ScribelyRed),
       )
       // Bar 5
       Box(
-        modifier = Modifier
-          .width(3.dp)
-          .height(14.dp)
-          .clip(RoundedCornerShape(2.dp))
-          .background(UIConfig.Colors.ScribelyGray),
+        modifier =
+          Modifier
+            .width(3.dp)
+            .height(14.dp)
+            .clip(RoundedCornerShape(2.dp))
+            .background(UIConfig.Colors.ScribelyGray),
       )
     }
 
     // "Scribely" text
     Text(
       text = "Scribely",
-      style = MaterialTheme.typography.headlineLarge.copy(
-        fontSize = UIConfig.Sizing.LogoTextSize,
-        fontWeight = FontWeight.Bold,
-        color = UIConfig.Colors.PrimaryTextColor,
-      ),
+      style =
+        MaterialTheme.typography.headlineLarge.copy(
+          fontSize = UIConfig.Sizing.LogoTextSize,
+          fontWeight = FontWeight.Bold,
+          color = UIConfig.Colors.PrimaryTextColor,
+        ),
     )
   }
 }

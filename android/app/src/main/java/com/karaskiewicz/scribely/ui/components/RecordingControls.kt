@@ -14,7 +14,7 @@ import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.ripple
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -89,12 +89,13 @@ fun RecordingControls(
 @Composable
 private fun RecordButton(onClick: () -> Unit) {
   Surface(
-    modifier = Modifier
-      .size(UIConfig.Sizing.RecordButtonSize)
-      .clickable(
-        indication = rememberRipple(),
-        interactionSource = remember { MutableInteractionSource() },
-      ) { onClick() },
+    modifier =
+      Modifier
+        .size(UIConfig.Sizing.RecordButtonSize)
+        .clickable(
+          indication = ripple(),
+          interactionSource = remember { MutableInteractionSource() },
+        ) { onClick() },
     shape = CircleShape,
     color = UIConfig.Colors.ScribelyRed,
     shadowElevation = UIConfig.Sizing.ButtonElevation,
@@ -113,12 +114,13 @@ private fun RecordButton(onClick: () -> Unit) {
 @Composable
 private fun PauseButton(onClick: () -> Unit) {
   Surface(
-    modifier = Modifier
-      .size(UIConfig.Sizing.MainButtonSize)
-      .clickable(
-        indication = rememberRipple(),
-        interactionSource = remember { MutableInteractionSource() },
-      ) { onClick() },
+    modifier =
+      Modifier
+        .size(UIConfig.Sizing.MainButtonSize)
+        .clickable(
+          indication = ripple(),
+          interactionSource = remember { MutableInteractionSource() },
+        ) { onClick() },
     shape = CircleShape,
     color = UIConfig.Colors.WhiteBackground,
     shadowElevation = UIConfig.Sizing.ButtonElevation,
@@ -137,12 +139,13 @@ private fun PauseButton(onClick: () -> Unit) {
 @Composable
 private fun ResumeButton(onClick: () -> Unit) {
   Surface(
-    modifier = Modifier
-      .size(UIConfig.Sizing.MainButtonSize)
-      .clickable(
-        indication = rememberRipple(),
-        interactionSource = remember { MutableInteractionSource() },
-      ) { onClick() },
+    modifier =
+      Modifier
+        .size(UIConfig.Sizing.MainButtonSize)
+        .clickable(
+          indication = ripple(),
+          interactionSource = remember { MutableInteractionSource() },
+        ) { onClick() },
     shape = CircleShape,
     color = UIConfig.Colors.WhiteBackground,
     shadowElevation = UIConfig.Sizing.ButtonElevation,
@@ -161,12 +164,13 @@ private fun ResumeButton(onClick: () -> Unit) {
 @Composable
 private fun StopButton(onClick: () -> Unit) {
   Surface(
-    modifier = Modifier
-      .size(UIConfig.Sizing.MainButtonSize)
-      .clickable(
-        indication = rememberRipple(),
-        interactionSource = remember { MutableInteractionSource() },
-      ) { onClick() },
+    modifier =
+      Modifier
+        .size(UIConfig.Sizing.MainButtonSize)
+        .clickable(
+          indication = ripple(),
+          interactionSource = remember { MutableInteractionSource() },
+        ) { onClick() },
     shape = CircleShape,
     color = UIConfig.Colors.ScribelyRed,
     shadowElevation = UIConfig.Sizing.ButtonElevation,
@@ -185,12 +189,13 @@ private fun StopButton(onClick: () -> Unit) {
 @Composable
 private fun DiscardButton(onClick: () -> Unit) {
   Surface(
-    modifier = Modifier
-      .size(UIConfig.Sizing.MainButtonSize)
-      .clickable(
-        indication = rememberRipple(),
-        interactionSource = remember { MutableInteractionSource() },
-      ) { onClick() },
+    modifier =
+      Modifier
+        .size(UIConfig.Sizing.MainButtonSize)
+        .clickable(
+          indication = ripple(),
+          interactionSource = remember { MutableInteractionSource() },
+        ) { onClick() },
     shape = CircleShape,
     color = UIConfig.Colors.WhiteBackground,
     shadowElevation = UIConfig.Sizing.ButtonElevation,

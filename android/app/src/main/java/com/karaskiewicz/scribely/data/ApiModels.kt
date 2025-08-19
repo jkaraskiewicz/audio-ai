@@ -10,13 +10,10 @@ data class ProcessTextRequest(
 data class ProcessResponse(
   @SerializedName("result")
   val result: String?,
-
   @SerializedName("message")
   val message: String?,
-
   @SerializedName("saved_to")
   val savedTo: String?,
-
   @SerializedName("error")
   val error: String?,
 ) {
@@ -27,10 +24,8 @@ data class ProcessResponse(
 data class HealthResponse(
   @SerializedName("status")
   val status: String,
-
   @SerializedName("message")
   val message: String?,
-
   @SerializedName("timestamp")
   val timestamp: String?,
 )

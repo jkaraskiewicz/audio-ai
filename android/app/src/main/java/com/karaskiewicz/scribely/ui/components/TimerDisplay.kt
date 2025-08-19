@@ -58,12 +58,13 @@ fun TimerDisplay(
     // 🎨 Large timer display
     Text(
       text = formatDuration(recordingDuration),
-      style = MaterialTheme.typography.displayLarge.copy(
-        fontSize = UIConfig.Sizing.TimerTextSize,
-        fontWeight = FontWeight.Light,
-        letterSpacing = UIConfig.Typography.TimerLetterSpacing,
-        color = UIConfig.Colors.TimerTextColor,
-      ),
+      style =
+        MaterialTheme.typography.displayLarge.copy(
+          fontSize = UIConfig.Sizing.TimerTextSize,
+          fontWeight = FontWeight.Light,
+          letterSpacing = UIConfig.Typography.TimerLetterSpacing,
+          color = UIConfig.Colors.TimerTextColor,
+        ),
       textAlign = TextAlign.Center,
       modifier = Modifier.scale(timerScale),
     )
@@ -82,8 +83,10 @@ private fun useTimerTickAnimation(
 ): Float {
   var tickTrigger by remember { mutableIntStateOf(0) }
   val timerScale by animateFloatAsState(
-    targetValue = if (tickTrigger % 2 == 0) 1f else 1.04f, // 🎨 Customize scale here
-    animationSpec = tween(200), // 🎨 Customize duration here
+    // 🎨 Customize scale here
+    targetValue = if (tickTrigger % 2 == 0) 1f else 1.04f,
+    // 🎨 Customize duration here
+    animationSpec = tween(200),
     finishedListener = { if (recordingState == RecordingState.RECORDING) tickTrigger++ },
     label = "timerTick",
   )

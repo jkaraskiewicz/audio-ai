@@ -22,7 +22,6 @@ import androidx.compose.ui.unit.sp
  * 5. Want to reposition elements? → Modify UIConfig.Layout
  */
 object UIConfig {
-
   // ============================================
   // 🎨 COLORS - Brand & UI Colors
   // ============================================
@@ -185,6 +184,7 @@ object UIConfig {
       TOP_CENTER, // Center the logo
       TOP_RIGHT, // Logo in top right
     }
+
     val logoPosition = LogoPosition.TOP_LEFT // 🎨 CUSTOMIZE: Change logo position
 
     // ⚙️ SETTINGS BUTTON POSITIONING
@@ -193,6 +193,7 @@ object UIConfig {
       TOP_LEFT, // Settings in top left
       HIDDEN, // Hide settings button
     }
+
     val settingsPosition = SettingsPosition.TOP_RIGHT // 🎨 CUSTOMIZE: Change settings position
 
     // 🎛️ CONTROLS LAYOUT
@@ -201,6 +202,7 @@ object UIConfig {
       SIMPLE_TWO_BUTTON, // Classic 2-button layout
       MINIMAL_SINGLE, // Just record button
     }
+
     val controlsStyle = ControlsStyle.MODERN_THREE_BUTTON // 🎨 CUSTOMIZE: Change controls
 
     // ⏰ TIMER POSITIONING
@@ -209,6 +211,7 @@ object UIConfig {
       TOP, // Timer at top
       BOTTOM, // Timer at bottom
     }
+
     val timerPosition = TimerPosition.CENTER // 🎨 CUSTOMIZE: Change timer position
   }
 }

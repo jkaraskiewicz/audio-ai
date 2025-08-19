@@ -12,7 +12,6 @@ import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 class ApiClientTest {
-
   @Mock
   private lateinit var mockContext: Context
 

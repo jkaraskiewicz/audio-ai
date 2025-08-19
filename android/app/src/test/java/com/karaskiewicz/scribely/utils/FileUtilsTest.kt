@@ -14,7 +14,6 @@ import kotlin.test.assertNull
 
 @RunWith(RobolectricTestRunner::class)
 class FileUtilsTest {
-
   @Mock
   private lateinit var mockUri: Uri
 

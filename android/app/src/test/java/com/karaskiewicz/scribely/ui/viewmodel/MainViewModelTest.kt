@@ -20,7 +20,6 @@ import kotlin.test.assertTrue
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class MainViewModelTest {
-
   @get:Rule
   val instantTaskExecutorRule = InstantTaskExecutorRule()
 
@@ -41,17 +40,18 @@ class MainViewModelTest {
   }
 
   @Test
-  fun `loadConfiguration updates state correctly`() = runTest {
-    // When
-    viewModel.loadConfiguration(context)
+  fun `loadConfiguration updates state correctly`() =
+    runTest {
+      // When
+      viewModel.loadConfiguration(context)
 
-    // Wait for the Flow collection to emit at least one value
-    testScheduler.advanceUntilIdle()
+      // Wait for the Flow collection to emit at least one value
+      testScheduler.advanceUntilIdle()
 
-    // Then
-    // Default state should be configured with default URL
-    assertTrue(viewModel.isConfigured.value)
-  }
+      // Then
+      // Default state should be configured with default URL
+      assertTrue(viewModel.isConfigured.value)
+    }
 
   @Test
   fun `isApiConfigured returns true for context with default URL`() {

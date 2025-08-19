@@ -1,10 +1,8 @@
 package com.karaskiewicz.scribely.ui.viewmodel
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.karaskiewicz.scribely.data.ApiClient
-import com.karaskiewicz.scribely.data.PreferencesDataStore
+import com.karaskiewicz.scribely.network.ApiService
 import com.karaskiewicz.scribely.utils.PreferencesDataStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,8 +17,8 @@ data class ConnectionTestState(
 
 class SettingsViewModel(
   private val preferencesDataStore: PreferencesDataStore,
+  private val apiService: ApiService,
 ) : ViewModel() {
-
   private val _serverUrl = MutableStateFlow("")
   val serverUrl: StateFlow<String> = _serverUrl.asStateFlow()
 
@@ -41,24 +39,7 @@ class SettingsViewModel(
     }
   }
 
-  fun testConnection(context: Context) {
-    val apiClient = ApiClient.getInstance()
-
-    if (!apiClient.isConfigured(context)) {
-      _connectionTestState.value = ConnectionTestState(
-        error = "Please configure server URL first",
-      )
-      return
-    }
-
-    val apiService = apiClient.getApiService(context)
-    if (apiService == null) {
-      _connectionTestState.value = ConnectionTestState(
-        error = "Failed to create API service",
-      )
-      return
-    }
-
+  fun testConnection() {
     viewModelScope.launch {
       _connectionTestState.value = ConnectionTestState(isLoading = true)
 
@@ -67,14 +48,16 @@ class SettingsViewModel(
         if (response.isSuccessful) {
           _connectionTestState.value = ConnectionTestState(isSuccess = true)
         } else {
-          _connectionTestState.value = ConnectionTestState(
-            error = "HTTP ${response.code()}: ${response.message()}",
-          )
+          _connectionTestState.value =
+            ConnectionTestState(
+              error = "HTTP ${response.code()}: ${response.message()}",
+            )
         }
       } catch (e: Exception) {
-        _connectionTestState.value = ConnectionTestState(
-          error = e.message ?: "Unknown error occurred",
-        )
+        _connectionTestState.value =
+          ConnectionTestState(
+            error = e.message ?: "Unknown error occurred",
+          )
       }
     }
   }

@@ -11,10 +11,11 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 class PreferencesDataStore(private val context: Context) {
-  private val serverUrl: Flow<String> = context.dataStore.data
-    .map { preferences ->
-      preferences[SERVER_URL_KEY] ?: DEFAULT_SERVER_URL
-    }
+  val serverUrl: Flow<String> =
+    context.dataStore.data
+      .map { preferences ->
+        preferences[SERVER_URL_KEY] ?: DEFAULT_SERVER_URL
+      }
 
   suspend fun updateServerUrl(url: String) {
     context.dataStore.edit { settings ->

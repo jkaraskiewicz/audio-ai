@@ -8,7 +8,6 @@ import com.karaskiewicz.scribely.ui.screen.SettingsScreen
 import com.karaskiewicz.scribely.ui.theme.ScribelyTheme
 
 class SettingsActivity : ComponentActivity() {
-
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     enableEdgeToEdge()

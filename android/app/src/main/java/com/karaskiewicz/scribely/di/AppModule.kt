@@ -21,43 +21,50 @@ import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-val utilsModule = module {
-  single { PreferencesDataStore(androidContext()) }
-  single { FileManager(androidContext()) }
-  single { MediaRecorderFactory(androidContext()) }
-}
+val utilsModule =
+  module {
+    single { PreferencesDataStore(androidContext()) }
+    single { FileManager(androidContext()) }
+    single { MediaRecorderFactory(androidContext()) }
+  }
 
-val networkingModule = module {
-  single<Retrofit> { createRetrofit(get()) }
-  single<ApiService> { get<Retrofit>().create(ApiService::class.java) }
-  single<RecordingRepository> { RecordingRepositoryImpl(get(), get()) }
-}
+val networkingModule =
+  module {
+    single<Retrofit> { createRetrofit(get()) }
+    single<ApiService> { get<Retrofit>().create(ApiService::class.java) }
+    single<RecordingRepository> { RecordingRepositoryImpl(get(), get()) }
+  }
 
-val useCasesModule = module {
-  single { RecordingUseCase(get(), get(), get()) }
-}
+val useCasesModule =
+  module {
+    single { RecordingUseCase(get(), get(), get()) }
+  }
 
-val viewModelsModule = module {
-  viewModel { MainViewModel(get(), get()) }
-  viewModel { SettingsViewModel(get()) }
-  viewModel { ShareViewModel(get()) }
-}
+val viewModelsModule =
+  module {
+    viewModel { MainViewModel(get(), get()) }
+    viewModel { SettingsViewModel(get(), get()) }
+    viewModel { ShareViewModel(get(), get()) }
+  }
 
 private fun createRetrofit(preferencesDataStore: PreferencesDataStore): Retrofit {
-  val loggingInterceptor = HttpLoggingInterceptor().apply {
-    level = HttpLoggingInterceptor.Level.BODY
-  }
+  val loggingInterceptor =
+    HttpLoggingInterceptor().apply {
+      level = HttpLoggingInterceptor.Level.BODY
+    }
 
-  val okHttpClient = OkHttpClient.Builder()
-    .addInterceptor(loggingInterceptor)
-    .connectTimeout(30, TimeUnit.SECONDS)
-    .readTimeout(60, TimeUnit.SECONDS)
-    .writeTimeout(60, TimeUnit.SECONDS)
-    .build()
+  val okHttpClient =
+    OkHttpClient.Builder()
+      .addInterceptor(loggingInterceptor)
+      .connectTimeout(30, TimeUnit.SECONDS)
+      .readTimeout(60, TimeUnit.SECONDS)
+      .writeTimeout(60, TimeUnit.SECONDS)
+      .build()
 
-  val serverUrl = runBlocking {
-    preferencesDataStore.getServerUrl()
-  }
+  val serverUrl =
+    runBlocking {
+      preferencesDataStore.getServerUrl()
+    }
 
   return Retrofit.Builder()
     .baseUrl(serverUrl)

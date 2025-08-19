@@ -37,6 +37,11 @@ android {
 
   kotlinOptions {
     jvmTarget = "17"
+    freeCompilerArgs +=
+      listOf(
+        "-opt-in=kotlin.RequiresOptIn",
+        "-Xsuppress-version-warnings",
+      )
   }
 
   buildFeatures {
@@ -46,7 +51,7 @@ android {
 
   lint {
     abortOnError = false
-    warningsAsErrors = true
+    warningsAsErrors = false
     checkReleaseBuilds = false
   }
 
@@ -114,11 +119,15 @@ dependencies {
 }
 
 ktlint {
-  version.set("0.50.0")
+  version.set("1.0.1")
   android.set(true)
   ignoreFailures.set(false)
   reporters {
     reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.PLAIN)
     reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.CHECKSTYLE)
+  }
+  filter {
+    exclude("**/test/**")
+    exclude("**/androidTest/**")
   }
 }

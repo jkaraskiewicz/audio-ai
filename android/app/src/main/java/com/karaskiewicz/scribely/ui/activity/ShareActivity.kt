@@ -9,7 +9,6 @@ import com.karaskiewicz.scribely.ui.screen.ShareScreen
 import com.karaskiewicz.scribely.ui.theme.ScribelyTheme
 
 class ShareActivity : ComponentActivity() {
-
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     enableEdgeToEdge()

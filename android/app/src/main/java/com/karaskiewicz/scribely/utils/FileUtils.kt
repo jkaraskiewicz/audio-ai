@@ -4,14 +4,16 @@ import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
-import android.util.Log
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
 import timber.log.Timber
 
 object FileUtils {
-  fun copyUriToTempFile(context: Context, uri: Uri): File? {
+  fun copyUriToTempFile(
+    context: Context,
+    uri: Uri,
+  ): File? {
     return try {
       val fileName = getFileName(context, uri) ?: "shared_file"
       val tempFile = File(context.cacheDir, fileName)
@@ -32,7 +34,10 @@ object FileUtils {
     }
   }
 
-  private fun getFileName(context: Context, uri: Uri): String? {
+  private fun getFileName(
+    context: Context,
+    uri: Uri,
+  ): String? {
     var name: String? = null
     if (uri.scheme == ContentResolver.SCHEME_CONTENT) {
       val cursor = context.contentResolver.query(uri, null, null, null, null)

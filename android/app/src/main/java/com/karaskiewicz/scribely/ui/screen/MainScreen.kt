@@ -65,40 +65,44 @@ fun MainScreen(
   }
 
   // 🎨 Permission Handling (Single Responsibility)
-  val permissionLauncher = rememberLauncherForActivityResult(
-    contract = ActivityResultContracts.RequestPermission(),
-  ) { isGranted ->
-    if (isGranted) {
-      viewModel.startRecording(context)
-    } else {
-      // TODO: Show permission error message
+  val permissionLauncher =
+    rememberLauncherForActivityResult(
+      contract = ActivityResultContracts.RequestPermission(),
+    ) { isGranted ->
+      if (isGranted) {
+        viewModel.startRecording(context)
+      } else {
+        // TODO: Show permission error message
+      }
     }
-  }
 
   // 🎨 Recording Actions (Clean Interface)
-  val recordingActions = RecordingActions(
-    onStart = {
-      when (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO)) {
-        android.content.pm.PackageManager.PERMISSION_GRANTED -> {
-          viewModel.startRecording(context)
+  val recordingActions =
+    RecordingActions(
+      onStart = {
+        when (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO)) {
+          android.content.pm.PackageManager.PERMISSION_GRANTED -> {
+            viewModel.startRecording(context)
+          }
+          else -> {
+            permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+          }
         }
-        else -> {
-          permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-        }
-      }
-    },
-    onPause = { viewModel.pauseRecording(context) },
-    onResume = { viewModel.resumeRecording(context) },
-    onStop = { viewModel.finishRecording(context) },
-    onDiscard = { viewModel.resetRecording(context) },
-  )
+      },
+      onPause = { viewModel.pauseRecording(context) },
+      onResume = { viewModel.resumeRecording(context) },
+      onStop = { viewModel.finishRecording(context) },
+      onDiscard = { viewModel.resetRecording(context) },
+    )
 
   // 🎨 Main Layout (Clean Structure)
   Box(
-    modifier = Modifier
-      .fillMaxSize()
-      .background(UIConfig.Colors.DefaultBackground) // 🎨 CUSTOMIZE: Background color
-      .padding(UIConfig.Spacing.ScreenPadding), // 🎨 CUSTOMIZE: Screen padding
+    modifier =
+      Modifier
+        .fillMaxSize()
+        .background(UIConfig.Colors.DefaultBackground) // 🎨 CUSTOMIZE: Background color
+        .padding(UIConfig.Spacing.ScreenPadding),
+    // 🎨 CUSTOMIZE: Screen padding
   ) {
     Column(
       modifier = Modifier.fillMaxSize(),
@@ -108,9 +112,10 @@ fun MainScreen(
 
       // 🎨 Main Content (Timer + Controls)
       Column(
-        modifier = Modifier
-          .fillMaxWidth()
-          .weight(1f),
+        modifier =
+          Modifier
+            .fillMaxWidth()
+            .weight(1f),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
       ) {

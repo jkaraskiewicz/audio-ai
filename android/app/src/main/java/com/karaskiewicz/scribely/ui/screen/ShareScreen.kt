@@ -91,10 +91,11 @@ private fun ShareDialog(
 ) {
   val animationScale by animateFloatAsState(
     targetValue = 1f,
-    animationSpec = spring(
-      dampingRatio = Spring.DampingRatioMediumBouncy,
-      stiffness = Spring.StiffnessLow,
-    ),
+    animationSpec =
+      spring(
+        dampingRatio = Spring.DampingRatioMediumBouncy,
+        stiffness = Spring.StiffnessLow,
+      ),
     label = "dialogScale",
   )
 
@@ -105,23 +106,31 @@ private fun ShareDialog(
   )
 
   Dialog(
-    onDismissRequest = if (!state.isLoading) onDismiss else { {} },
-    properties = DialogProperties(
-      dismissOnBackPress = !state.isLoading,
-      dismissOnClickOutside = !state.isLoading,
-    ),
+    onDismissRequest =
+      if (!state.isLoading) {
+        onDismiss
+      } else {
+        {}
+      },
+    properties =
+      DialogProperties(
+        dismissOnBackPress = !state.isLoading,
+        dismissOnClickOutside = !state.isLoading,
+      ),
   ) {
     Box(
-      modifier = Modifier
-        .fillMaxSize()
-        .background(Color.Black.copy(alpha = backgroundAlpha)),
+      modifier =
+        Modifier
+          .fillMaxSize()
+          .background(Color.Black.copy(alpha = backgroundAlpha)),
       contentAlignment = Alignment.Center,
     ) {
       Surface(
-        modifier = Modifier
-          .fillMaxWidth()
-          .padding(32.dp)
-          .scale(animationScale),
+        modifier =
+          Modifier
+            .fillMaxWidth()
+            .padding(32.dp)
+            .scale(animationScale),
         shape = RoundedCornerShape(20.dp),
         tonalElevation = 4.dp,
         shadowElevation = 6.dp,
@@ -143,11 +152,12 @@ private fun ShareDialog(
 
           // Title - much more compact
           Text(
-            text = when {
-              state.isSuccess -> "Complete!"
-              state.error != null -> "Error"
-              else -> "Processing..."
-            },
+            text =
+              when {
+                state.isSuccess -> "Complete!"
+                state.error != null -> "Error"
+                else -> "Processing..."
+              },
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.onSurface,
@@ -172,11 +182,12 @@ private fun ShareDialog(
             text = state.error ?: state.message,
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
-            color = when {
-              state.error != null -> MaterialTheme.colorScheme.error
-              state.isSuccess -> MaterialTheme.colorScheme.primary
-              else -> MaterialTheme.colorScheme.onSurfaceVariant
-            },
+            color =
+              when {
+                state.error != null -> MaterialTheme.colorScheme.error
+                state.isSuccess -> MaterialTheme.colorScheme.primary
+                else -> MaterialTheme.colorScheme.onSurfaceVariant
+              },
             lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.1,
           )
 
@@ -200,17 +211,19 @@ private fun ShareDialog(
 
 @Composable
 private fun StatusIcon(state: ShareState) {
-  val icon = when {
-    state.isSuccess -> Icons.Default.CheckCircle
-    state.error != null -> Icons.Default.Error
-    else -> null
-  }
+  val icon =
+    when {
+      state.isSuccess -> Icons.Default.CheckCircle
+      state.error != null -> Icons.Default.Error
+      else -> null
+    }
 
-  val iconColor = when {
-    state.isSuccess -> Color(0xFF4CAF50)
-    state.error != null -> MaterialTheme.colorScheme.error
-    else -> MaterialTheme.colorScheme.primary
-  }
+  val iconColor =
+    when {
+      state.isSuccess -> Color(0xFF4CAF50)
+      state.error != null -> MaterialTheme.colorScheme.error
+      else -> MaterialTheme.colorScheme.primary
+    }
 
   icon?.let {
     Icon(
@@ -230,19 +243,21 @@ private fun ActionButtons(
 ) {
   Row(
     modifier = Modifier.fillMaxWidth(),
-    horizontalArrangement = if (state.error != null && state.error.contains("configure")) {
-      Arrangement.spacedBy(8.dp)
-    } else {
-      Arrangement.Center
-    },
+    horizontalArrangement =
+      if (state.error != null && state.error.contains("configure")) {
+        Arrangement.spacedBy(8.dp)
+      } else {
+        Arrangement.Center
+      },
   ) {
     if (state.error != null && state.error.contains("configure")) {
       FilledTonalButton(
         onClick = onNavigateToSettings,
         modifier = Modifier.weight(1f),
-        colors = ButtonDefaults.filledTonalButtonColors(
-          containerColor = MaterialTheme.colorScheme.primaryContainer,
-        ),
+        colors =
+          ButtonDefaults.filledTonalButtonColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+          ),
       ) {
         Icon(
           imageVector = Icons.Default.Settings,
@@ -259,18 +274,21 @@ private fun ActionButtons(
 
     Button(
       onClick = onDismiss,
-      modifier = if (state.error != null && state.error.contains("configure")) {
-        Modifier.weight(1f)
-      } else {
-        Modifier
-      },
-      colors = ButtonDefaults.buttonColors(
-        containerColor = if (state.isSuccess) {
-          MaterialTheme.colorScheme.primary
+      modifier =
+        if (state.error != null && state.error.contains("configure")) {
+          Modifier.weight(1f)
         } else {
-          MaterialTheme.colorScheme.secondary
+          Modifier
         },
-      ),
+      colors =
+        ButtonDefaults.buttonColors(
+          containerColor =
+            if (state.isSuccess) {
+              MaterialTheme.colorScheme.primary
+            } else {
+              MaterialTheme.colorScheme.secondary
+            },
+        ),
     ) {
       Text(
         text = if (state.isSuccess) "Done" else "Close",

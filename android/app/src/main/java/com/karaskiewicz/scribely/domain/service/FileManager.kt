@@ -54,14 +54,16 @@ class FileManager(private val context: Context) {
 
   @SuppressLint("ConstantLocale")
   private companion object {
-    val TIMESTAMP_FORMAT = SimpleDateFormat(
-      RecordingConstants.TIMESTAMP_FORMAT,
-      Locale.getDefault(),
-    )
+    val TIMESTAMP_FORMAT =
+      SimpleDateFormat(
+        RecordingConstants.TIMESTAMP_FORMAT,
+        Locale.getDefault(),
+      )
 
-    val SEGMENT_TIMESTAMP_FORMAT = SimpleDateFormat(
-      RecordingConstants.SEGMENT_TIMESTAMP_FORMAT,
-      Locale.getDefault(),
-    )
+    val SEGMENT_TIMESTAMP_FORMAT =
+      SimpleDateFormat(
+        RecordingConstants.SEGMENT_TIMESTAMP_FORMAT,
+        Locale.getDefault(),
+      )
   }
 }

@@ -35,13 +35,16 @@ fun MessageCards(
   // 🎨 Error message card
   errorMessage?.let { message ->
     Card(
-      modifier = modifier
-        .fillMaxWidth()
-        .padding(UIConfig.Spacing.MediumSpacing),
-      colors = CardDefaults.cardColors(
-        containerColor = MaterialTheme.colorScheme.errorContainer,
-      ),
-      elevation = CardDefaults.cardElevation(defaultElevation = 4.dp), // 🎨 CUSTOMIZE: Elevation
+      modifier =
+        modifier
+          .fillMaxWidth()
+          .padding(UIConfig.Spacing.MediumSpacing),
+      colors =
+        CardDefaults.cardColors(
+          containerColor = MaterialTheme.colorScheme.errorContainer,
+        ),
+      // 🎨 CUSTOMIZE: Elevation
+      elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
     ) {
       Text(
         text = message,
@@ -56,18 +59,23 @@ fun MessageCards(
   // 🎨 Success message card
   successMessage?.let { message ->
     Card(
-      modifier = modifier
-        .fillMaxWidth()
-        .padding(UIConfig.Spacing.MediumSpacing),
-      colors = CardDefaults.cardColors(
-        containerColor = UIConfig.Colors.ScribelyRedLight, // 🎨 CUSTOMIZE: Success color
-      ),
-      elevation = CardDefaults.cardElevation(defaultElevation = 4.dp), // 🎨 CUSTOMIZE: Elevation
+      modifier =
+        modifier
+          .fillMaxWidth()
+          .padding(UIConfig.Spacing.MediumSpacing),
+      colors =
+        CardDefaults.cardColors(
+          // 🎨 CUSTOMIZE: Success color
+          containerColor = UIConfig.Colors.ScribelyRedLight,
+        ),
+      // 🎨 CUSTOMIZE: Elevation
+      elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
     ) {
       Text(
         text = message,
         style = MaterialTheme.typography.bodyMedium,
-        color = UIConfig.Colors.PrimaryTextColor, // 🎨 CUSTOMIZE: Text color
+        // 🎨 CUSTOMIZE: Text color
+        color = UIConfig.Colors.PrimaryTextColor,
         modifier = Modifier.padding(UIConfig.Sizing.ContainerPadding),
         textAlign = TextAlign.Center,
       )
@@ -87,9 +95,10 @@ fun ErrorCard(
   textColor: Color = MaterialTheme.colorScheme.onErrorContainer,
 ) {
   Card(
-    modifier = modifier
-      .fillMaxWidth()
-      .padding(UIConfig.Spacing.MediumSpacing),
+    modifier =
+      modifier
+        .fillMaxWidth()
+        .padding(UIConfig.Spacing.MediumSpacing),
     colors = CardDefaults.cardColors(containerColor = backgroundColor),
     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
   ) {
@@ -111,9 +120,10 @@ fun SuccessCard(
   textColor: Color = UIConfig.Colors.PrimaryTextColor,
 ) {
   Card(
-    modifier = modifier
-      .fillMaxWidth()
-      .padding(UIConfig.Spacing.MediumSpacing),
+    modifier =
+      modifier
+        .fillMaxWidth()
+        .padding(UIConfig.Spacing.MediumSpacing),
     colors = CardDefaults.cardColors(containerColor = backgroundColor),
     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
   ) {

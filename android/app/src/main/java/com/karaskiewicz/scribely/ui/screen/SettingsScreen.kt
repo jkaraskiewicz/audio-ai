@@ -49,8 +49,11 @@ import org.koin.androidx.compose.koinViewModel
 // Test connection status enum
 sealed class TestStatus {
   object Idle : TestStatus()
+
   object Testing : TestStatus()
+
   object Success : TestStatus()
+
   object Error : TestStatus()
 }
 
@@ -79,7 +82,7 @@ fun SettingsScreen(
 
   // Helper function to handle test connection
   fun handleTestConnection() {
-    viewModel.testConnection(context)
+    viewModel.testConnection()
   }
 
   // Helper function to handle save
@@ -93,20 +96,22 @@ fun SettingsScreen(
   }
 
   Box(
-    modifier = Modifier
-      .fillMaxSize()
-      .background(UIConfig.Colors.WhiteBackground)
-      .padding(UIConfig.Spacing.ScreenPadding),
+    modifier =
+      Modifier
+        .fillMaxSize()
+        .background(UIConfig.Colors.WhiteBackground)
+        .padding(UIConfig.Spacing.ScreenPadding),
   ) {
     Column(
       modifier = Modifier.fillMaxSize(),
     ) {
       // Header
       Row(
-        modifier = Modifier
-          .fillMaxWidth()
-          .height(UIConfig.Spacing.HeaderHeight)
-          .padding(bottom = UIConfig.Spacing.MediumSpacing),
+        modifier =
+          Modifier
+            .fillMaxWidth()
+            .height(UIConfig.Spacing.HeaderHeight)
+            .padding(bottom = UIConfig.Spacing.MediumSpacing),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(UIConfig.Spacing.MediumSpacing),
       ) {
@@ -123,10 +128,11 @@ fun SettingsScreen(
 
         Text(
           text = "Settings",
-          style = MaterialTheme.typography.headlineMedium.copy(
-            fontWeight = FontWeight.Bold,
-            color = UIConfig.Colors.PrimaryTextColor,
-          ),
+          style =
+            MaterialTheme.typography.headlineMedium.copy(
+              fontWeight = FontWeight.Bold,
+              color = UIConfig.Colors.PrimaryTextColor,
+            ),
           modifier = Modifier.weight(1f),
           textAlign = TextAlign.Center,
         )
@@ -137,11 +143,12 @@ fun SettingsScreen(
 
       // Settings content
       Column(
-        modifier = Modifier
-          .fillMaxWidth()
-          .widthIn(max = UIConfig.Spacing.SettingsMaxWidth)
-          .weight(1f)
-          .padding(horizontal = UIConfig.Spacing.MediumSpacing),
+        modifier =
+          Modifier
+            .fillMaxWidth()
+            .widthIn(max = UIConfig.Spacing.SettingsMaxWidth)
+            .weight(1f)
+            .padding(horizontal = UIConfig.Spacing.MediumSpacing),
         verticalArrangement = Arrangement.spacedBy(UIConfig.Spacing.SettingsVerticalSpacing),
       ) {
         // Server Endpoint Section
@@ -150,10 +157,11 @@ fun SettingsScreen(
         ) {
           Text(
             text = "Server Endpoint",
-            style = MaterialTheme.typography.bodyMedium.copy(
-              fontWeight = FontWeight.Normal,
-              color = UIConfig.Colors.SecondaryTextColor,
-            ),
+            style =
+              MaterialTheme.typography.bodyMedium.copy(
+                fontWeight = FontWeight.Normal,
+                color = UIConfig.Colors.SecondaryTextColor,
+              ),
           )
 
           Row(
@@ -172,10 +180,11 @@ fun SettingsScreen(
             Button(
               onClick = { handleTestConnection() },
               enabled = !connectionTestState.isLoading,
-              colors = ButtonDefaults.buttonColors(
-                containerColor = UIConfig.Colors.ScribelyGray,
-                contentColor = UIConfig.Colors.WhiteBackground,
-              ),
+              colors =
+                ButtonDefaults.buttonColors(
+                  containerColor = UIConfig.Colors.ScribelyGray,
+                  contentColor = UIConfig.Colors.WhiteBackground,
+                ),
               shape = RoundedCornerShape(UIConfig.Sizing.InputCornerRadius),
             ) {
               when {
@@ -202,7 +211,8 @@ fun SettingsScreen(
               Text(
                 text = "Connection successful!",
                 style = MaterialTheme.typography.bodySmall,
-                color = Color(0xFF059669), // Green color
+                // Green color
+                color = Color(0xFF059669),
               )
             }
             connectionTestState.error != null -> {
@@ -221,10 +231,11 @@ fun SettingsScreen(
         ) {
           Text(
             text = "Save Directory",
-            style = MaterialTheme.typography.bodyMedium.copy(
-              fontWeight = FontWeight.Normal,
-              color = UIConfig.Colors.SecondaryTextColor,
-            ),
+            style =
+              MaterialTheme.typography.bodyMedium.copy(
+                fontWeight = FontWeight.Normal,
+                color = UIConfig.Colors.SecondaryTextColor,
+              ),
           )
 
           Row(
@@ -245,17 +256,18 @@ fun SettingsScreen(
                 // TODO: Trigger native directory picker
                 println("Triggering native directory picker...")
               },
-              modifier = Modifier
-                .background(
-                  color = UIConfig.Colors.DefaultBackground,
-                  shape = RoundedCornerShape(UIConfig.Sizing.InputCornerRadius),
-                )
-                .border(
-                  1.dp,
-                  UIConfig.Colors.BorderColor,
-                  RoundedCornerShape(UIConfig.Sizing.InputCornerRadius),
-                )
-                .size(UIConfig.Sizing.InputHeight),
+              modifier =
+                Modifier
+                  .background(
+                    color = UIConfig.Colors.DefaultBackground,
+                    shape = RoundedCornerShape(UIConfig.Sizing.InputCornerRadius),
+                  )
+                  .border(
+                    1.dp,
+                    UIConfig.Colors.BorderColor,
+                    RoundedCornerShape(UIConfig.Sizing.InputCornerRadius),
+                  )
+                  .size(UIConfig.Sizing.InputHeight),
             ) {
               Icon(
                 imageVector = Icons.Default.Folder,
@@ -276,17 +288,19 @@ fun SettingsScreen(
           Button(
             onClick = { handleSave(editableServerUrl) },
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(
-              containerColor = UIConfig.Colors.ScribelyRed,
-              contentColor = UIConfig.Colors.WhiteBackground,
-            ),
+            colors =
+              ButtonDefaults.buttonColors(
+                containerColor = UIConfig.Colors.ScribelyRed,
+                contentColor = UIConfig.Colors.WhiteBackground,
+              ),
             shape = RoundedCornerShape(UIConfig.Sizing.CardCornerRadius),
           ) {
             Text(
               text = "Save Settings",
-              style = MaterialTheme.typography.labelLarge.copy(
-                fontWeight = FontWeight.Bold,
-              ),
+              style =
+                MaterialTheme.typography.labelLarge.copy(
+                  fontWeight = FontWeight.Bold,
+                ),
               modifier = Modifier.padding(vertical = UIConfig.Spacing.SmallSpacing),
             )
           }
@@ -296,7 +310,8 @@ fun SettingsScreen(
             Text(
               text = saveStatus,
               style = MaterialTheme.typography.bodyMedium,
-              color = Color(0xFF059669), // Green color
+              // Green color
+              color = Color(0xFF059669),
               textAlign = TextAlign.Center,
             )
           }

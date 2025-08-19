@@ -33,17 +33,19 @@ fun AppHeader(
   modifier: Modifier = Modifier,
 ) {
   Box(
-    modifier = modifier
-      .fillMaxWidth()
-      .height(UIConfig.Spacing.HeaderHeight),
+    modifier =
+      modifier
+        .fillMaxWidth()
+        .height(UIConfig.Spacing.HeaderHeight),
   ) {
     // 🎨 Logo positioning (EASY TO CHANGE)
     // To center logo: change to Alignment.Center
     // To move right: change to Alignment.CenterEnd
     ScribelyLogo(
-      modifier = Modifier
-        .align(Alignment.CenterStart) // 🎨 CUSTOMIZE: Logo position here
-        .padding(start = UIConfig.Spacing.LogoPadding),
+      modifier =
+        Modifier
+          .align(Alignment.CenterStart) // 🎨 CUSTOMIZE: Logo position here
+          .padding(start = UIConfig.Spacing.LogoPadding),
     )
 
     // 🎨 Settings button positioning (EASY TO CHANGE)
@@ -51,12 +53,14 @@ fun AppHeader(
     // To hide: comment out this section
     IconButton(
       onClick = onSettingsClick,
-      modifier = Modifier
-        .align(Alignment.CenterEnd) // 🎨 CUSTOMIZE: Settings position here
-        .padding(end = UIConfig.Spacing.LogoPadding),
+      modifier =
+        Modifier
+          .align(Alignment.CenterEnd) // 🎨 CUSTOMIZE: Settings position here
+          .padding(end = UIConfig.Spacing.LogoPadding),
     ) {
       Icon(
-        imageVector = Icons.Default.Settings, // 🎨 CUSTOMIZE: Change icon here
+        // 🎨 CUSTOMIZE: Change icon here
+        imageVector = Icons.Default.Settings,
         contentDescription = "Settings",
         tint = UIConfig.Colors.SecondaryTextColor,
         modifier = Modifier.size(UIConfig.Sizing.SettingsIconSize),

@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.karaskiewicz.scribely.data.PreferencesDataStore
 import com.karaskiewicz.scribely.domain.model.RecordingConstants
 import com.karaskiewicz.scribely.domain.model.RecordingResult
 import com.karaskiewicz.scribely.domain.model.RecordingState
@@ -24,7 +23,6 @@ class MainViewModel(
   private val recordingUseCase: RecordingUseCase,
   private val preferencesDataStore: PreferencesDataStore,
 ) : ViewModel() {
-
   // Configuration state
   private val _serverUrl = MutableStateFlow("")
   val serverUrl: StateFlow<String> = _serverUrl.asStateFlow()
@@ -74,7 +72,7 @@ class MainViewModel(
   fun startRecording(context: Context) {
     clearMessages()
 
-    when (val result = recordingUseCase.startRecording(context)) {
+    when (val result = recordingUseCase.startRecording()) {
       is RecordingResult.Success -> {
         _recordingState.value = RecordingState.RECORDING
         recordingStartTime = System.currentTimeMillis()
@@ -154,11 +152,12 @@ class MainViewModel(
         }
         is UploadResult.Error -> {
           // Check if this is an upload error vs recording error
-          val message = if (result.message.contains("500") || result.message.contains("server")) {
-            "Recording saved locally (server error: ${result.message})"
-          } else {
-            result.message
-          }
+          val message =
+            if (result.message.contains("500") || result.message.contains("server")) {
+              "Recording saved locally (server error: ${result.message})"
+            } else {
+              result.message
+            }
           _successMessage.value = message
           resetToIdleAfterDelay()
         }
