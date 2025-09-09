@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  # Whisper ASR Webservice
+  whisper:
+    image: onerahmet/openai-whisper-asr-webservice:latest
+    container_name: audio-ai-whisper-prod
+    ports:
+      - "9000:9000"
+    environment:
+      - ASR_MODEL=base
+      - ASR_ENGINE=faster_whisper
+    volumes:
+      - whisper_models:/app/models
+    networks:
+      - audio-ai-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/docs"]
+      interval: 60s
+      timeout: 30s
+      retries: 3
+      start_period: 120s
+
+  # Audio-AI Backend - GitHub Repository Build
+  audio-ai:
+    # Replace 'your-username/audio-ai' with actual GitHub repository
+    image: ghcr.io/your-username/audio-ai/backend:latest
+    container_name: audio-ai-backend-prod
+    ports:
+      - "${BACKEND_PORT:-3000}:3000"
+    volumes:
+      # Mount processed files directory
+      - ${PROCESSED_FILES_PATH:-./processed}:/usr/src/app/processed
+    environment:
+      # Core Configuration
+      - NODE_ENV=production
+      - PORT=3000
+      
+      # Transcription Provider Configuration
+      - TRANSCRIPTION_PROVIDER=${TRANSCRIPTION_PROVIDER:-openai_whisper_webservice}
+      - WHISPER_SERVICE_URL=${WHISPER_SERVICE_URL:-http://whisper:9000}
+      
+      # AI Service Configuration
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      
+      # Optional Settings
+      - MAX_FILE_SIZE_MB=${MAX_FILE_SIZE_MB:-100}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      
+      # Security and Performance
+      - NODE_OPTIONS=--max-old-space-size=2048
+      - TZ=${TZ:-UTC}
+    depends_on:
+      whisper:
+        condition: service_healthy
+    networks:
+      - audio-ai-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.25'
+
+volumes:
+  whisper_models:
+    driver: local
+
+networks:
+  audio-ai-network:
+    driver: bridge
+    name: audio-ai-prod-network
