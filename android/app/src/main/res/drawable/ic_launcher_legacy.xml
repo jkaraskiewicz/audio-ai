@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+    
+    <!-- Background -->
+    <path
+        android:pathData="M22,0 L78,0 Q100,0 100,22 L100,78 Q100,100 78,100 L22,100 Q0,100 0,78 L0,22 Q0,0 22,0 Z"
+        android:fillColor="#6ab09c" />
+
+    <!-- AI Brainwave/Neural Network Pattern -->
+    <group android:alpha="0.7">
+        <path
+            android:pathData="M 20 50 C 35 35, 65 35, 80 50"
+            android:strokeColor="#f4e1d2"
+            android:strokeWidth="0.75"
+            android:fillColor="@android:color/transparent" />
+        <path
+            android:pathData="M 25 55 C 40 45, 60 45, 75 55"
+            android:strokeColor="#f4e1d2"
+            android:strokeWidth="0.75"
+            android:fillColor="@android:color/transparent" />
+        <path
+            android:pathData="M 30 60 C 40 55, 60 55, 70 60"
+            android:strokeColor="#f4e1d2"
+            android:strokeWidth="0.75"
+            android:fillColor="@android:color/transparent" />
+        <path
+            android:pathData="M 20,50 m -1.5,0 a 1.5,1.5 0 1,0 3,0 a 1.5,1.5 0 1,0 -3,0"
+            android:fillColor="#f4e1d2"/>
+        <path
+            android:pathData="M 80,50 m -1.5,0 a 1.5,1.5 0 1,0 3,0 a 1.5,1.5 0 1,0 -3,0"
+            android:fillColor="#f4e1d2"/>
+        <path
+            android:pathData="M 50,36 m -1.5,0 a 1.5,1.5 0 1,0 3,0 a 1.5,1.5 0 1,0 -3,0"
+            android:fillColor="#f4e1d2"/>
+        <path
+            android:pathData="M 35,39 m -1,0 a 1,1 0 1,0 2,0 a 1,1 0 1,0 -2,0"
+            android:fillColor="#f4e1d2"/>
+        <path
+            android:pathData="M 65,39 m -1,0 a 1,1 0 1,0 2,0 a 1,1 0 1,0 -2,0"
+            android:fillColor="#f4e1d2"/>
+    </group>
+
+    <!-- Retro Microphone -->
+    <group android:translateX="32"
+           android:translateY="22"
+           android:scaleX="0.32"
+           android:scaleY="0.32">
+        <!-- Microphone Head -->
+        <path
+            android:pathData="M50,0 C22.4,0 0,22.4 0,50 L0,90 C0,117.6 22.4,140 50,140 S100,117.6 100,90 L100,50 C100,22.4 77.6,0 50,0 Z"
+            android:fillColor="#f4e1d2"/>
+        
+        <!-- Shadow on Head -->
+        <path
+            android:pathData="M50,0 C22.4,0 0,22.4 0,50 L0,90 C0,117.6 22.4,140 50,140"
+            android:fillColor="#c97b63"
+            android:alpha="0.3"/>
+
+        <!-- Grille Lines -->
+        <path
+            android:pathData="M15,20 L85,20 Q87,20 87,24 L87,24 Q87,28 85,28 L15,28 Q13,28 13,24 L13,24 Q13,20 15,20 Z"
+            android:fillColor="#3b5249"
+            android:alpha="0.7"/>
+        <path
+            android:pathData="M15,40 L85,40 Q87,40 87,44 L87,44 Q87,48 85,48 L15,48 Q13,48 13,44 L13,44 Q13,40 15,40 Z"
+            android:fillColor="#3b5249"
+            android:alpha="0.7"/>
+        <path
+            android:pathData="M15,60 L85,60 Q87,60 87,64 L87,64 Q87,68 85,68 L15,68 Q13,68 13,64 L13,64 Q13,60 15,60 Z"
+            android:fillColor="#3b5249"
+            android:alpha="0.7"/>
+        <path
+            android:pathData="M15,80 L85,80 Q87,80 87,84 L87,84 Q87,88 85,88 L15,88 Q13,88 13,84 L13,84 Q13,80 15,80 Z"
+            android:fillColor="#3b5249"
+            android:alpha="0.7"/>
+        <path
+            android:pathData="M15,100 L85,100 Q87,100 87,104 L87,104 Q87,108 85,108 L15,108 Q13,108 13,104 L13,104 Q13,100 15,100 Z"
+            android:fillColor="#3b5249"
+            android:alpha="0.7"/>
+
+        <!-- Microphone Body -->
+        <path
+            android:pathData="M40,140 L60,140 L65,180 L35,180 Z"
+            android:fillColor="#c97b63"/>
+        
+        <!-- Microphone Base -->
+        <path
+            android:pathData="M30,180 L70,180 Q75,180 75,185 L75,185 Q75,190 70,190 L30,190 Q25,190 25,185 L25,185 Q25,180 30,180 Z"
+            android:fillColor="#f4e1d2"/>
+    </group>
+</vector>

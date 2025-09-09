@@ -43,12 +43,52 @@ export class TranscriptController {
         transcriptLength: transcript?.length,
       });
 
-      const result = await this.transcriptProcessorService.processFileOrTranscript({
-        file,
-        transcript,
-      });
+      // For text transcripts, process synchronously (fast)
+      if (transcript) {
+        const result = await this.transcriptProcessorService.processFileOrTranscript({
+          file,
+          transcript,
+        });
+        res.status(200).json(result);
+        return;
+      }
 
-      res.status(200).json(result);
+      // For files (especially audio), respond immediately and process in background
+      if (file) {
+        logger.info('Starting background processing for file', {
+          filename: file.originalname,
+          fileSize: file.size,
+        });
+
+        // Respond immediately with success
+        res.status(200).json({
+          message: 'File received and processing started',
+          filename: file.originalname,
+          status: 'processing',
+          timestamp: new Date().toISOString(),
+        });
+
+        // Process in background (fire and forget)
+        setImmediate(async () => {
+          try {
+            logger.info('Background processing started', { filename: file.originalname });
+            const result = await this.transcriptProcessorService.processFileOrTranscript({
+              file,
+              transcript,
+            });
+            logger.info('Background processing completed successfully', {
+              filename: file.originalname,
+              savedPath: result.saved_to,
+            });
+          } catch (backgroundError) {
+            logger.error('Background processing failed', {
+              filename: file.originalname,
+              error: backgroundError instanceof Error ? backgroundError.message : 'Unknown error',
+              stack: backgroundError instanceof Error ? backgroundError.stack : undefined,
+            });
+          }
+        });
+      }
     } catch (error) {
       next(error);
     }

@@ -188,7 +188,7 @@ private fun ShareDialog(
                 state.isSuccess -> MaterialTheme.colorScheme.primary
                 else -> MaterialTheme.colorScheme.onSurfaceVariant
               },
-            lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.1,
+            lineHeight = MaterialTheme.typography.bodyMedium.lineHeight,
           )
 
           // Action Buttons

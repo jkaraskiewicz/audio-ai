@@ -5,9 +5,9 @@ import timber.log.Timber
 /**
  * Utility functions for working with Kotlin Result class
  * to reduce try/catch boilerplate and improve error handling
+ *
+ * Safely executes a network operation and logs errors
  */
-
-// Safely executes a network operation and logs errors
 inline fun <T> safeNetworkCall(
   operation: String,
   crossinline block: () -> T,

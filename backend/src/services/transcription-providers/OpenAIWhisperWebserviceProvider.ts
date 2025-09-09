@@ -106,7 +106,8 @@ export class OpenAIWhisperWebserviceProvider implements AudioTranscriptionProvid
       const response = await fetch(`${this.whisperUrl}/asr`, {
         method: 'POST',
         body: formData,
-      });
+        timeout: 180000, // 3 minutes timeout for large audio files
+      } as any);
 
       if (!response.ok) {
         const errorText = await response.text();

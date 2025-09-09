@@ -3,7 +3,7 @@ import { app } from '../../src/index';
 
 describe('File Processing Integration Tests', () => {
   describe('POST /process-file', () => {
-    it('should handle text file upload', async () => {
+    it('should handle text file upload with async processing', async () => {
       const textContent = 'I want to build a mobile app for tracking expenses and budgeting.';
 
       const response = await request(app)
@@ -11,13 +11,17 @@ describe('File Processing Integration Tests', () => {
         .attach('file', Buffer.from(textContent), 'expense-tracker-idea.txt')
         .expect(200);
 
-      expect(response.body).toHaveProperty('result');
-      expect(response.body).toHaveProperty('saved_to');
-      expect(response.body.message).toContain('direct_text_extraction');
-      expect(response.body.result).toContain('# ');
+      // File uploads now return async response
+      expect(response.body).toHaveProperty('message');
+      expect(response.body).toHaveProperty('filename');
+      expect(response.body).toHaveProperty('status');
+      expect(response.body).toHaveProperty('timestamp');
+      expect(response.body.message).toBe('File received and processing started');
+      expect(response.body.status).toBe('processing');
+      expect(response.body.filename).toBe('expense-tracker-idea.txt');
     }, 30000);
 
-    it('should handle markdown file upload', async () => {
+    it('should handle markdown file upload with async processing', async () => {
       const markdownContent = `# Project Ideas
 
 ## Mobile App Ideas
@@ -34,9 +38,14 @@ describe('File Processing Integration Tests', () => {
         .attach('file', Buffer.from(markdownContent), 'project-ideas.md')
         .expect(200);
 
-      expect(response.body).toHaveProperty('result');
-      expect(response.body).toHaveProperty('saved_to');
-      expect(response.body.message).toContain('direct_text_extraction');
+      // File uploads now return async response
+      expect(response.body).toHaveProperty('message');
+      expect(response.body).toHaveProperty('filename');
+      expect(response.body).toHaveProperty('status');
+      expect(response.body).toHaveProperty('timestamp');
+      expect(response.body.message).toBe('File received and processing started');
+      expect(response.body.status).toBe('processing');
+      expect(response.body.filename).toBe('project-ideas.md');
     }, 30000);
 
     it('should handle transcript text without file', async () => {
@@ -90,7 +99,7 @@ describe('File Processing Integration Tests', () => {
       expect(response.body.error).toContain('valid extension');
     });
 
-    it('should handle reasonably sized files', async () => {
+    it('should handle reasonably sized files with async processing', async () => {
       // Create a reasonable sized file that should work
       const content = 'This is a test document for file processing. '.repeat(100); // Much smaller, more realistic
 
@@ -99,7 +108,12 @@ describe('File Processing Integration Tests', () => {
         .attach('file', Buffer.from(content), 'test-document.txt')
         .expect(200); // Should work for reasonable size
 
-      expect(response.body).toHaveProperty('result');
+      // File uploads now return async response
+      expect(response.body).toHaveProperty('message');
+      expect(response.body).toHaveProperty('filename');
+      expect(response.body).toHaveProperty('status');
+      expect(response.body.message).toBe('File received and processing started');
+      expect(response.body.filename).toBe('test-document.txt');
     }, 30000);
   });
 
@@ -113,15 +127,21 @@ describe('File Processing Integration Tests', () => {
       expect(response.body).toHaveProperty('error');
     });
 
-    it('should provide helpful error messages for unsupported file types', async () => {
+    it('should accept unsupported file types for async processing', async () => {
+      // With async processing, unsupported files are accepted and processed in background
+      // Errors occur during background processing, not at upload time
       const response = await request(app)
         .post('/process-file')
         .attach('file', Buffer.from('binary data'), 'test.exe')
-        .expect(400);
+        .expect(200);
 
-      // The error would come from the file processing service
-      // This might return 400 from validation or 500 from processing
-      expect([400, 500]).toContain(response.status);
+      // File uploads now return async response even for unsupported types
+      expect(response.body).toHaveProperty('message');
+      expect(response.body).toHaveProperty('filename');
+      expect(response.body).toHaveProperty('status');
+      expect(response.body.message).toBe('File received and processing started');
+      expect(response.body.filename).toBe('test.exe');
+      // The error will be logged in background processing, not returned to client
     });
   });
 });

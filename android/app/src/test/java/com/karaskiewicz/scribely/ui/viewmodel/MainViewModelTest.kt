@@ -1,8 +1,9 @@
 package com.karaskiewicz.scribely.ui.viewmodel
 
-import android.content.Context
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.test.core.app.ApplicationProvider
+import com.karaskiewicz.scribely.domain.usecase.RecordingUseCase
+import com.karaskiewicz.scribely.utils.PreferencesDataStore
+import com.karaskiewicz.scribely.domain.model.RecordingState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -13,25 +14,33 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import kotlin.test.assertTrue
+import org.mockito.Mock
+import org.mockito.MockitoAnnotations
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
 
 @ExperimentalCoroutinesApi
-@RunWith(RobolectricTestRunner::class)
 class MainViewModelTest {
   @get:Rule
   val instantTaskExecutorRule = InstantTaskExecutorRule()
 
   private val testDispatcher = StandardTestDispatcher()
+
+  @Mock
+  private lateinit var mockRecordingUseCase: RecordingUseCase
+
+  @Mock
+  private lateinit var mockPreferencesDataStore: PreferencesDataStore
+
   private lateinit var viewModel: MainViewModel
-  private lateinit var context: Context
 
   @Before
   fun setup() {
+    MockitoAnnotations.openMocks(this)
     Dispatchers.setMain(testDispatcher)
-    viewModel = MainViewModel()
-    context = ApplicationProvider.getApplicationContext()
+
+    viewModel = MainViewModel(mockRecordingUseCase, mockPreferencesDataStore)
   }
 
   @After
@@ -40,25 +49,22 @@ class MainViewModelTest {
   }
 
   @Test
-  fun `loadConfiguration updates state correctly`() =
+  fun `initial state is correct`() =
     runTest {
-      // When
-      viewModel.loadConfiguration(context)
-
-      // Wait for the Flow collection to emit at least one value
-      testScheduler.advanceUntilIdle()
-
       // Then
-      // Default state should be configured with default URL
-      assertTrue(viewModel.isConfigured.value)
+      assertEquals(RecordingState.IDLE, viewModel.recordingState.value)
+      assertEquals("", viewModel.serverUrl.value)
+      assertFalse(viewModel.isConfigured.value)
+      assertEquals(0L, viewModel.recordingDuration.value)
+      assertNull(viewModel.errorMessage.value)
+      assertNull(viewModel.successMessage.value)
     }
 
   @Test
-  fun `isApiConfigured returns true for context with default URL`() {
-    // When
-    val isConfigured = viewModel.isApiConfigured(context)
+  fun `viewModel is properly initialized with dependencies`() {
+    // Given & When - ViewModel is created in setup()
 
-    // Then
-    assertTrue(isConfigured)
+    // Then - Should not crash and have proper initial state
+    assertEquals(RecordingState.IDLE, viewModel.recordingState.value)
   }
 }

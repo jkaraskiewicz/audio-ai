@@ -12,6 +12,7 @@ import com.karaskiewicz.scribely.utils.FileUtils
 import com.karaskiewicz.scribely.utils.safeSuspendNetworkCall
 import com.karaskiewicz.scribely.utils.safeFileOperation
 import com.karaskiewicz.scribely.utils.mapToResult
+import timber.log.Timber
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -38,19 +39,25 @@ class ShareViewModel(
     context: Context,
     intent: Intent,
   ) {
+    Timber.d("Handling shared content - Action: ${intent.action}, Type: ${intent.type}")
+
     when (intent.action) {
       Intent.ACTION_SEND -> {
         if (intent.type?.startsWith("text/") == true) {
+          Timber.d("Handling text share")
           handleTextShare(context, intent)
         } else {
+          Timber.d("Handling file share with type: ${intent.type}")
           handleFileShare(context, intent)
         }
       }
       Intent.ACTION_SEND_MULTIPLE -> {
+        Timber.d("Handling multiple files share")
         handleMultipleFilesShare(context, intent)
       }
       else -> {
-        _shareState.value = ShareState(error = "No content to share")
+        Timber.w("Unsupported action: ${intent.action}")
+        _shareState.value = ShareState(error = "Unsupported share action: ${intent.action}")
       }
     }
   }
@@ -79,8 +86,28 @@ class ShareViewModel(
         @Suppress("DEPRECATION")
         intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
       }
+
+    Timber.d("File share URI: $uri")
+
     if (uri == null) {
-      _shareState.value = ShareState(error = "No file found")
+      Timber.w("No URI found in share intent")
+      _shareState.value = ShareState(error = "No file found in share")
+      return
+    }
+
+    // Log file information
+    try {
+      val contentResolver = context.contentResolver
+      val mimeType = contentResolver.getType(uri)
+      Timber.d("Shared file - URI: $uri, MIME type: $mimeType")
+
+      // Check if we can access the file
+      contentResolver.openInputStream(uri)?.use {
+        Timber.d("Successfully opened input stream for file")
+      }
+    } catch (e: Exception) {
+      Timber.e(e, "Failed to access shared file")
+      _shareState.value = ShareState(error = "Cannot access shared file: ${e.message}")
       return
     }
 
@@ -161,20 +188,27 @@ class ShareViewModel(
     context: Context,
     uri: Uri,
   ) {
+    Timber.d("Starting to process file: $uri")
     viewModelScope.launch {
       _shareState.value = ShareState(isLoading = true, message = "Processing file...")
 
       val fileResult =
         safeFileOperation("copy URI to temp file") {
-          FileUtils.copyUriToTempFile(context, uri)
+          Timber.d("Copying URI to temp file: $uri")
+          val result = FileUtils.copyUriToTempFile(context, uri)
+          Timber.d("Copy result: ${result?.absolutePath}")
+          result
         }
 
       fileResult.mapToResult(
         onSuccess = { file ->
           if (file == null) {
+            Timber.w("FileUtils returned null file")
             _shareState.value = ShareState(error = "Failed to read file")
             return@mapToResult
           }
+
+          Timber.d("Successfully created temp file: ${file.absolutePath}, size: ${file.length()} bytes")
 
           val networkResult =
             safeSuspendNetworkCall("process file") {
@@ -222,6 +256,7 @@ class ShareViewModel(
           )
         },
         onFailure = { exception ->
+          Timber.e(exception, "Failed to process file")
           _shareState.value =
             ShareState(
               error = "File error: ${exception.message ?: "Unknown error"}",
