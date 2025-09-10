@@ -11,7 +11,9 @@ WORKDIR /usr/src/app
 
 # Copy package files for dependency installation
 COPY package*.json ./
-RUN npm ci --only=production && npm cache clean --force
+
+# Install ALL dependencies (including devDependencies for building)
+RUN npm ci && npm cache clean --force
 
 # Copy source code and build
 COPY . .
@@ -28,10 +30,12 @@ WORKDIR /usr/src/app
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S audioai -u 1001
 
+# Copy package.json and install only production dependencies
+COPY --chown=audioai:nodejs package*.json ./
+RUN npm ci --only=production && npm cache clean --force
+
 # Copy built application from builder stage
 COPY --from=builder --chown=audioai:nodejs /usr/src/app/dist ./dist
-COPY --from=builder --chown=audioai:nodejs /usr/src/app/node_modules ./node_modules
-COPY --from=builder --chown=audioai:nodejs /usr/src/app/package.json ./
 
 # Create processed directory for file storage
 RUN mkdir -p /usr/src/app/processed && chown -R audioai:nodejs /usr/src/app/processed
