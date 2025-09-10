@@ -37,8 +37,8 @@ RUN npm ci --only=production && npm cache clean --force
 # Copy built application from builder stage
 COPY --from=builder --chown=audioai:nodejs /usr/src/app/dist ./dist
 
-# Create processed directory for file storage
-RUN mkdir -p /usr/src/app/processed && chown -R audioai:nodejs /usr/src/app/processed
+# Create processed directory for file storage with proper permissions
+RUN mkdir -p /usr/src/app/processed && chown -R audioai:nodejs /usr/src/app/processed && chmod -R 755 /usr/src/app/processed
 
 # Switch to non-root user
 USER audioai

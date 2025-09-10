@@ -24,14 +24,14 @@ services:
 
   # Audio-AI Backend - GitHub Repository Build
   audio-ai:
-    # Replace 'your-username/audio-ai' with actual GitHub repository
-    image: ghcr.io/your-username/audio-ai/backend:latest
+    # GitHub Container Registry image
+    image: ghcr.io/jkaraskiewicz/audio-ai/backend:latest
     container_name: audio-ai-backend-prod
     ports:
       - "${BACKEND_PORT:-3000}:3000"
     volumes:
-      # Mount processed files directory
-      - ${PROCESSED_FILES_PATH:-./processed}:/usr/src/app/processed
+      # Mount processed files directory with proper permissions
+      - ${PROCESSED_FILES_PATH:-./processed}:/usr/src/app/processed:z
     environment:
       # Core Configuration
       - NODE_ENV=production
