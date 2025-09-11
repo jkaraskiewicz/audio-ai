@@ -51,6 +51,10 @@ services:
       # Security and Performance
       - NODE_OPTIONS=--max-old-space-size=2048
       - TZ=${TZ:-UTC}
+      
+      # User ID mapping for file permissions
+      - PUID=${PUID:-1001}
+      - PGID=${PGID:-1001}
     depends_on:
       whisper:
         condition: service_healthy
