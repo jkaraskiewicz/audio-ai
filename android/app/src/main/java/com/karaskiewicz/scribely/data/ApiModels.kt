@@ -16,6 +16,12 @@ data class ProcessResponse(
   val savedTo: String?,
   @SerializedName("error")
   val error: String?,
+  @SerializedName("status")
+  val status: String?,
+  @SerializedName("filename")
+  val filename: String?,
+  @SerializedName("timestamp")
+  val timestamp: String?,
 ) {
   val isSuccess: Boolean
     get() = result != null && savedTo != null && error == null

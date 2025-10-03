@@ -50,6 +50,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import org.koin.androidx.compose.koinViewModel
 import com.karaskiewicz.scribely.ui.theme.ScribelyTheme
+import com.karaskiewicz.scribely.ui.theme.UIConfig
 import com.karaskiewicz.scribely.ui.viewmodel.ShareState
 import com.karaskiewicz.scribely.ui.viewmodel.ShareViewModel
 import kotlinx.coroutines.delay
@@ -131,10 +132,10 @@ private fun ShareDialog(
             .fillMaxWidth()
             .padding(32.dp)
             .scale(animationScale),
-        shape = RoundedCornerShape(20.dp),
-        tonalElevation = 4.dp,
-        shadowElevation = 6.dp,
-        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(UIConfig.Sizing.CardCornerRadius),
+        tonalElevation = 0.dp,
+        shadowElevation = UIConfig.Sizing.ButtonElevation,
+        color = UIConfig.Colors.WhiteBackground,
       ) {
         Column(
           modifier = Modifier.padding(20.dp),
@@ -150,7 +151,7 @@ private fun ShareDialog(
             StatusIcon(state = state)
           }
 
-          // Title - much more compact
+          // Title - Scribely themed
           Text(
             text =
               when {
@@ -159,8 +160,8 @@ private fun ShareDialog(
                 else -> "Processing..."
               },
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = UIConfig.Typography.BoldWeight,
+            color = UIConfig.Colors.PrimaryTextColor,
             textAlign = TextAlign.Center,
           )
 
@@ -173,20 +174,20 @@ private fun ShareDialog(
             CircularProgressIndicator(
               modifier = Modifier.size(24.dp),
               strokeWidth = 2.5.dp,
-              color = MaterialTheme.colorScheme.primary,
+              color = UIConfig.Colors.ScribelyRed,
             )
           }
 
-          // Message - more compact
+          // Message - Scribely themed
           Text(
             text = state.error ?: state.message,
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
             color =
               when {
-                state.error != null -> MaterialTheme.colorScheme.error
-                state.isSuccess -> MaterialTheme.colorScheme.primary
-                else -> MaterialTheme.colorScheme.onSurfaceVariant
+                state.error != null -> UIConfig.Colors.ScribelyRed
+                state.isSuccess -> UIConfig.Colors.ScribelyGray
+                else -> UIConfig.Colors.SecondaryTextColor
               },
             lineHeight = MaterialTheme.typography.bodyMedium.lineHeight,
           )
@@ -220,9 +221,9 @@ private fun StatusIcon(state: ShareState) {
 
   val iconColor =
     when {
-      state.isSuccess -> Color(0xFF4CAF50)
-      state.error != null -> MaterialTheme.colorScheme.error
-      else -> MaterialTheme.colorScheme.primary
+      state.isSuccess -> Color(0xFF4CAF50) // Keep success green
+      state.error != null -> UIConfig.Colors.ScribelyRed
+      else -> UIConfig.Colors.ScribelyRed
     }
 
   icon?.let {
@@ -254,9 +255,11 @@ private fun ActionButtons(
       FilledTonalButton(
         onClick = onNavigateToSettings,
         modifier = Modifier.weight(1f),
+        shape = RoundedCornerShape(UIConfig.Sizing.ButtonCornerRadius),
         colors =
           ButtonDefaults.filledTonalButtonColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            containerColor = UIConfig.Colors.ScribelyGrayLight,
+            contentColor = UIConfig.Colors.WhiteBackground,
           ),
       ) {
         Icon(
@@ -268,6 +271,7 @@ private fun ActionButtons(
         Text(
           "Settings",
           style = MaterialTheme.typography.labelLarge,
+          fontWeight = UIConfig.Typography.BoldWeight,
         )
       }
     }
@@ -280,20 +284,22 @@ private fun ActionButtons(
         } else {
           Modifier
         },
+      shape = RoundedCornerShape(UIConfig.Sizing.ButtonCornerRadius),
       colors =
         ButtonDefaults.buttonColors(
           containerColor =
             if (state.isSuccess) {
-              MaterialTheme.colorScheme.primary
+              UIConfig.Colors.ScribelyRed
             } else {
-              MaterialTheme.colorScheme.secondary
+              UIConfig.Colors.ScribelyGrayLight
             },
+          contentColor = UIConfig.Colors.WhiteBackground,
         ),
     ) {
       Text(
         text = if (state.isSuccess) "Done" else "Close",
         style = MaterialTheme.typography.labelLarge,
-        fontWeight = FontWeight.Medium,
+        fontWeight = UIConfig.Typography.BoldWeight,
       )
     }
   }

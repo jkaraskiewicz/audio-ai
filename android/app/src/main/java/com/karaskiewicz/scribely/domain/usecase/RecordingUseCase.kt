@@ -128,11 +128,18 @@ class RecordingUseCase(
           }
 
         try {
-          mediaRecorder.stop()
+          // Stop and release MediaRecorder safely
+          try {
+            mediaRecorder.stop()
+          } catch (stopException: Exception) {
+            Timber.e(stopException, "Error stopping MediaRecorder")
+            // Continue anyway - try to save what we have
+          }
+
           mediaRecorder.release()
 
           // Wait a moment for file system to sync
-          Thread.sleep(100)
+          Thread.sleep(200)
 
           if (!outputFile.exists()) {
             Timber.e("Recording file not found: ${outputFile.absolutePath}")
@@ -146,6 +153,7 @@ class RecordingUseCase(
             return RecordingResult.Error("Recording file is empty")
           }
 
+          Timber.d("Recording finished successfully: ${outputFile.absolutePath}, size: ${outputFile.length()} bytes")
           state = RecordingState.Finished(outputFile)
           RecordingResult.Success
         } catch (e: Exception) {
@@ -163,6 +171,7 @@ class RecordingUseCase(
 
   /**
    * Uploads the completed recording.
+   * Performs file conversion on IO dispatcher to avoid blocking.
    */
   suspend fun uploadRecording(): UploadResult {
     return when (val currentState = state) {
@@ -173,15 +182,28 @@ class RecordingUseCase(
           return UploadResult.Error("Recording file no longer exists")
         }
 
-        // Convert to M4A for upload
+        Timber.d("Starting file conversion for upload: ${recordingFile.absolutePath}, size: ${recordingFile.length()} bytes")
+
+        // Convert to M4A for upload on IO dispatcher
         val uploadFile = fileManager.createUploadFile()
         val audioComposer = AudioComposer()
-        val conversionSuccess = audioComposer.convertToM4A(recordingFile, uploadFile)
+
+        val conversionSuccess = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+          try {
+            audioComposer.convertToM4A(recordingFile, uploadFile)
+          } catch (e: Exception) {
+            Timber.e(e, "Exception during audio conversion")
+            false
+          }
+        }
 
         if (!conversionSuccess || !uploadFile.exists()) {
           Timber.e("Failed to convert recording to M4A format")
+          fileManager.deleteFileIfExists(uploadFile)
           return UploadResult.Error("Failed to prepare recording for upload")
         }
+
+        Timber.d("Conversion successful, uploading file: ${uploadFile.absolutePath}, size: ${uploadFile.length()} bytes")
 
         val result = recordingRepository.uploadRecording(uploadFile)
 

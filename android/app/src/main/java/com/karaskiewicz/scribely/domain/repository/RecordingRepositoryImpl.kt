@@ -30,12 +30,21 @@ class RecordingRepositoryImpl(
 
     return uploadResult.mapToResult(
       onSuccess = { response ->
-        if (response.isSuccessful && response.body()?.isSuccess == true) {
-          Timber.d("Recording uploaded successfully")
-          UploadResult.UploadSuccess
-        } else {
-          Timber.w("Upload failed, saving locally")
-          saveLocally(audioFile)
+        when {
+          // Backend returns 200 with status='processing' for async processing
+          response.isSuccessful && response.body()?.status == "processing" -> {
+            Timber.d("Recording uploaded successfully (async processing)")
+            UploadResult.UploadSuccess
+          }
+          // Legacy: backend returns isSuccess=true for synchronous processing
+          response.isSuccessful && response.body()?.isSuccess == true -> {
+            Timber.d("Recording uploaded successfully (sync processing)")
+            UploadResult.UploadSuccess
+          }
+          else -> {
+            Timber.w("Upload failed with status: ${response.code()}, saving locally")
+            saveLocally(audioFile)
+          }
         }
       },
       onFailure = { exception ->
