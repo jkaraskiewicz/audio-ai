@@ -4,201 +4,18 @@ import {
   TranscriptionProviderConfig,
   TranscriptionProviderInfo,
 } from '../../interfaces/AudioTranscriptionProvider';
+import { PROVIDER_DEFINITIONS } from './ProviderDefinitions';
+import { ProviderFactory } from './ProviderFactory';
 import { MockTranscriptionProvider } from './MockTranscriptionProvider';
-import { GeminiAudioTranscriptionProvider } from './GeminiAudioTranscriptionProvider';
-import { HuggingFaceTranscriptionProvider } from './HuggingFaceTranscriptionProvider';
-import { LocalWhisperProvider } from './LocalWhisperProvider';
-import { FreeWebSpeechProvider } from './FreeWebSpeechProvider';
-import { DockerWhisperProvider } from './DockerWhisperProvider';
-import { OpenAIWhisperWebserviceProvider } from './OpenAIWhisperWebserviceProvider';
+import { ProviderRegistryEntry } from './ProviderMetadata';
 import { logger } from '../../utils/logger';
 
 /**
- * Provider constructor signature for factory instantiation
- */
-type ProviderConstructor = new (...args: any[]) => AudioTranscriptionProvider;
-
-/**
- * Provider factory function signature for custom instantiation logic
- */
-type ProviderFactory = (config: TranscriptionProviderConfig) => AudioTranscriptionProvider;
-
-/**
- * Registry entry containing all information needed to create and describe a provider
- */
-interface ProviderRegistryEntry {
-  name: TranscriptionProvider;
-  description: string;
-  constructor?: ProviderConstructor;
-  factory?: ProviderFactory;
-  requiresApiKey: boolean;
-  supportsModels: boolean;
-  supportedFormats: string[];
-  maxFileSize: number;
-  isAvailable: boolean;
-  metadata: {
-    cost: 'free' | 'paid' | 'freemium';
-    installation: 'none' | 'api_key' | 'docker' | 'pip';
-    performance: 'low' | 'medium' | 'high';
-    accuracy: 'low' | 'medium' | 'high';
-  };
-}
-
-/**
  * Centralized registry for all audio transcription providers
- * Makes it easy to add new providers without modifying the factory
+ * Simplified registry focusing on provider lookup and information retrieval
  */
 export class ProviderRegistry {
-  private static readonly providers = new Map<TranscriptionProvider, ProviderRegistryEntry>([
-    [
-      TranscriptionProvider.FREE_WEB_SPEECH,
-      {
-        name: TranscriptionProvider.FREE_WEB_SPEECH,
-        description: 'Free web speech recognition (no API key required)',
-        constructor: FreeWebSpeechProvider,
-        requiresApiKey: false,
-        supportsModels: false,
-        supportedFormats: ['.mp3', '.wav', '.ogg', '.flac', '.m4a', '.mp4', '.webm'],
-        maxFileSize: 50 * 1024 * 1024, // 50MB
-        isAvailable: true,
-        metadata: {
-          cost: 'free',
-          installation: 'none',
-          performance: 'medium',
-          accuracy: 'medium',
-        },
-      },
-    ],
-    [
-      TranscriptionProvider.LOCAL_WHISPER,
-      {
-        name: TranscriptionProvider.LOCAL_WHISPER,
-        description: 'Local OpenAI Whisper (free, requires: pip install openai-whisper)',
-        constructor: LocalWhisperProvider,
-        requiresApiKey: false,
-        supportsModels: true,
-        supportedFormats: ['.mp3', '.wav', '.ogg', '.flac', '.m4a', '.mp4'],
-        maxFileSize: 50 * 1024 * 1024, // 50MB
-        isAvailable: true,
-        metadata: {
-          cost: 'free',
-          installation: 'pip',
-          performance: 'high',
-          accuracy: 'high',
-        },
-      },
-    ],
-    [
-      TranscriptionProvider.HUGGING_FACE,
-      {
-        name: TranscriptionProvider.HUGGING_FACE,
-        description: 'Hugging Face Whisper API (free: 1,000 requests/month)',
-        constructor: HuggingFaceTranscriptionProvider,
-        requiresApiKey: true,
-        supportsModels: true,
-        supportedFormats: ['.mp3', '.wav', '.ogg', '.flac', '.m4a'],
-        maxFileSize: 20 * 1024 * 1024, // 20MB for Hugging Face
-        isAvailable: true,
-        metadata: {
-          cost: 'freemium',
-          installation: 'api_key',
-          performance: 'high',
-          accuracy: 'high',
-        },
-      },
-    ],
-    [
-      TranscriptionProvider.MOCK,
-      {
-        name: TranscriptionProvider.MOCK,
-        description: 'Mock provider for development and testing (free)',
-        constructor: MockTranscriptionProvider,
-        requiresApiKey: false,
-        supportsModels: false,
-        supportedFormats: ['.mp3', '.wav', '.ogg', '.flac', '.m4a', '.mp4', '.webm'],
-        maxFileSize: 50 * 1024 * 1024, // 50MB
-        isAvailable: true,
-        metadata: {
-          cost: 'free',
-          installation: 'none',
-          performance: 'low',
-          accuracy: 'low',
-        },
-      },
-    ],
-    [
-      TranscriptionProvider.GEMINI_AUDIO,
-      {
-        name: TranscriptionProvider.GEMINI_AUDIO,
-        description: 'Google Gemini AI audio transcription (when available)',
-        constructor: GeminiAudioTranscriptionProvider,
-        factory: (config: TranscriptionProviderConfig) => {
-          if (!config.apiKey) {
-            logger.warn('Gemini API key not provided, falling back to mock provider');
-            return new MockTranscriptionProvider();
-          }
-          return new GeminiAudioTranscriptionProvider(config.apiKey, config.model);
-        },
-        requiresApiKey: true,
-        supportsModels: true,
-        supportedFormats: ['.mp3', '.wav', '.ogg', '.flac', '.m4a'],
-        maxFileSize: 20 * 1024 * 1024, // 20MB estimated for Gemini
-        isAvailable: false, // Not actually available yet
-        metadata: {
-          cost: 'paid',
-          installation: 'api_key',
-          performance: 'high',
-          accuracy: 'high',
-        },
-      },
-    ],
-    [
-      TranscriptionProvider.DOCKER_WHISPER,
-      {
-        name: TranscriptionProvider.DOCKER_WHISPER,
-        description: 'Docker-based OpenAI Whisper service (free, external or self-hosted)',
-        constructor: DockerWhisperProvider,
-        factory: (config: TranscriptionProviderConfig) => {
-          const whisperUrl = (config as any).whisperServiceUrl || process.env.WHISPER_SERVICE_URL;
-          return new DockerWhisperProvider(whisperUrl);
-        },
-        requiresApiKey: false,
-        supportsModels: true,
-        supportedFormats: ['.wav', '.mp3', '.ogg', '.flac', '.m4a', '.mp4', '.webm', '.aiff'],
-        maxFileSize: 100 * 1024 * 1024, // 100MB
-        isAvailable: true,
-        metadata: {
-          cost: 'free',
-          installation: 'docker',
-          performance: 'high',
-          accuracy: 'high',
-        },
-      },
-    ],
-    [
-      TranscriptionProvider.OPENAI_WHISPER_WEBSERVICE,
-      {
-        name: TranscriptionProvider.OPENAI_WHISPER_WEBSERVICE,
-        description: 'OpenAI Whisper ASR Webservice (onerahmet/openai-whisper-asr-webservice)',
-        constructor: OpenAIWhisperWebserviceProvider,
-        factory: (config: TranscriptionProviderConfig) => {
-          const whisperUrl = (config as any).whisperServiceUrl || process.env.WHISPER_SERVICE_URL;
-          return new OpenAIWhisperWebserviceProvider(whisperUrl);
-        },
-        requiresApiKey: false,
-        supportsModels: true,
-        supportedFormats: ['.wav', '.mp3', '.ogg', '.flac', '.m4a', '.mp4', '.webm', '.aiff'],
-        maxFileSize: 100 * 1024 * 1024, // 100MB
-        isAvailable: true,
-        metadata: {
-          cost: 'free',
-          installation: 'docker',
-          performance: 'high',
-          accuracy: 'high',
-        },
-      },
-    ],
-  ]);
+  private static providers = PROVIDER_DEFINITIONS;
 
   /**
    * Create a provider instance using the registry
@@ -212,26 +29,7 @@ export class ProviderRegistry {
       return new MockTranscriptionProvider();
     }
 
-    try {
-      if (entry.factory) {
-        return entry.factory(config);
-      } else if (entry.constructor) {
-        // Use constructor with appropriate parameters
-        if (entry.requiresApiKey && config.apiKey) {
-          if (entry.supportsModels && config.model) {
-            return new entry.constructor(config.apiKey, config.model);
-          }
-          return new entry.constructor(config.apiKey);
-        }
-        return new entry.constructor();
-      }
-
-      logger.error(`Provider ${config.provider} has no constructor or factory`);
-      return new MockTranscriptionProvider();
-    } catch (error) {
-      logger.error(`Failed to create provider ${config.provider}`, error);
-      return new MockTranscriptionProvider();
-    }
+    return ProviderFactory.create(entry, config);
   }
 
   /**
