@@ -1,16 +1,15 @@
 package com.karaskiewicz.scribely.ui.viewmodel
 
-import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
 import android.util.Log
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.karaskiewicz.scribely.domain.model.RecordingConstants
 import com.karaskiewicz.scribely.domain.model.RecordingResult
 import com.karaskiewicz.scribely.domain.model.RecordingState
 import com.karaskiewicz.scribely.domain.model.UploadResult
+import com.karaskiewicz.scribely.domain.usecase.PermissionHandler
+import com.karaskiewicz.scribely.domain.usecase.RecordingDurationTracker
 import com.karaskiewicz.scribely.domain.usecase.RecordingUseCase
 import com.karaskiewicz.scribely.utils.PreferencesDataStore
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,6 +24,8 @@ import kotlinx.coroutines.launch
 class MainViewModel(
   private val recordingUseCase: RecordingUseCase,
   private val preferencesDataStore: PreferencesDataStore,
+  private val permissionHandler: PermissionHandler,
+  private val durationTracker: RecordingDurationTracker,
 ) : ViewModel() {
   // Configuration state
   private val _serverUrl = MutableStateFlow("")
@@ -43,13 +44,8 @@ class MainViewModel(
   private val _successMessage = MutableStateFlow<String?>(null)
   val successMessage: StateFlow<String?> = _successMessage.asStateFlow()
 
-  private val _recordingDuration = MutableStateFlow(0L)
-  val recordingDuration: StateFlow<Long> = _recordingDuration.asStateFlow()
-
-  // Recording timing
-  private var recordingStartTime: Long = 0
-  private var pausedDuration: Long = 0
-  private var lastPauseTime: Long = 0
+  // Expose duration from tracker
+  val recordingDuration: StateFlow<Long> = durationTracker.duration
 
   fun loadConfiguration() {
     viewModelScope.launch {
@@ -76,19 +72,23 @@ class MainViewModel(
     clearMessages()
 
     // Check for audio recording permission
-    if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO)
-      != PackageManager.PERMISSION_GRANTED
-    ) {
-      _errorMessage.value = "Audio recording permission is required"
-      return
+    when (val permissionResult = permissionHandler.checkAudioRecordingPermission(context)) {
+      is PermissionHandler.PermissionResult.Granted -> {
+        // Permission granted, proceed with recording
+      }
+      is PermissionHandler.PermissionResult.Denied -> {
+        _errorMessage.value = permissionResult.message
+        return
+      }
     }
 
     when (val result = recordingUseCase.startRecording()) {
       is RecordingResult.Success -> {
         _recordingState.value = RecordingState.RECORDING
-        recordingStartTime = System.currentTimeMillis()
-        pausedDuration = 0
-        startDurationTimer()
+        durationTracker.start()
+        durationTracker.startDurationTimer(viewModelScope) {
+          _recordingState.value == RecordingState.RECORDING
+        }
       }
       is RecordingResult.Error -> {
         Log.e(RecordingConstants.LOG_TAG, "Recording failed: ${result.message}")
@@ -104,7 +104,7 @@ class MainViewModel(
   fun pauseRecording(context: Context) {
     when (val result = recordingUseCase.pauseRecording()) {
       is RecordingResult.Success -> {
-        lastPauseTime = System.currentTimeMillis()
+        durationTracker.pause()
         _recordingState.value = RecordingState.PAUSED
       }
       is RecordingResult.Error -> {
@@ -119,10 +119,12 @@ class MainViewModel(
   fun resumeRecording(context: Context) {
     when (val result = recordingUseCase.resumeRecording(context)) {
       is RecordingResult.Success -> {
-        pausedDuration += System.currentTimeMillis() - lastPauseTime
+        durationTracker.resume()
         _recordingState.value = RecordingState.RECORDING
         // Restart the timer for the recording state
-        startDurationTimer()
+        durationTracker.startDurationTimer(viewModelScope) {
+          _recordingState.value == RecordingState.RECORDING
+        }
       }
       is RecordingResult.Error -> {
         _errorMessage.value = result.message
@@ -185,20 +187,6 @@ class MainViewModel(
   }
 
   /**
-   * Starts the duration timer for recording.
-   */
-  private fun startDurationTimer() {
-    viewModelScope.launch {
-      while (_recordingState.value == RecordingState.RECORDING) {
-        val currentTime = System.currentTimeMillis()
-        val elapsed = currentTime - recordingStartTime - pausedDuration
-        _recordingDuration.value = elapsed
-        kotlinx.coroutines.delay(RecordingConstants.DURATION_UPDATE_INTERVAL_MS)
-      }
-    }
-  }
-
-  /**
    * Resets the recording state to idle after a delay.
    */
   private fun resetToIdleAfterDelay() {
@@ -221,12 +209,9 @@ class MainViewModel(
    */
   private fun resetRecordingState() {
     _recordingState.value = RecordingState.IDLE
-    _recordingDuration.value = 0L
+    durationTracker.reset()
     _errorMessage.value = null
     _successMessage.value = null
-    recordingStartTime = 0
-    pausedDuration = 0
-    lastPauseTime = 0
   }
 
   override fun onCleared() {
