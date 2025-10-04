@@ -153,9 +153,9 @@ describe('FileExtensionDetector', () => {
         expect(result).toBeNull();
       });
 
-      it('should return null for .png', () => {
+      it('should return UNKNOWN for .png (binary extension)', () => {
         const result = detector.detectByExtension('image.png');
-        expect(result).toBeNull();
+        expect(result).toBe(FileType.UNKNOWN);
       });
 
       it('should return null for unknown extension', () => {
