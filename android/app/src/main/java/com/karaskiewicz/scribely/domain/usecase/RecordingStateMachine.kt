@@ -4,54 +4,54 @@ import android.media.MediaRecorder
 import java.io.File
 
 /**
- * Recording state machine - manages recording lifecycle states
+ * Internal machine state - holds MediaRecorder and File references
  * Follows State Pattern and Single Responsibility Principle
  */
-internal sealed class RecordingState {
-  object Idle : RecordingState()
+internal sealed class MachineState {
+  object Idle : MachineState()
 
-  data class Recording(val mediaRecorder: MediaRecorder, val outputFile: File) : RecordingState()
+  data class Recording(val mediaRecorder: MediaRecorder, val outputFile: File) : MachineState()
 
-  data class Paused(val mediaRecorder: MediaRecorder, val outputFile: File) : RecordingState()
+  data class Paused(val mediaRecorder: MediaRecorder, val outputFile: File) : MachineState()
 
-  data class Finished(val outputFile: File) : RecordingState()
+  data class Finished(val outputFile: File) : MachineState()
 }
 
 /**
  * State machine for managing recording state transitions
  */
 internal class RecordingStateMachine {
-  private var state: RecordingState = RecordingState.Idle
+  private var state: MachineState = MachineState.Idle
 
-  fun getCurrentState(): RecordingState = state
+  fun getCurrentState(): MachineState = state
 
   fun transitionToRecording(
     mediaRecorder: MediaRecorder,
     outputFile: File,
   ) {
-    state = RecordingState.Recording(mediaRecorder, outputFile)
+    state = MachineState.Recording(mediaRecorder, outputFile)
   }
 
   fun transitionToPaused(
     mediaRecorder: MediaRecorder,
     outputFile: File,
   ) {
-    state = RecordingState.Paused(mediaRecorder, outputFile)
+    state = MachineState.Paused(mediaRecorder, outputFile)
   }
 
   fun transitionToFinished(outputFile: File) {
-    state = RecordingState.Finished(outputFile)
+    state = MachineState.Finished(outputFile)
   }
 
   fun transitionToIdle() {
-    state = RecordingState.Idle
+    state = MachineState.Idle
   }
 
-  fun isIdle(): Boolean = state is RecordingState.Idle
+  fun isIdle(): Boolean = state is MachineState.Idle
 
-  fun isRecording(): Boolean = state is RecordingState.Recording
+  fun isRecording(): Boolean = state is MachineState.Recording
 
-  fun isPaused(): Boolean = state is RecordingState.Paused
+  fun isPaused(): Boolean = state is MachineState.Paused
 
-  fun isFinished(): Boolean = state is RecordingState.Finished
+  fun isFinished(): Boolean = state is MachineState.Finished
 }

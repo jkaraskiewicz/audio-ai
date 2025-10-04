@@ -50,7 +50,7 @@ class RecordingUseCase(
    */
   fun pauseRecording(): RecordingResult =
     when (val currentState = stateMachine.getCurrentState()) {
-      is RecordingState.Recording -> {
+      is MachineState.Recording -> {
         val result = recorderController.pause(currentState.mediaRecorder)
         if (result is RecordingResult.Success) {
           stateMachine.transitionToPaused(currentState.mediaRecorder, currentState.outputFile)
@@ -68,7 +68,7 @@ class RecordingUseCase(
    */
   fun resumeRecording(context: Context): RecordingResult =
     when (val currentState = stateMachine.getCurrentState()) {
-      is RecordingState.Paused -> {
+      is MachineState.Paused -> {
         val result = recorderController.resume(currentState.mediaRecorder)
         if (result is RecordingResult.Success) {
           stateMachine.transitionToRecording(currentState.mediaRecorder, currentState.outputFile)
@@ -86,7 +86,7 @@ class RecordingUseCase(
    */
   fun finishRecording(): RecordingResult =
     when (val currentState = stateMachine.getCurrentState()) {
-      is RecordingState.Recording, is RecordingState.Paused -> {
+      is MachineState.Recording, is MachineState.Paused -> {
         val (mediaRecorder, outputFile) = extractRecorderAndFile(currentState)
         try {
           recorderController.stopAndRelease(mediaRecorder)
@@ -114,7 +114,7 @@ class RecordingUseCase(
    */
   suspend fun uploadRecording(): UploadResult {
     return when (val currentState = stateMachine.getCurrentState()) {
-      is RecordingState.Finished -> {
+      is MachineState.Finished -> {
         val recordingFile = currentState.outputFile
         if (!recordingFile.exists()) {
           Timber.e("Upload failed - recording file no longer exists")
@@ -156,8 +156,8 @@ class RecordingUseCase(
    */
   fun resetRecording() {
     when (val currentState = stateMachine.getCurrentState()) {
-      is RecordingState.Recording -> recorderController.safeRelease(currentState.mediaRecorder)
-      is RecordingState.Paused -> recorderController.safeRelease(currentState.mediaRecorder)
+      is MachineState.Recording -> recorderController.safeRelease(currentState.mediaRecorder)
+      is MachineState.Paused -> recorderController.safeRelease(currentState.mediaRecorder)
       else -> {} // No cleanup needed
     }
     stateMachine.transitionToIdle()
@@ -165,10 +165,10 @@ class RecordingUseCase(
 
   // Private helper methods
 
-  private fun extractRecorderAndFile(state: RecordingState): Pair<android.media.MediaRecorder, java.io.File> =
+  private fun extractRecorderAndFile(state: MachineState): Pair<android.media.MediaRecorder, java.io.File> =
     when (state) {
-      is RecordingState.Recording -> state.mediaRecorder to state.outputFile
-      is RecordingState.Paused -> state.mediaRecorder to state.outputFile
+      is MachineState.Recording -> state.mediaRecorder to state.outputFile
+      is MachineState.Paused -> state.mediaRecorder to state.outputFile
       else -> throw IllegalStateException("Unexpected state")
     }
 
