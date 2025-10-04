@@ -5,22 +5,17 @@ import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.karaskiewicz.scribely.data.ProcessTextRequest
-import com.karaskiewicz.scribely.network.ApiServiceManager
-import com.karaskiewicz.scribely.domain.usecase.RecordingUseCase
-import com.karaskiewicz.scribely.utils.FileUtils
-import com.karaskiewicz.scribely.utils.safeSuspendNetworkCall
-import com.karaskiewicz.scribely.utils.safeFileOperation
-import com.karaskiewicz.scribely.utils.mapToResult
+import com.karaskiewicz.scribely.domain.usecase.ProcessFileUseCase
+import com.karaskiewicz.scribely.domain.usecase.ProcessTextUseCase
 import timber.log.Timber
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.MultipartBody
-import okhttp3.RequestBody.Companion.asRequestBody
 
+/**
+ * State for share screen
+ */
 data class ShareState(
   val isLoading: Boolean = false,
   val isSuccess: Boolean = false,
@@ -28,13 +23,24 @@ data class ShareState(
   val message: String = "",
 )
 
+/**
+ * ViewModel for handling shared content from other apps
+ * Follows Clean Architecture - delegates processing to use cases
+ *
+ * Orchestrates share workflow by delegating to:
+ * - ProcessTextUseCase: text content processing
+ * - ProcessFileUseCase: file content processing
+ */
 class ShareViewModel(
-  private val recordingUseCase: RecordingUseCase,
-  private val apiServiceManager: ApiServiceManager,
+  private val processTextUseCase: ProcessTextUseCase,
+  private val processFileUseCase: ProcessFileUseCase,
 ) : ViewModel() {
   private val _shareState = MutableStateFlow(ShareState(message = "Preparing..."))
   val shareState: StateFlow<ShareState> = _shareState.asStateFlow()
 
+  /**
+   * Handles shared content based on intent action and type
+   */
   fun handleSharedContent(
     context: Context,
     intent: Intent,
@@ -42,24 +48,41 @@ class ShareViewModel(
     Timber.d("Handling shared content - Action: ${intent.action}, Type: ${intent.type}")
 
     when (intent.action) {
-      Intent.ACTION_SEND -> {
-        if (intent.type?.startsWith("text/") == true) {
-          Timber.d("Handling text share")
-          handleTextShare(context, intent)
-        } else {
-          Timber.d("Handling file share with type: ${intent.type}")
-          handleFileShare(context, intent)
-        }
-      }
-      Intent.ACTION_SEND_MULTIPLE -> {
-        Timber.d("Handling multiple files share")
-        handleMultipleFilesShare(context, intent)
-      }
+      Intent.ACTION_SEND -> handleSingleShare(context, intent)
+      Intent.ACTION_SEND_MULTIPLE -> handleMultipleShare(context, intent)
       else -> {
         Timber.w("Unsupported action: ${intent.action}")
         _shareState.value = ShareState(error = "Unsupported share action: ${intent.action}")
       }
     }
+  }
+
+  private fun handleSingleShare(
+    context: Context,
+    intent: Intent,
+  ) {
+    if (intent.type?.startsWith("text/") == true) {
+      Timber.d("Handling text share")
+      handleTextShare(context, intent)
+    } else {
+      Timber.d("Handling file share with type: ${intent.type}")
+      handleFileShare(context, intent)
+    }
+  }
+
+  private fun handleMultipleShare(
+    context: Context,
+    intent: Intent,
+  ) {
+    Timber.d("Handling multiple files share")
+    val uris = extractUriList(intent)
+    if (uris.isNullOrEmpty()) {
+      _shareState.value = ShareState(error = "No files found")
+      return
+    }
+
+    // For now, just process the first file
+    processFile(context, uris[0])
   }
 
   private fun handleTextShare(
@@ -79,14 +102,7 @@ class ShareViewModel(
     context: Context,
     intent: Intent,
   ) {
-    val uri =
-      if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-        intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
-      } else {
-        @Suppress("DEPRECATION")
-        intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
-      }
-
+    val uri = extractUri(intent)
     Timber.d("File share URI: $uri")
 
     if (uri == null) {
@@ -95,43 +111,7 @@ class ShareViewModel(
       return
     }
 
-    // Log file information
-    try {
-      val contentResolver = context.contentResolver
-      val mimeType = contentResolver.getType(uri)
-      Timber.d("Shared file - URI: $uri, MIME type: $mimeType")
-
-      // Check if we can access the file
-      contentResolver.openInputStream(uri)?.use {
-        Timber.d("Successfully opened input stream for file")
-      }
-    } catch (e: Exception) {
-      Timber.e(e, "Failed to access shared file")
-      _shareState.value = ShareState(error = "Cannot access shared file: ${e.message}")
-      return
-    }
-
     processFile(context, uri)
-  }
-
-  private fun handleMultipleFilesShare(
-    context: Context,
-    intent: Intent,
-  ) {
-    val uris =
-      if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-        intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM, Uri::class.java)
-      } else {
-        @Suppress("DEPRECATION")
-        intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)
-      }
-    if (uris.isNullOrEmpty()) {
-      _shareState.value = ShareState(error = "No files found")
-      return
-    }
-
-    // For now, just process the first file
-    processFile(context, uris[0])
   }
 
   private fun processText(
@@ -141,46 +121,14 @@ class ShareViewModel(
     viewModelScope.launch {
       _shareState.value = ShareState(isLoading = true, message = "Processing text...")
 
-      val result =
-        safeSuspendNetworkCall("process text") {
-          val apiService = apiServiceManager.createApiService()
-          val request = ProcessTextRequest(text)
-          apiService.processText(request)
+      when (val result = processTextUseCase.processText(context, text)) {
+        is ProcessTextUseCase.TextProcessingResult.Success -> {
+          _shareState.value = ShareState(isSuccess = true, message = result.message)
         }
-
-      result.mapToResult(
-        onSuccess = { response ->
-          when {
-            response.isSuccessful -> {
-              val body = response.body()
-              if (body?.isSuccess == true) {
-                _shareState.value =
-                  ShareState(
-                    isSuccess = true,
-                    message = "Text processed successfully!\nSaved to: ${body.savedTo}",
-                  )
-              } else {
-                _shareState.value =
-                  ShareState(
-                    error = "Processing failed: ${body?.error ?: "Unknown error"}",
-                  )
-              }
-            }
-            else -> {
-              _shareState.value =
-                ShareState(
-                  error = "Server error: HTTP ${response.code()}",
-                )
-            }
-          }
-        },
-        onFailure = { exception ->
-          _shareState.value =
-            ShareState(
-              error = "Network error: ${exception.message ?: "Unknown error"}",
-            )
-        },
-      )
+        is ProcessTextUseCase.TextProcessingResult.Error -> {
+          _shareState.value = ShareState(error = result.errorMessage)
+        }
+      }
     }
   }
 
@@ -188,81 +136,35 @@ class ShareViewModel(
     context: Context,
     uri: Uri,
   ) {
-    Timber.d("Starting to process file: $uri")
     viewModelScope.launch {
       _shareState.value = ShareState(isLoading = true, message = "Processing file...")
 
-      val fileResult =
-        safeFileOperation("copy URI to temp file") {
-          Timber.d("Copying URI to temp file: $uri")
-          val result = FileUtils.copyUriToTempFile(context, uri)
-          Timber.d("Copy result: ${result?.absolutePath}")
-          result
+      when (val result = processFileUseCase.processFile(context, uri)) {
+        is ProcessFileUseCase.FileProcessingResult.Success -> {
+          _shareState.value = ShareState(isSuccess = true, message = result.message)
         }
-
-      fileResult.mapToResult(
-        onSuccess = { file ->
-          if (file == null) {
-            Timber.w("FileUtils returned null file")
-            _shareState.value = ShareState(error = "Failed to read file")
-            return@mapToResult
-          }
-
-          Timber.d("Successfully created temp file: ${file.absolutePath}, size: ${file.length()} bytes")
-
-          val networkResult =
-            safeSuspendNetworkCall("process file") {
-              val apiService = apiServiceManager.createApiService()
-              val requestFile = file.asRequestBody("*/*".toMediaTypeOrNull())
-              val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
-              apiService.processFile(body)
-            }
-
-          // Clean up temp file
-          file.delete()
-
-          networkResult.mapToResult(
-            onSuccess = { response ->
-              when {
-                response.isSuccessful -> {
-                  val responseBody = response.body()
-                  if (responseBody?.isSuccess == true) {
-                    _shareState.value =
-                      ShareState(
-                        isSuccess = true,
-                        message = "File processed successfully!\nSaved to: ${responseBody.savedTo}",
-                      )
-                  } else {
-                    _shareState.value =
-                      ShareState(
-                        error = "Processing failed: ${responseBody?.error ?: "Unknown error"}",
-                      )
-                  }
-                }
-                else -> {
-                  _shareState.value =
-                    ShareState(
-                      error = "Server error: HTTP ${response.code()}",
-                    )
-                }
-              }
-            },
-            onFailure = { exception ->
-              _shareState.value =
-                ShareState(
-                  error = "Network error: ${exception.message ?: "Unknown error"}",
-                )
-            },
-          )
-        },
-        onFailure = { exception ->
-          Timber.e(exception, "Failed to process file")
-          _shareState.value =
-            ShareState(
-              error = "File error: ${exception.message ?: "Unknown error"}",
-            )
-        },
-      )
+        is ProcessFileUseCase.FileProcessingResult.Error -> {
+          _shareState.value = ShareState(error = result.errorMessage)
+        }
+      }
     }
   }
+
+  // Android version-safe URI extraction helpers
+
+  private fun extractUri(intent: Intent): Uri? =
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+      intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+    } else {
+      @Suppress("DEPRECATION")
+      intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
+    }
+
+  private fun extractUriList(intent: Intent): List<Uri>? =
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+      intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM, Uri::class.java)
+    } else {
+      @Suppress("DEPRECATION")
+      intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)
+    }
 }

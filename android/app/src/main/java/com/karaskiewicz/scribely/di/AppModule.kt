@@ -4,6 +4,8 @@ import com.karaskiewicz.scribely.domain.repository.RecordingRepository
 import com.karaskiewicz.scribely.domain.repository.RecordingRepositoryImpl
 import com.karaskiewicz.scribely.domain.service.FileManager
 import com.karaskiewicz.scribely.domain.service.MediaRecorderFactory
+import com.karaskiewicz.scribely.domain.usecase.ProcessFileUseCase
+import com.karaskiewicz.scribely.domain.usecase.ProcessTextUseCase
 import com.karaskiewicz.scribely.domain.usecase.RecordingUseCase
 import com.karaskiewicz.scribely.network.ApiServiceManager
 import com.karaskiewicz.scribely.ui.viewmodel.MainViewModel
@@ -31,6 +33,8 @@ val networkingModule =
 val useCasesModule =
   module {
     single { RecordingUseCase(get(), get(), get()) }
+    single { ProcessTextUseCase(get()) }
+    single { ProcessFileUseCase(get()) }
   }
 
 val viewModelsModule =
