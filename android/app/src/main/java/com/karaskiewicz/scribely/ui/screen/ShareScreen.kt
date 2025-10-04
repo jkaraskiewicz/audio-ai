@@ -1,60 +1,33 @@
 package com.karaskiewicz.scribely.ui.screen
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import org.koin.androidx.compose.koinViewModel
+import com.karaskiewicz.scribely.ui.components.ShareDialog
 import com.karaskiewicz.scribely.ui.theme.ScribelyTheme
-import com.karaskiewicz.scribely.ui.theme.UIConfig
 import com.karaskiewicz.scribely.ui.viewmodel.ShareState
 import com.karaskiewicz.scribely.ui.viewmodel.ShareViewModel
 import kotlinx.coroutines.delay
 
+/**
+ * Share screen - entry point for handling shared content
+ * Follows Single Responsibility Principle - only handles screen orchestration and lifecycle
+ *
+ * This file is now minimal and focused on screen-level concerns:
+ * - Intent handling
+ * - ViewModel state collection
+ * - Auto-dismiss logic
+ * - Delegation to ShareDialog for presentation
+ *
+ * UI components extracted to:
+ * - ShareDialog.kt (dialog presentation with animations)
+ * - ShareStatusIcon.kt (status icon logic)
+ * - ShareActionButtons.kt (action button logic)
+ */
 @Composable
 fun ShareScreen(
   intent: android.content.Intent,
@@ -65,6 +38,7 @@ fun ShareScreen(
   val context = LocalContext.current
   val shareState by viewModel.shareState.collectAsState()
 
+  // Handle shared content on launch
   LaunchedEffect(intent) {
     viewModel.handleSharedContent(context, intent)
   }
@@ -77,6 +51,7 @@ fun ShareScreen(
     }
   }
 
+  // Delegate to ShareDialog for presentation
   ShareDialog(
     state = shareState,
     onDismiss = onDismiss,
@@ -84,227 +59,7 @@ fun ShareScreen(
   )
 }
 
-@Composable
-private fun ShareDialog(
-  state: ShareState,
-  onDismiss: () -> Unit,
-  onNavigateToSettings: () -> Unit,
-) {
-  val animationScale by animateFloatAsState(
-    targetValue = 1f,
-    animationSpec =
-      spring(
-        dampingRatio = Spring.DampingRatioMediumBouncy,
-        stiffness = Spring.StiffnessLow,
-      ),
-    label = "dialogScale",
-  )
-
-  val backgroundAlpha by animateFloatAsState(
-    targetValue = 0.6f,
-    animationSpec = tween(300),
-    label = "backgroundAlpha",
-  )
-
-  Dialog(
-    onDismissRequest =
-      if (!state.isLoading) {
-        onDismiss
-      } else {
-        {}
-      },
-    properties =
-      DialogProperties(
-        dismissOnBackPress = !state.isLoading,
-        dismissOnClickOutside = !state.isLoading,
-      ),
-  ) {
-    Box(
-      modifier =
-        Modifier
-          .fillMaxSize()
-          .background(Color.Black.copy(alpha = backgroundAlpha)),
-      contentAlignment = Alignment.Center,
-    ) {
-      Surface(
-        modifier =
-          Modifier
-            .fillMaxWidth()
-            .padding(32.dp)
-            .scale(animationScale),
-        shape = RoundedCornerShape(UIConfig.Sizing.CardCornerRadius),
-        tonalElevation = 0.dp,
-        shadowElevation = UIConfig.Sizing.ButtonElevation,
-        color = UIConfig.Colors.WhiteBackground,
-      ) {
-        Column(
-          modifier = Modifier.padding(20.dp),
-          horizontalAlignment = Alignment.CenterHorizontally,
-          verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-          // Status Icon with Animation
-          AnimatedVisibility(
-            visible = true,
-            enter = scaleIn(spring(dampingRatio = Spring.DampingRatioMediumBouncy)) + fadeIn(),
-            exit = scaleOut() + fadeOut(),
-          ) {
-            StatusIcon(state = state)
-          }
-
-          // Title - Scribely themed
-          Text(
-            text =
-              when {
-                state.isSuccess -> "Complete!"
-                state.error != null -> "Error"
-                else -> "Processing..."
-              },
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = UIConfig.Typography.BoldWeight,
-            color = UIConfig.Colors.PrimaryTextColor,
-            textAlign = TextAlign.Center,
-          )
-
-          // Progress Indicator - smaller
-          AnimatedVisibility(
-            visible = state.isLoading,
-            enter = fadeIn() + scaleIn(),
-            exit = fadeOut() + scaleOut(),
-          ) {
-            CircularProgressIndicator(
-              modifier = Modifier.size(24.dp),
-              strokeWidth = 2.5.dp,
-              color = UIConfig.Colors.ScribelyRed,
-            )
-          }
-
-          // Message - Scribely themed
-          Text(
-            text = state.error ?: state.message,
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center,
-            color =
-              when {
-                state.error != null -> UIConfig.Colors.ScribelyRed
-                state.isSuccess -> UIConfig.Colors.ScribelyGray
-                else -> UIConfig.Colors.SecondaryTextColor
-              },
-            lineHeight = MaterialTheme.typography.bodyMedium.lineHeight,
-          )
-
-          // Action Buttons
-          AnimatedVisibility(
-            visible = !state.isLoading,
-            enter = fadeIn(tween(400)) + scaleIn(spring()),
-            exit = fadeOut() + scaleOut(),
-          ) {
-            ActionButtons(
-              state = state,
-              onDismiss = onDismiss,
-              onNavigateToSettings = onNavigateToSettings,
-            )
-          }
-        }
-      }
-    }
-  }
-}
-
-@Composable
-private fun StatusIcon(state: ShareState) {
-  val icon =
-    when {
-      state.isSuccess -> Icons.Default.CheckCircle
-      state.error != null -> Icons.Default.Error
-      else -> null
-    }
-
-  val iconColor =
-    when {
-      state.isSuccess -> Color(0xFF4CAF50) // Keep success green
-      state.error != null -> UIConfig.Colors.ScribelyRed
-      else -> UIConfig.Colors.ScribelyRed
-    }
-
-  icon?.let {
-    Icon(
-      imageVector = it,
-      contentDescription = null,
-      modifier = Modifier.size(32.dp),
-      tint = iconColor,
-    )
-  }
-}
-
-@Composable
-private fun ActionButtons(
-  state: ShareState,
-  onDismiss: () -> Unit,
-  onNavigateToSettings: () -> Unit,
-) {
-  Row(
-    modifier = Modifier.fillMaxWidth(),
-    horizontalArrangement =
-      if (state.error != null && state.error.contains("configure")) {
-        Arrangement.spacedBy(8.dp)
-      } else {
-        Arrangement.Center
-      },
-  ) {
-    if (state.error != null && state.error.contains("configure")) {
-      FilledTonalButton(
-        onClick = onNavigateToSettings,
-        modifier = Modifier.weight(1f),
-        shape = RoundedCornerShape(UIConfig.Sizing.ButtonCornerRadius),
-        colors =
-          ButtonDefaults.filledTonalButtonColors(
-            containerColor = UIConfig.Colors.ScribelyGrayLight,
-            contentColor = UIConfig.Colors.WhiteBackground,
-          ),
-      ) {
-        Icon(
-          imageVector = Icons.Default.Settings,
-          contentDescription = null,
-          modifier = Modifier.size(16.dp),
-        )
-        Spacer(modifier = Modifier.width(6.dp))
-        Text(
-          "Settings",
-          style = MaterialTheme.typography.labelLarge,
-          fontWeight = UIConfig.Typography.BoldWeight,
-        )
-      }
-    }
-
-    Button(
-      onClick = onDismiss,
-      modifier =
-        if (state.error != null && state.error.contains("configure")) {
-          Modifier.weight(1f)
-        } else {
-          Modifier
-        },
-      shape = RoundedCornerShape(UIConfig.Sizing.ButtonCornerRadius),
-      colors =
-        ButtonDefaults.buttonColors(
-          containerColor =
-            if (state.isSuccess) {
-              UIConfig.Colors.ScribelyRed
-            } else {
-              UIConfig.Colors.ScribelyGrayLight
-            },
-          contentColor = UIConfig.Colors.WhiteBackground,
-        ),
-    ) {
-      Text(
-        text = if (state.isSuccess) "Done" else "Close",
-        style = MaterialTheme.typography.labelLarge,
-        fontWeight = UIConfig.Typography.BoldWeight,
-      )
-    }
-  }
-}
-
+// Preview functions
 @Preview(showBackground = true)
 @Composable
 fun ShareDialogPreview() {
