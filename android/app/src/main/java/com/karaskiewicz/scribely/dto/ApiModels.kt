@@ -1,4 +1,4 @@
-package com.karaskiewicz.scribely.data
+package com.karaskiewicz.scribely.dto
 
 import com.google.gson.annotations.SerializedName
 

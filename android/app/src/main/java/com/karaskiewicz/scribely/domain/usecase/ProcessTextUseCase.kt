@@ -1,7 +1,7 @@
 package com.karaskiewicz.scribely.domain.usecase
 
 import android.content.Context
-import com.karaskiewicz.scribely.data.ProcessTextRequest
+import com.karaskiewicz.scribely.dto.ProcessTextRequest
 import com.karaskiewicz.scribely.network.ApiServiceManager
 import com.karaskiewicz.scribely.utils.safeSuspendNetworkCall
 import com.karaskiewicz.scribely.utils.mapToResult

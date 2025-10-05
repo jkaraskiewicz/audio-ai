@@ -1,4 +1,4 @@
-package com.karaskiewicz.scribely.domain.usecase
+package com.karaskiewicz.scribely.utils
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first

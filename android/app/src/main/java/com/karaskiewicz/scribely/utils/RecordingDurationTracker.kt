@@ -1,4 +1,4 @@
-package com.karaskiewicz.scribely.domain.usecase
+package com.karaskiewicz.scribely.utils
 
 import com.karaskiewicz.scribely.domain.model.RecordingConstants
 import kotlinx.coroutines.CoroutineScope

@@ -1,4 +1,4 @@
-package com.karaskiewicz.scribely.domain.usecase
+package com.karaskiewicz.scribely.domain.handler
 
 import com.karaskiewicz.scribely.domain.model.RecordingResult
 import com.karaskiewicz.scribely.domain.service.FileManager

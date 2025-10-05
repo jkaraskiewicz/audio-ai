@@ -1,8 +1,7 @@
-package com.karaskiewicz.scribely.domain.usecase
+package com.karaskiewicz.scribely.domain.service
 
 import android.media.MediaRecorder
 import com.karaskiewicz.scribely.domain.model.RecordingResult
-import com.karaskiewicz.scribely.domain.service.MediaRecorderFactory
 import timber.log.Timber
 import java.io.File
 

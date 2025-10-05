@@ -1,4 +1,4 @@
-package com.karaskiewicz.scribely.domain.usecase
+package com.karaskiewicz.scribely.domain.model
 
 import android.media.MediaRecorder
 import java.io.File

@@ -2,8 +2,8 @@ package com.karaskiewicz.scribely.ui.viewmodel
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.karaskiewicz.scribely.domain.usecase.RecordingUseCase
-import com.karaskiewicz.scribely.domain.usecase.PermissionHandler
-import com.karaskiewicz.scribely.domain.usecase.RecordingDurationTracker
+import com.karaskiewicz.scribely.domain.handler.PermissionHandler
+import com.karaskiewicz.scribely.utils.RecordingDurationTracker
 import com.karaskiewicz.scribely.utils.PreferencesDataStore
 import com.karaskiewicz.scribely.domain.model.RecordingState
 import kotlinx.coroutines.Dispatchers

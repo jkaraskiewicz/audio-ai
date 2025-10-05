@@ -8,8 +8,8 @@ import com.karaskiewicz.scribely.domain.model.RecordingConstants
 import com.karaskiewicz.scribely.domain.model.RecordingResult
 import com.karaskiewicz.scribely.domain.model.RecordingState
 import com.karaskiewicz.scribely.domain.model.UploadResult
-import com.karaskiewicz.scribely.domain.usecase.PermissionHandler
-import com.karaskiewicz.scribely.domain.usecase.RecordingDurationTracker
+import com.karaskiewicz.scribely.domain.handler.PermissionHandler
+import com.karaskiewicz.scribely.utils.RecordingDurationTracker
 import com.karaskiewicz.scribely.domain.usecase.RecordingUseCase
 import com.karaskiewicz.scribely.utils.PreferencesDataStore
 import kotlinx.coroutines.flow.MutableStateFlow

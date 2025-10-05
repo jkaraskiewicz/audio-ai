@@ -1,4 +1,4 @@
-package com.karaskiewicz.scribely.domain.usecase
+package com.karaskiewicz.scribely.domain.handler
 
 import android.Manifest
 import android.content.Context
