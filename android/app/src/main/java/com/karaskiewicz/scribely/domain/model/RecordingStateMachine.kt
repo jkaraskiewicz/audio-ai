@@ -47,11 +47,4 @@ internal class RecordingStateMachine {
     state = MachineState.Idle
   }
 
-  fun isIdle(): Boolean = state is MachineState.Idle
-
-  fun isRecording(): Boolean = state is MachineState.Recording
-
-  fun isPaused(): Boolean = state is MachineState.Paused
-
-  fun isFinished(): Boolean = state is MachineState.Finished
 }
