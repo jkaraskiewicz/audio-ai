@@ -8,7 +8,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.karaskiewicz.scribely.ui.theme.UIConfig
@@ -80,59 +79,5 @@ fun MessageCards(
         textAlign = TextAlign.Center,
       )
     }
-  }
-}
-
-/**
- * 🎨 DEVELOPER-FRIENDLY: Individual Message Card Components
- * Use these for more granular control
- */
-@Composable
-fun ErrorCard(
-  message: String,
-  modifier: Modifier = Modifier,
-  backgroundColor: Color = MaterialTheme.colorScheme.errorContainer,
-  textColor: Color = MaterialTheme.colorScheme.onErrorContainer,
-) {
-  Card(
-    modifier =
-      modifier
-        .fillMaxWidth()
-        .padding(UIConfig.Spacing.MediumSpacing),
-    colors = CardDefaults.cardColors(containerColor = backgroundColor),
-    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-  ) {
-    Text(
-      text = message,
-      style = MaterialTheme.typography.bodyMedium,
-      color = textColor,
-      modifier = Modifier.padding(UIConfig.Sizing.ContainerPadding),
-      textAlign = TextAlign.Center,
-    )
-  }
-}
-
-@Composable
-fun SuccessCard(
-  message: String,
-  modifier: Modifier = Modifier,
-  backgroundColor: Color = UIConfig.Colors.ScribelyRedLight,
-  textColor: Color = UIConfig.Colors.PrimaryTextColor,
-) {
-  Card(
-    modifier =
-      modifier
-        .fillMaxWidth()
-        .padding(UIConfig.Spacing.MediumSpacing),
-    colors = CardDefaults.cardColors(containerColor = backgroundColor),
-    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-  ) {
-    Text(
-      text = message,
-      style = MaterialTheme.typography.bodyMedium,
-      color = textColor,
-      modifier = Modifier.padding(UIConfig.Sizing.ContainerPadding),
-      textAlign = TextAlign.Center,
-    )
   }
 }
