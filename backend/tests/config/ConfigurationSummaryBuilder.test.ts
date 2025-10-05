@@ -55,6 +55,11 @@ describe('ConfigurationSummaryBuilder', () => {
 
       const summary = builder.buildSummary(appConfig, transcriptionConfig, aiConfig);
 
+      expect('error' in summary).toBe(false);
+      if ('error' in summary) {
+        return;
+      }
+
       expect(summary.environment).toBe('development');
       expect(summary.useCase).toBe('testing');
       expect(summary.port).toBe(3000);
@@ -101,6 +106,11 @@ describe('ConfigurationSummaryBuilder', () => {
 
       const summary = builder.buildSummary(appConfig, transcriptionConfig, aiConfig);
 
+      expect('error' in summary).toBe(false);
+      if ('error' in summary) {
+        return;
+      }
+
       expect(summary.transcription.hasApiKey).toBe(false);
     });
 
@@ -115,7 +125,10 @@ describe('ConfigurationSummaryBuilder', () => {
 
       const summary = builder.buildSummary(appConfig, transcriptionConfig, aiConfig);
 
-      expect(summary.error).toBe('Environment loading failed');
+      expect('error' in summary).toBe(true);
+      if ('error' in summary) {
+        expect(summary.error).toBe('Environment loading failed');
+      }
     });
 
     it('should handle unknown errors gracefully', () => {
@@ -129,7 +142,10 @@ describe('ConfigurationSummaryBuilder', () => {
 
       const summary = builder.buildSummary(appConfig, transcriptionConfig, aiConfig);
 
-      expect(summary.error).toBe('Configuration error');
+      expect('error' in summary).toBe(true);
+      if ('error' in summary) {
+        expect(summary.error).toBe('Configuration error');
+      }
     });
   });
 });

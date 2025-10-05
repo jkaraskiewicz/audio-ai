@@ -15,10 +15,15 @@ module.exports = {
   rules: {
     'prettier/prettier': 'error',
     '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-    '@typescript-eslint/explicit-function-return-type': 'warn',
-    '@typescript-eslint/no-explicit-any': 'warn',
+    '@typescript-eslint/explicit-function-return-type': 'error',
+    '@typescript-eslint/no-explicit-any': 'error',
+    '@typescript-eslint/no-non-null-assertion': 'error',
+    '@typescript-eslint/strict-boolean-expressions': 'off', // Too strict, causes many false positives
     'prefer-const': 'error',
     'no-var': 'error',
+    'no-console': ['warn', { allow: ['error'] }], // Allow console.error, warn for others (logger.ts uses console)
+    'eqeqeq': ['error', 'always'], // Require === and !==
+    'curly': ['error', 'all'], // Require braces for all control statements
   },
   env: {
     node: true,

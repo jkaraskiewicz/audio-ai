@@ -1,10 +1,14 @@
 import { AppConfig, AIServiceConfig, TranscriptionConfig } from '../types';
 import { EnvironmentConfigLoader } from './EnvironmentConfigLoader';
-import { FeatureFlagManager } from './FeatureFlagManager';
+import { FeatureFlagManager, FeatureFlags } from './FeatureFlagManager';
 import { ApplicationConfigBuilder } from './ApplicationConfigBuilder';
 import { TranscriptionConfigBuilder } from './TranscriptionConfigBuilder';
 import { AIConfigBuilder } from './AIConfigBuilder';
-import { ConfigurationSummaryBuilder } from './ConfigurationSummaryBuilder';
+import {
+  ConfigurationSummaryBuilder,
+  ConfigurationSummary,
+  ConfigurationSummaryError,
+} from './ConfigurationSummaryBuilder';
 import { ConfigurationValidator, ValidationResult } from './ConfigurationValidator';
 import { logger } from '../utils/logger';
 
@@ -92,11 +96,11 @@ export class ConfigurationService {
     }
   }
 
-  isFeatureEnabled(featureName: string): boolean {
-    return this.featureFlagManager.isFeatureEnabled(featureName as any);
+  isFeatureEnabled(featureName: keyof FeatureFlags): boolean {
+    return this.featureFlagManager.isFeatureEnabled(featureName);
   }
 
-  getConfigurationSummary(): Record<string, any> {
+  getConfigurationSummary(): ConfigurationSummary | ConfigurationSummaryError {
     const appConfig = this.getApplicationConfig();
     const transcriptionConfig = this.getTranscriptionConfig();
     const aiConfig = this.getAIConfig();

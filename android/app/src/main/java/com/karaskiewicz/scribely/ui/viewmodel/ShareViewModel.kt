@@ -3,6 +3,7 @@ package com.karaskiewicz.scribely.ui.viewmodel
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.karaskiewicz.scribely.domain.usecase.ProcessFileUseCase
@@ -153,7 +154,7 @@ class ShareViewModel(
   // Android version-safe URI extraction helpers
 
   private fun extractUri(intent: Intent): Uri? =
-    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
       intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
     } else {
       @Suppress("DEPRECATION")
@@ -161,7 +162,7 @@ class ShareViewModel(
     }
 
   private fun extractUriList(intent: Intent): List<Uri>? =
-    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
       intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM, Uri::class.java)
     } else {
       @Suppress("DEPRECATION")

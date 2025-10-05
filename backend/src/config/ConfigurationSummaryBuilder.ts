@@ -1,11 +1,35 @@
 import { AppConfig, TranscriptionConfig, AIServiceConfig } from '../types';
 import { EnvironmentConfigLoader } from './EnvironmentConfigLoader';
-import { FeatureFlagManager } from './FeatureFlagManager';
+import { FeatureFlagManager, FeatureFlags } from './FeatureFlagManager';
 
 /**
  * Builds configuration summary for logging and debugging
  * Follows Single Responsibility Principle
  */
+export interface ConfigurationSummary {
+  environment: string;
+  useCase?: string;
+  port: number;
+  baseDirectory: string;
+  transcription: {
+    provider: string;
+    hasApiKey: boolean;
+    model?: string;
+    language?: string;
+    maxFileSize?: number;
+  };
+  ai: {
+    model: string;
+    maxTokens?: number;
+    temperature?: number;
+  };
+  features: FeatureFlags;
+}
+
+export interface ConfigurationSummaryError {
+  error: string;
+}
+
 export class ConfigurationSummaryBuilder {
   constructor(
     private environmentLoader: EnvironmentConfigLoader,
@@ -16,7 +40,7 @@ export class ConfigurationSummaryBuilder {
     appConfig: AppConfig,
     transcriptionConfig: TranscriptionConfig,
     aiConfig: AIServiceConfig
-  ): Record<string, any> {
+  ): ConfigurationSummary | ConfigurationSummaryError {
     try {
       const environment = this.environmentLoader.loadEnvironmentConfiguration();
       const features = this.featureFlagManager.loadFeatureFlags();

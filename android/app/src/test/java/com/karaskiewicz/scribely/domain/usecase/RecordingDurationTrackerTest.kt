@@ -2,7 +2,6 @@ package com.karaskiewicz.scribely.domain.usecase
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -20,148 +19,159 @@ class RecordingDurationTrackerTest {
   }
 
   @Test
-  fun `initial duration is zero`() = runTest {
-    // When
-    val duration = tracker.duration.first()
+  fun `initial duration is zero`() =
+    runTest {
+      // When
+      val duration = tracker.duration.first()
 
-    // Then
-    assertEquals(0L, duration)
-  }
-
-  @Test
-  fun `start sets initial values`() = runTest {
-    // When
-    tracker.start()
-
-    // Then
-    val duration = tracker.duration.first()
-    assertEquals(0L, duration)
-  }
+      // Then
+      assertEquals(0L, duration)
+    }
 
   @Test
-  fun `pause records pause time`() = runTest {
-    // Given
-    tracker.start()
-    advanceTimeBy(1000)
+  fun `start sets initial values`() =
+    runTest {
+      // When
+      tracker.start()
 
-    // When
-    tracker.pause()
-
-    // Then - pause time is recorded (no exception thrown)
-    assertTrue(true)
-  }
+      // Then
+      val duration = tracker.duration.first()
+      assertEquals(0L, duration)
+    }
 
   @Test
-  fun `resume accumulates paused duration`() = runTest {
-    // Given
-    tracker.start()
-    advanceTimeBy(1000)
-    tracker.pause()
-    advanceTimeBy(2000)
+  fun `pause records pause time`() =
+    runTest {
+      // Given
+      tracker.start()
+      advanceTimeBy(1000)
 
-    // When
-    tracker.resume()
+      // When
+      tracker.pause()
 
-    // Then - resumed successfully (no exception thrown)
-    assertTrue(true)
-  }
-
-  @Test
-  fun `reset sets duration to zero`() = runTest {
-    // Given
-    tracker.start()
-    advanceTimeBy(2000)
-
-    // When
-    tracker.reset()
-    val duration = tracker.duration.first()
-
-    // Then
-    assertEquals(0L, duration)
-  }
+      // Then - pause time is recorded (no exception thrown)
+      assertTrue(true)
+    }
 
   @Test
-  fun `getCurrentDuration returns current duration value`() = runTest {
-    // Given
-    tracker.start()
+  fun `resume accumulates paused duration`() =
+    runTest {
+      // Given
+      tracker.start()
+      advanceTimeBy(1000)
+      tracker.pause()
+      advanceTimeBy(2000)
 
-    // When
-    val duration = tracker.getCurrentDuration()
+      // When
+      tracker.resume()
 
-    // Then
-    assertEquals(0L, duration)
-  }
-
-  @Test
-  fun `startDurationTimer can be called without errors`() = runTest {
-    // Given
-    var isRecording = false
-    tracker.start()
-
-    // When - start timer but immediately stop it by setting isRecording to false
-    tracker.startDurationTimer(this) { isRecording }
-
-    // Then - should not throw exceptions
-    val duration = tracker.getCurrentDuration()
-    assertTrue(duration >= 0L, "Duration should be non-negative, got $duration")
-  }
+      // Then - resumed successfully (no exception thrown)
+      assertTrue(true)
+    }
 
   @Test
-  fun `startDurationTimer stops when recording becomes inactive`() = runTest {
-    // Given
-    var isRecording = false
-    tracker.start()
+  fun `reset sets duration to zero`() =
+    runTest {
+      // Given
+      tracker.start()
+      advanceTimeBy(2000)
 
-    // When - timer should stop immediately since isRecording is false
-    tracker.startDurationTimer(this) { isRecording }
+      // When
+      tracker.reset()
+      val duration = tracker.duration.first()
 
-    // Then - duration should remain at 0 since timer never ran
-    val duration = tracker.getCurrentDuration()
-    assertEquals(0L, duration)
-  }
-
-  @Test
-  fun `multiple start calls reset tracking`() = runTest {
-    // Given
-    tracker.start()
-    advanceTimeBy(2000)
-
-    // When
-    tracker.start()
-    val duration = tracker.duration.first()
-
-    // Then
-    assertEquals(0L, duration)
-  }
+      // Then
+      assertEquals(0L, duration)
+    }
 
   @Test
-  fun `pause and resume cycle maintains elapsed time`() = runTest {
-    // Given
-    tracker.start()
+  fun `getCurrentDuration returns current duration value`() =
+    runTest {
+      // Given
+      tracker.start()
 
-    // When - pause and resume without timer running
-    tracker.pause()
-    tracker.resume()
+      // When
+      val duration = tracker.getCurrentDuration()
 
-    // Then - should maintain state without exceptions
-    val duration = tracker.getCurrentDuration()
-    assertTrue(duration >= 0L)
-  }
+      // Then
+      assertEquals(0L, duration)
+    }
 
   @Test
-  fun `reset clears all tracking state`() = runTest {
-    // Given
-    tracker.start()
-    advanceTimeBy(1000)
-    tracker.pause()
-    advanceTimeBy(500)
-    tracker.resume()
+  fun `startDurationTimer can be called without errors`() =
+    runTest {
+      // Given
+      var isRecording = false
+      tracker.start()
 
-    // When
-    tracker.reset()
+      // When - start timer but immediately stop it by setting isRecording to false
+      tracker.startDurationTimer(this) { isRecording }
 
-    // Then
-    assertEquals(0L, tracker.getCurrentDuration())
-    assertEquals(0L, tracker.duration.first())
-  }
+      // Then - should not throw exceptions
+      val duration = tracker.getCurrentDuration()
+      assertTrue(duration >= 0L, "Duration should be non-negative, got $duration")
+    }
+
+  @Test
+  fun `startDurationTimer stops when recording becomes inactive`() =
+    runTest {
+      // Given
+      var isRecording = false
+      tracker.start()
+
+      // When - timer should stop immediately since isRecording is false
+      tracker.startDurationTimer(this) { isRecording }
+
+      // Then - duration should remain at 0 since timer never ran
+      val duration = tracker.getCurrentDuration()
+      assertEquals(0L, duration)
+    }
+
+  @Test
+  fun `multiple start calls reset tracking`() =
+    runTest {
+      // Given
+      tracker.start()
+      advanceTimeBy(2000)
+
+      // When
+      tracker.start()
+      val duration = tracker.duration.first()
+
+      // Then
+      assertEquals(0L, duration)
+    }
+
+  @Test
+  fun `pause and resume cycle maintains elapsed time`() =
+    runTest {
+      // Given
+      tracker.start()
+
+      // When - pause and resume without timer running
+      tracker.pause()
+      tracker.resume()
+
+      // Then - should maintain state without exceptions
+      val duration = tracker.getCurrentDuration()
+      assertTrue(duration >= 0L)
+    }
+
+  @Test
+  fun `reset clears all tracking state`() =
+    runTest {
+      // Given
+      tracker.start()
+      advanceTimeBy(1000)
+      tracker.pause()
+      advanceTimeBy(500)
+      tracker.resume()
+
+      // When
+      tracker.reset()
+
+      // Then
+      assertEquals(0L, tracker.getCurrentDuration())
+      assertEquals(0L, tracker.duration.first())
+    }
 }

@@ -68,9 +68,15 @@ export class AIService {
       const filenameMatch = yamlContent.match(/filename:\s*(.+)/);
       const commentaryMatch = yamlContent.match(/commentary_needed:\s*(true|false)/);
 
-      if (categoryMatch) metadata.category = categoryMatch[1].trim();
-      if (filenameMatch) metadata.filename = filenameMatch[1].trim();
-      if (commentaryMatch) metadata.commentary_needed = commentaryMatch[1] === 'true';
+      if (categoryMatch) {
+        metadata.category = categoryMatch[1].trim();
+      }
+      if (filenameMatch) {
+        metadata.filename = filenameMatch[1].trim();
+      }
+      if (commentaryMatch) {
+        metadata.commentary_needed = commentaryMatch[1] === 'true';
+      }
 
       return metadata as LLMMetadata;
     } catch (error) {

@@ -10,13 +10,18 @@ export class TranscriptController {
     try {
       const { transcript } = req.body as ProcessTranscriptRequest;
 
+      if (!transcript) {
+        res.status(400).json({ error: 'Transcript is required' });
+        return;
+      }
+
       logger.info('Processing transcript request', {
         ip: req.ip,
         userAgent: req.get('User-Agent'),
-        transcriptLength: transcript?.length,
+        transcriptLength: transcript.length,
       });
 
-      const result = await this.transcriptProcessorService.processTranscript(transcript!);
+      const result = await this.transcriptProcessorService.processTranscript(transcript);
 
       res.status(200).json(result);
     } catch (error) {

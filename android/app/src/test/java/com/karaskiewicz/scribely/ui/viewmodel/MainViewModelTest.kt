@@ -53,12 +53,13 @@ class MainViewModelTest {
     // Mock duration tracker to return a flow
     whenever(mockDurationTracker.duration).thenReturn(MutableStateFlow(0L))
 
-    viewModel = MainViewModel(
-      mockRecordingUseCase,
-      mockPreferencesDataStore,
-      mockPermissionHandler,
-      mockDurationTracker
-    )
+    viewModel =
+      MainViewModel(
+        mockRecordingUseCase,
+        mockPreferencesDataStore,
+        mockPermissionHandler,
+        mockDurationTracker,
+      )
   }
 
   @After
