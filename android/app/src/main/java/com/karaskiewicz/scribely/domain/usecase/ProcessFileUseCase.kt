@@ -11,6 +11,7 @@ import timber.log.Timber
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
+import java.io.File
 
 /**
  * Use case for processing shared file content
@@ -96,7 +97,7 @@ class ProcessFileUseCase(
 
   private suspend fun uploadFile(
     context: Context,
-    file: java.io.File,
+    file: File,
   ): FileProcessingResult {
     val networkResult =
       safeSuspendNetworkCall("process file") {

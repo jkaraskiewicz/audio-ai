@@ -14,6 +14,8 @@ import com.karaskiewicz.scribely.domain.handler.RecordingFileHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import android.media.MediaRecorder
+import java.io.File
 
 /**
  * Use case for managing audio recording operations
@@ -169,7 +171,7 @@ class RecordingUseCase(
 
   // Private helper methods
 
-  private fun extractRecorderAndFile(state: MachineState): Pair<android.media.MediaRecorder, java.io.File> =
+  private fun extractRecorderAndFile(state: MachineState): Pair<MediaRecorder, File> =
     when (state) {
       is MachineState.Recording -> state.mediaRecorder to state.outputFile
       is MachineState.Paused -> state.mediaRecorder to state.outputFile
@@ -177,8 +179,8 @@ class RecordingUseCase(
     }
 
   private suspend fun convertRecordingToM4A(
-    recordingFile: java.io.File,
-    uploadFile: java.io.File,
+    recordingFile: File,
+    uploadFile: File,
   ): Boolean =
     withContext(Dispatchers.IO) {
       try {
@@ -191,8 +193,8 @@ class RecordingUseCase(
     }
 
   private fun cleanupAfterUpload(
-    uploadFile: java.io.File,
-    recordingFile: java.io.File,
+    uploadFile: File,
+    recordingFile: File,
     result: UploadResult,
   ) {
     fileHandler.deleteFileIfExists(uploadFile)
